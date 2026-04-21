@@ -6,7 +6,7 @@
 title: 坐看潮起潮落
 subtitle: '人的一切痛苦，本质上都是对自己无能的愤怒'
 description: '记录生活，享受技术'
-keywords:
+keywords: 工作, 生活, 技术
 author: Arthur
 language: en
 timezone: ''
@@ -101,4 +101,4 @@ theme: hexo-theme-shiro
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: ''
+  type: git

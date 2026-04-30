@@ -1,0 +1,427 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>工作总结 | 坐看潮起潮落</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="工作总结 | 坐看潮起潮落" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/04/30/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="坐看潮起潮落" />
+    
+    <meta property="og:image" content="https://p.ipic.vip/4og5b0.jpg" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="工作总结 | 坐看潮起潮落" />
+    
+    
+    <meta name="twitter:image" content="https://p.ipic.vip/4og5b0.jpg" />
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/04/30/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">坐看潮起潮落</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                人的一切痛苦，本质上都是对自己无能的愤怒
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >Home</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >Archives</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >Home</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >Archives</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            工作总结
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-04-30">2026/04/30</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>最近10年有余的工作总结，看看都做了些啥呢。一直在进步，一直在改变。在一家公司11年整了，伴随着公司一起成长，也见证了公司的起起落落。在公司需要我的时候，我都会挺身而出，希望公司茁壮成长。加倍地努力，一直学习，把自己培养成六边形战士。</p>
+<h1 id="一、-59"><a href="#一、-59" class="headerlink" title="一、 59"></a>一、 59</h1><p>2015年加入做零食盒子的业务，当年业务发展很快，似乎都是1个月业绩翻一番，然后人员招得也很多，技术团队150人吧。我负责当时的移动端，有12人，也参与iOS的开发。APP更新周期差不多都是1周。创业开始阶段，思想很活跃，新想法一直在冒出。</p>
+<p>当时app的名称为59store，业务有夜猫子，云打印，饮料。不同业务模块有不同开发人员维护。代码管理使用git，大家都适应多人开发。同时为了代码更好的管理，将代码进行分模块管理，每个模块创建一个git仓库，然后通过版本号来依赖。</p>
+<p>使用友盟来进行崩溃日志采集和埋点记录。并且会在提测前，进行code review，并分享下设计思路。从而保证代码的健壮性和业务的稳定性。</p>
+<h1 id="二、-骑电"><a href="#二、-骑电" class="headerlink" title="二、 骑电"></a>二、 骑电</h1><p>16年7月份，公司内部孵化成立了骑电。全体人员都转入骑电，从0开始思考、预演、设计电单车的租赁业务，主要涉及到电单车的使用，调度和换电，3个大模块。硬件上主要是中控系统的开发。</p>
+<p>我是继续担任移动端的负责人。</p>
+<h3 id="1-android"><a href="#1-android" class="headerlink" title="1. android"></a>1. android</h3><p>一直是从事iOS的开发，觉得iOS是未来，深入研究iOS底层学习，成为行业的专家。</p>
+<p>没想到17年共享单车引来政策的大调整，业务量大量的萎缩，导致公司缩减规模。Android端开发进展拖了整体进度。想着我抽出时间来调节下，基础的功能开发我也参加下。同时也可以更加保证iOS和Android的功能一致性。</p>
+<p>《疯狂Android讲义》入门，接着开始《第一行代码 2》开始学习，将书本中知识点都自己实现了一遍。后来《第一行代码 Android3》出版了，又买了一本，再学习了一遍，讲到的最佳实践都可以在项目中使用。接着学了《Android开发艺术探索》，里面的理论基础讲得很多，对Android的底层有了一些了解。</p>
+<p>感觉自己对Android有了全面了解后，觉得是时候出手了。从修改bug开始，参与一些小需求的开发，慢慢地几个版本结束，大致已经熟悉Android的开发流程，网络请求、页面绘制等。</p>
+<p>此时新版本开发时，Android和iOS我可以一人搞定，并且可以保证逻辑一致。</p>
+<h3 id="2-担任运营端的负责人。"><a href="#2-担任运营端的负责人。" class="headerlink" title="2.  担任运营端的负责人。"></a>2.  担任运营端的负责人。</h3><p>18年大家企业从共享自行车开始涉足共享电动车，供应链开始完善，生产车辆越来越快，投放的车辆也越来越多。运营成为了公司中重要部门，但需要从0开始摸索。任命我为运营端的负责人，配备了1个产品经理，1个测试人员，1个UI设计师，2个后端研发人员，1个android开发人员和我iOS开发人员。</p>
+<p>研发采用敏捷开发，将运营中紧急的任务快速迭代。收集领导层、客服、运营人员、用户等的需求，按优先级和工作量进行排期。周一进行PRD（<strong>产品需求文档</strong>）的评审，会后研发人员进行需求地分解并确定方案，同时测试人员进行测试文档的编写。周二早上过一遍测试用例，大家都同步需求细节。然后开始开发，争取在周三进行提测，并在周四测试完成，周五前发布到生产环境。</p>
+<p>记得当时公司有一个全职的运维人员，负责公司服务器管理和版本发布。我们运营端发布版本是最密集的。</p>
+<p>18年的一整年，发布了将近50个版本，将共享电单车需要用到的运营功能都开发完成。主要涉及到功能有：故障车打捞，批量调度，单车换电，车辆质检，仓库管理，还车点管理等。</p>
+<p><img src="https://p.ipic.vip/4og5b0.jpg" alt="运营端"></p>
+<h3 id="3-python"><a href="#3-python" class="headerlink" title="3. python"></a>3. python</h3><p>很是一个巧合的机会，需要分析订单数量，研究发现使用python是最方便。开始全面的了解python，下载工具，搭建环境，买了2本python的入门书，看了几本电子书后。感觉到自己已经足够开发了。也是巧合，公司的单车模拟器需要维护，而我又会python。</p>
+<p><img src="https://p.ipic.vip/rf2hvl.png" alt="单车模拟器"></p>
+<p>熟悉了模拟器使用的框架，单车的通讯协议后，问题的修复和新需求的开发都由我跟进。</p>
+<p>同时，数据分析，日志分析，导出数据，重复性工作，统统都编写成python脚本。然后把python给产品，可以一直重复使用了。大大地提交了工作效率。</p>
+<p>同时为了保持python的熟悉度，使用python来编写算法。</p>
+<h3 id="4-前端、小程序"><a href="#4-前端、小程序" class="headerlink" title="4. 前端、小程序"></a>4. 前端、小程序</h3><p>前端岗位空缺的时候，硬着头皮顶上了。先学习了ant-design库，将所有的组件和demo都看了一遍。再学习了wepy库，一个第三方项目用来打包微信和支付宝小程序。同时也是恶补了js和css的语法。并把微信小程序官方文档的小程序部分都学习了一遍，所有接口都了解是做什么用的。</p>
+<p>等学习完成后，开始放手进行bug的修改。同时对公司的ERP系统，进行第三方库的升级。再升级的过程中，提高对业务和技术的水平。将所有的第三方库都升级到最新，自己反复测试后，提测并发布。</p>
+<p>小程序修复bug中，有一个mqtt连接失败的问题，困恼了很久。因为mqtt库使用的是第三方的，然后再二次开发来支持微信和支付宝。花了一个星期，对mqtt文件进行逐行的分析和研究，一步一步调试重现，最终找到问题的原因，将问题修复。</p>
+<h3 id="5-flutter"><a href="#5-flutter" class="headerlink" title="5. flutter"></a>5. flutter</h3><p>作为一个iOSer，开始android开发后，每次在编写Android代码时，脑子中总是出现iOS的实现方案。而在iOS开发过程中，又想着Android代码是否有功能遗漏。虽然使用了Xmind来管理功能点，将大任务分解成小任务，然后同时开发iOS和Android，来提升效率。</p>
+<p>一直关注着跨平台的技术，flutter自学了2年，学了几本flutter的入门和精通，也编写了<a target="_blank" rel="noopener" href="https://github.com/yinanwang1/LearnPython%E7%9A%84demo%E3%80%82%E5%AF%B9widget%E5%92%8Cstate%E7%9A%84%E4%BA%86%E7%84%B6%E5%A6%82%E8%83%B8%E5%90%8E%EF%BC%8C%E5%9C%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E5%BC%80%E5%A7%8B%E5%8A%A0%E5%85%A5flutter%E3%80%82%E6%96%B0%E5%8A%9F%E8%83%BD%E5%BC%80%E5%8F%91%E7%9A%84%E6%97%B6%E5%80%99%EF%BC%8C%E4%BC%98%E5%85%88%E8%80%83%E8%99%91%E7%9A%84%E4%BD%BF%E7%94%A8%E3%80%82%E6%95%88%E7%8E%87%E6%8F%90%E5%8D%874%E5%80%8D%E5%90%A7%EF%BC%8C%E5%9B%A0%E4%B8%BA%E5%8F%91%E7%8E%B0%E4%BD%BF%E7%94%A8flutter%E5%BC%80%E5%8F%91%E6%AF%94%E7%9B%B4%E6%8E%A5%E7%94%A8native%E5%BC%80%E5%8F%91%EF%BC%8C%E6%95%88%E7%8E%87%E6%8F%90%E5%8D%872%E5%80%8D%E3%80%82%E7%84%B6%E5%90%8E%E5%8F%88%E7%9C%81%E4%B8%8B%E4%B8%80%E7%AB%AF%E7%9A%84%E5%BC%80%E5%8F%91%E3%80%82%E7%9B%B4%E6%8E%A54%E5%80%8D%E7%9A%84%E6%8F%90%E5%8D%87%E3%80%82%E7%AA%81%E7%84%B6%E5%8F%91%E7%8E%B0%E6%88%91%E7%9A%84iOS%E5%92%8CAndroid%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E9%AB%98%E5%BE%97%E7%A6%BB%E8%B0%B1%E3%80%82">https://github.com/yinanwang1/LearnPython的demo。对widget和state的了然如胸后，在项目中开始加入flutter。新功能开发的时候，优先考虑的使用。效率提升4倍吧，因为发现使用flutter开发比直接用native开发，效率提升2倍。然后又省下一端的开发。直接4倍的提升。突然发现我的iOS和Android开发效率高得离谱。</a></p>
+<p>在使用flutter中碰到扫码慢的问题，使用得mobile_scanner三方库。深入了解后，减少扫码的类型，指定识别的区域，优化数据的解析等等。Android端基本可以满足运营人员的要求了。iOS端还是不停地有人抱怨，说扫描3秒后识别不出，倾斜一点都不行。继续从mobile_scanner的iOS端代码开始查找解决方案，发现没有使用iOS自带的AVCaptureMetadataOutput来实现二维码的识别。而iOS自带的效率很高，so直接修改源码，并达到了预期的效果。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/juliansteenbakker/mobile_scanner/issues/569">https://github.com/juliansteenbakker/mobile_scanner/issues/569</a></p>
+<p><img src="https://p.ipic.vip/i6kf3e.png" alt="方法建议"></p>
+<p>此方案还被作者采纳，在新版本中使用了此方法。</p>
+<h3 id="6-java"><a href="#6-java" class="headerlink" title="6. java"></a>6. java</h3><p>运营端的后端研发人员离职后，发现运营业务问题分析需要从代码上来分析。那就申请后端的代码权限吧，然后把Intellij  IDEA装起来。碰到不懂的知识点，深入熟悉。接着从常用注解学起，spring boot、rabbit mq、netty、redis、kafka、mybatis plus等常用框架的学习，多线程、互斥锁的研究。</p>
+<p>运营端的后端服务dispatcher从controller层开始入手，将代码执行的过程整理清楚并做好笔记。如果是完整的业务，按业务逻辑编写后笔记。之后查问题、新功能开发，上手就非常地容易了。</p>
+<p>我一个人就可以撑起整个运营业务的线上问题定位，bug的修复，新功能地开发。编写好后端java代码后，编写API的接口文档，然后运营端iOS和Android功能使用flutter对接接口，最后自己联调功能。效率比多个人快很多。</p>
+<h1 id="三、-英语"><a href="#三、-英语" class="headerlink" title="三、 英语"></a>三、 英语</h1><p>深知英语的重要性，一直都在学习。将手机和电脑设置为英文，来创造英文的环境并提高英文的实用性。</p>
+<p>在出国游玩的时候，用英语购物问路都很自信。在工作中，查看英文文档有利于对新技术的了解。</p>
+<p>使用并坚持了2个软件，每天都学习。</p>
+<h3 id="背单词"><a href="#背单词" class="headerlink" title="背单词"></a>背单词</h3><p><img src="https://p.ipic.vip/lzllv5.jpg" alt="背单词"></p>
+<p>每天坚持背英语单词已经成为了习惯。还记得当年的口罩期，40度吧。吃了退烧药，感觉申请还行。拿起手机把当前的单词复习了吧。</p>
+<h3 id="听说读写"><a href="#听说读写" class="headerlink" title="听说读写"></a>听说读写</h3><p><img src="https://p.ipic.vip/f58b5p.jpg" alt="听说读写"></p>
+<p>当单词背诵到一定程度后，还想着怎么提高下自己。觉得听说读写要不就全面提升下吧。找到了这个软件，很合适每天零碎的时间来学习。包含各个功能。</p>
+<h1 id="四、-算法"><a href="#四、-算法" class="headerlink" title="四、 算法"></a>四、 算法</h1><p>算法和设计模式，也是学了忘，忘了有学。在项目空隙，都会再拿起来研究一番。对代码的提升非常的明显，并且有利于对问题的从不同角度来思考解决方案。一直在<a target="_blank" rel="noopener" href="https://leetcode.cn/u/nan-zhi-qian-qian/%E4%B8%8A%E8%BF%9B%E8%A1%8C%E7%BB%83%E4%B9%A0%E3%80%82">https://leetcode.cn/u/nan-zhi-qian-qian/上进行练习。</a></p>
+<p><img src="https://p.ipic.vip/y8ecqk.png" alt="Leetcode"></p>
+<p>碰到轻松能解决的算法题，让人自信爆满。碰到有难度的算法题，让人兴奋、大脑飞速运转，花费时间最后解法，真的是酣畅淋漓啊，忍不住要分享。碰到难度太大，尝试多次还是失败后，会失落，但是在学习最优解后，自己再默默地再实现一边，把解法成为自己的能力。感觉能力大涨的痛快。</p>
+<h1 id="五、-技术分享"><a href="#五、-技术分享" class="headerlink" title="五、 技术分享"></a>五、 技术分享</h1><p>从工作开始一直都是保持着做工作笔记的习惯，秉持着“好记性不如烂笔头”。截止2026-04-19日的笔记数。</p>
+<p><img src="https://p.ipic.vip/zj53db.png" alt="工作笔记"></p>
+<p>开始学习一个新技术就新建一个文件夹，将相关的心得和经验记录其中。一般选择一个月为周期，整理下文档，保持文档的时效性。</p>
+<p>当经验觉得有必要分享时，整理成一篇文章，分享到<a target="_blank" rel="noopener" href="https://juejin.cn/user/3210229681759879%E3%80%82">https://juejin.cn/user/3210229681759879。</a></p>
+<p><img src="https://p.ipic.vip/811q2b.png" alt="截止2026041916"></p>
+<h1 id="六、-公众号"><a href="#六、-公众号" class="headerlink" title="六、 公众号"></a>六、 公众号</h1><p>之前都是在“简书”分享技术文章，后来感觉拥有自己的公众号来分享技术和生活，岂不是更方便。创建“码恳垦”公众号。</p>
+<p><img src="https://p.ipic.vip/7ee3b5.png" alt="公众号"></p>
+<p>是英文monkey king的音译。 公众号改革之前获客太难了，没有啥阅读量，转到“今日头条”发表生活的感悟。</p>
+<h1 id="七、-小程序"><a href="#七、-小程序" class="headerlink" title="七、 小程序"></a>七、 小程序</h1><p>工作中用到了编写小程序，但是用的是wepy框架，太古老了，而且已经停止了维护。升级或替换的可能性不大，所以一直想用taro写一个小程序。“弥可学字”，从0到1开始搞起。当时女儿刚开始学汉字，猜字谜是很好的方法，那就做一个吧。写界面花了一天时间搞定了，但是字谜从哪里来。思路是找出一年级到六年级要学的汉字，然后为每一个汉字编写字谜。</p>
+<p>花了很大的力气去搜集字谜，可是进度缓慢啊。最后还是放弃自己一个一个搜，而是直接编写了一个python脚本，从网络上把字谜获取，然后输出json字符串。直接放到小程序中。（计划放到服务器，通过接口获取）</p>
+<p>【弥可学字-哔哩哔哩】 <a target="_blank" rel="noopener" href="https://b23.tv/oqy1PSv">https://b23.tv/oqy1PSv</a></p>
+<p>界面录制了一个视频放到了B站。“番茄钟”、“24点”和“日地月轨迹”这3个是用了codex这个AI agent来完成的。由AI来完成主要功能，然后再手动修改一些代码来完成细节。</p>
+<h1 id="八、-AI研究"><a href="#八、-AI研究" class="headerlink" title="八、 AI研究"></a>八、 AI研究</h1><p>23年就了解到AI，注册了各大平台体验。整体下来就是文字对话，很多时候还是答非所问。觉得AI像之前的AR一样，是一个噱头吧！知道25年，突然AI Agent雨后春笋一般地出现了。AI正在逐步改变生活和工作，赶紧学起来吧。</p>
+<ol>
+<li>全面地学习“李宏毅”的AI课程。学习了机器学习，AI的原理。</li>
+<li>在本地部署了openclaw，体验了落地的AI Agent。</li>
+<li>下载了codex编写业务代码。</li>
+<li>安装LM Studio，在本地运行Qwen3.5模型。</li>
+<li>学习了skill的编写，编写weekly-report.md来编写周报。</li>
+<li>学习了langchain4j的使用，编写demo调用deepseek的API。</li>
+<li>学习了MCP的编写，编写demo在claude本地调用。</li>
+</ol>
+<p>继续学习中，未来10年AI的使用，就像10年前开始用智能手机一样。</p>
+<h1 id="九、-github"><a href="#九、-github" class="headerlink" title="九、 github"></a>九、 github</h1><p>github已经使用了10几年吧，<a target="_blank" rel="noopener" href="https://github.com/yinanwang1%E3%80%82%E5%87%A1%E6%98%AF%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E9%83%BD%E6%98%AF%E9%BB%98%E8%AE%A4%E5%B0%B1%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93%EF%BC%8C%E6%96%B9%E4%BE%BF%E4%BB%A3%E7%A0%81%E7%9A%84%E7%AE%A1%E7%90%86%E3%80%82%E5%90%8E%E6%9D%A5%E8%80%83%E8%99%91%E5%88%B0%E5%BE%88%E5%A4%9A%E4%BB%A3%E7%A0%81%E4%B8%8D%E6%96%B9%E4%BE%BF%E5%85%AC%E5%BC%80%EF%BC%8C%E5%B0%B1%E5%9C%A8%E5%85%AC%E5%8F%B8%E7%9A%84git%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E5%88%9B%E5%BB%BA%E4%BB%93%E5%BA%93%E3%80%82">https://github.com/yinanwang1。凡是创建项目都是默认就创建一个代码仓库，方便代码的管理。后来考虑到很多代码不方便公开，就在公司的git服务器上创建仓库。</a></p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <div></div>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 坐看潮起潮落</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

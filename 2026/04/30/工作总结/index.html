@@ -304,9 +304,9 @@
 <p>![支付宝小程序](&#x2F;Users&#x2F;arthurwang&#x2F;Library&#x2F;Application Support&#x2F;typora-user-images&#x2F;image-20260502000054673.png)</p>
 <p>支付宝小程序的编号问题导致mqtt断开连接。</p>
 <h3 id="5-flutter"><a href="#5-flutter" class="headerlink" title="5. flutter"></a>5. flutter</h3><p>作为一个iOSer，开始android开发后，每次在编写Android代码时，脑子中总是出现iOS的实现方案。而在iOS开发过程中，又想着Android代码是否有功能遗漏。虽然使用了Xmind来管理功能点，将大任务分解成小任务，然后同时开发iOS和Android，来提升效率。</p>
-<p>一直关注着跨平台的技术，flutter自学了2年，学了几本flutter的入门和精通，也编写了<a target="_blank" rel="noopener" href="https://github.com/yinanwang1/LearnPython%E7%9A%84demo%E3%80%82%E5%AF%B9widget%E5%92%8Cstate%E4%BA%86%E7%84%B6%E5%A6%82%E8%83%B8%E5%90%8E%EF%BC%8C%E5%9C%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E5%BC%80%E5%A7%8B%E5%8A%A0%E5%85%A5flutter%E3%80%82%E6%96%B0%E5%8A%9F%E8%83%BD%E5%BC%80%E5%8F%91%E7%9A%84%E6%97%B6%E5%80%99%EF%BC%8C%E4%BC%98%E5%85%88%E8%80%83%E8%99%91flutter%E7%9A%84%E4%BD%BF%E7%94%A8%E3%80%82%E6%95%88%E7%8E%87%E6%8F%90%E5%8D%874%E5%80%8D%E5%90%A7%EF%BC%8C%E5%9B%A0%E4%B8%BA%E5%8F%91%E7%8E%B0%E4%BD%BF%E7%94%A8flutter%E5%BC%80%E5%8F%91%E6%AF%94%E7%9B%B4%E6%8E%A5%E7%94%A8native%E5%BC%80%E5%8F%91%EF%BC%8C%E6%95%88%E7%8E%87%E6%8F%90%E5%8D%872%E5%80%8D%E3%80%82%E7%84%B6%E5%90%8E%E5%8F%88%E7%9C%81%E4%B8%8B%E4%B8%80%E7%AB%AF%E7%9A%84%E5%BC%80%E5%8F%91%E3%80%82%E7%9B%B4%E6%8E%A54%E5%80%8D%E7%9A%84%E6%8F%90%E5%8D%87%E3%80%82%E7%AA%81%E7%84%B6%E5%8F%91%E7%8E%B0%E6%88%91%E7%9A%84iOS%E5%92%8CAndroid%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E9%AB%98%E5%BE%97%E7%A6%BB%E8%B0%B1%E3%80%82">https://github.com/yinanwang1/LearnPython的demo。对widget和state了然如胸后，在项目中开始加入flutter。新功能开发的时候，优先考虑flutter的使用。效率提升4倍吧，因为发现使用flutter开发比直接用native开发，效率提升2倍。然后又省下一端的开发。直接4倍的提升。突然发现我的iOS和Android开发效率高得离谱。</a></p>
+<p>一直关注着跨平台的技术，flutter自学了2年，学了几本flutter的入门和精通，也编写了<a target="_blank" rel="noopener" href="https://github.com/yinanwang1/LearnPython">LearnPython</a>的demo。对widget和state了然如胸后，在项目中开始加入flutter。新功能开发的时候，优先考虑flutter的使用。效率提升4倍吧，因为发现使用flutter开发比直接用native开发，效率提升2倍。然后又省下一端的开发。直接4倍的提升。突然发现我的iOS和Android开发效率高得离谱。</p>
 <p>在使用flutter中碰到扫码慢的问题，使用得mobile_scanner三方库。深入了解后，减少扫码的类型，指定识别的区域，优化数据的解析等等。Android端基本可以满足运营人员的要求了。iOS端还是不停地有人抱怨，说扫描3秒后识别不出，相机倾斜一点都不行。继续从mobile_scanner的iOS端代码开始查找解决方案，发现没有使用iOS自带的AVCaptureMetadataOutput来实现二维码的识别。而iOS自带的效率很高，so直接修改源码，并达到了预期的效果。</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/juliansteenbakker/mobile_scanner/issues/569">https://github.com/juliansteenbakker/mobile_scanner/issues/569</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/juliansteenbakker/mobile_scanner/issues/569">https://github.com/juliansteenbakker/mobile_scanner&#x2F;issues&#x2F;569</a></p>
 <p><img src="https://p.ipic.vip/i6kf3e.png" alt="方法建议"></p>
 <p>此方案还被作者采纳，在新版本中使用了此方法。</p>
 <h3 id="6-java"><a href="#6-java" class="headerlink" title="6. java"></a>6. java</h3><p>运营端的后端研发人员离职后，发现运营业务问题分析需要从代码上来分析。那就申请后端的代码权限吧，然后把Intellij  IDEA装起来。碰到不懂的知识点，深入熟悉。接着从常用注解学起，spring boot、rabbit mq、netty、redis、kafka、mybatis plus等常用框架的学习，多线程、互斥锁的研究。</p>
@@ -319,20 +319,20 @@
 <p>每天坚持背英语单词已经成为了习惯。还记得当年的口罩期，40度吧。吃了退烧药，感觉身体还行。拿起手机把当天的单词复习了吧。</p>
 <h3 id="听说读写"><a href="#听说读写" class="headerlink" title="听说读写"></a>听说读写</h3><p><img src="https://p.ipic.vip/f58b5p.jpg" alt="听说读写"></p>
 <p>当单词背诵到一定程度后，还想着怎么提高下自己。觉得听说读写要不就全面提升下吧。找到了这个软件，很合适每天零碎的时间来学习。包含各个功能。</p>
-<h2 id="四、-算法"><a href="#四、-算法" class="headerlink" title="四、 算法"></a>四、 算法</h2><p>算法和设计模式，也是学了忘，忘了有学。在项目空隙，都会再拿起来研究一番。对代码逻辑的提升非常的明显，并且有利于对问题的从不同角度来思考解决方案。一直在<a target="_blank" rel="noopener" href="https://leetcode.cn/u/nan-zhi-qian-qian/%E4%B8%8A%E8%BF%9B%E8%A1%8C%E7%BB%83%E4%B9%A0%E3%80%82">https://leetcode.cn/u/nan-zhi-qian-qian/上进行练习。</a></p>
+<h2 id="四、-算法"><a href="#四、-算法" class="headerlink" title="四、 算法"></a>四、 算法</h2><p>算法和设计模式，也是学了忘，忘了有学。在项目空隙，都会再拿起来研究一番。对代码逻辑的提升非常的明显，并且有利于对问题的从不同角度来思考解决方案。一直在<a target="_blank" rel="noopener" href="https://leetcode.cn/u/nan-zhi-qian-qian/">Leetcode算法练习</a>上进行练习。</p>
 <p><img src="https://p.ipic.vip/y8ecqk.png" alt="Leetcode"></p>
 <p>碰到轻松能解决的算法题，让人自信爆满。碰到有难度的算法题，让人兴奋、大脑飞速运转，花费时间最后解法，真的是酣畅淋漓啊，忍不住要分享。碰到难度太大，尝试多次还是失败后，会失落，但是在学习最优解后，自己再默默地再实现一边，把解法成为自己的能力。感觉能力大涨的痛快。</p>
 <h2 id="五、-技术分享"><a href="#五、-技术分享" class="headerlink" title="五、 技术分享"></a>五、 技术分享</h2><p>从工作开始一直都是保持着做工作笔记的习惯，秉持着“好记性不如烂笔头”。截止2026-04-19日的笔记数。</p>
 <p><img src="https://p.ipic.vip/zj53db.png" alt="工作笔记"></p>
 <p>开始学习一个新技术就新建一个文件夹，将相关的心得和经验记录其中。一般选择一个月为周期，整理下文档，保持文档的时效性。</p>
-<p>当经验觉得有必要分享时，整理成一篇文章，分享到<a target="_blank" rel="noopener" href="https://juejin.cn/user/3210229681759879%E3%80%82">https://juejin.cn/user/3210229681759879。</a></p>
+<p>当经验觉得有必要分享时，整理成一篇文章，分享到<a target="_blank" rel="noopener" href="https://juejin.cn/user/3210229681759879">稀土掘金</a>。</p>
 <p><img src="https://p.ipic.vip/811q2b.png" alt="截止2026041916"></p>
 <h2 id="六、-公众号"><a href="#六、-公众号" class="headerlink" title="六、 公众号"></a>六、 公众号</h2><p>之前都是在“简书”分享技术文章，后来感觉拥有自己的公众号来分享技术和生活，岂不是更方便。创建“码恳垦”公众号。</p>
 <p><img src="https://p.ipic.vip/7ee3b5.png" alt="公众号"></p>
 <p>是英文monkey king的音译。 公众号改革之前获客太难了，没有啥阅读量，转到“今日头条”发表生活的感悟。</p>
 <h2 id="七、-小程序"><a href="#七、-小程序" class="headerlink" title="七、 小程序"></a>七、 小程序</h2><p>工作中用到了编写小程序，但是用的是wepy框架，太古老了，而且已经停止了维护。升级或替换的可能性不大，所以一直想用taro写一个小程序。“弥可学字”，从0到1开始搞起。当时女儿刚开始学汉字，猜字谜是很好的方法，那就做一个吧。写界面花了一天时间搞定了，但是字谜从哪里来。思路是找出一年级到六年级要学的汉字，然后为每一个汉字编写字谜。</p>
 <p>花了很大的力气去搜集字谜，可是进度缓慢啊。最后还是放弃自己一个一个搜，而是直接编写了一个python脚本，从网络上把字谜获取，然后输出json字符串。直接放到小程序中。（计划放到服务器，通过接口获取）</p>
-<p>【弥可学字-哔哩哔哩】 <a target="_blank" rel="noopener" href="https://b23.tv/oqy1PSv">https://b23.tv/oqy1PSv</a></p>
+<p><a target="_blank" rel="noopener" href="https://b23.tv/oqy1PSv">弥可学字-哔哩哔哩</a></p>
 <p>界面录制了一个视频放到了B站。“番茄钟”、“24点”和“日地月轨迹”这3个是用了codex这个AI agent来完成的。由AI来完成主要功能，然后再手动修改一些代码来完成细节。</p>
 <h2 id="八、-AI研究"><a href="#八、-AI研究" class="headerlink" title="八、 AI研究"></a>八、 AI研究</h2><p>23年就了解到AI，注册了各大平台体验。整体下来就是文字对话，很多时候还是答非所问。觉得AI像之前的AR一样，是一个噱头吧！直到25年，突然AI Agent雨后春笋一般地出现了。AI正在逐步改变生活和工作，赶紧学起来吧。</p>
 <ol>
@@ -345,7 +345,7 @@
 <li>学习了MCP的编写，编写demo在claude本地调用。</li>
 </ol>
 <p>继续学习中，未来10年AI的使用，就像10年前开始用智能手机一样。</p>
-<h2 id="九、-github"><a href="#九、-github" class="headerlink" title="九、 github"></a>九、 github</h2><p>github已经使用了10几年吧，<a target="_blank" rel="noopener" href="https://github.com/yinanwang1%E3%80%82%E5%87%A1%E6%98%AF%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E9%83%BD%E6%98%AF%E9%BB%98%E8%AE%A4%E5%B0%B1%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93%EF%BC%8C%E6%96%B9%E4%BE%BF%E4%BB%A3%E7%A0%81%E7%9A%84%E7%AE%A1%E7%90%86%E3%80%82%E5%90%8E%E6%9D%A5%E8%80%83%E8%99%91%E5%88%B0%E5%BE%88%E5%A4%9A%E4%BB%A3%E7%A0%81%E4%B8%8D%E6%96%B9%E4%BE%BF%E5%85%AC%E5%BC%80%EF%BC%8C%E5%B0%B1%E5%9C%A8%E5%85%AC%E5%8F%B8%E7%9A%84git%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E5%88%9B%E5%BB%BA%E4%BB%93%E5%BA%93%E3%80%82">https://github.com/yinanwang1。凡是创建项目都是默认就创建一个代码仓库，方便代码的管理。后来考虑到很多代码不方便公开，就在公司的git服务器上创建仓库。</a></p>
+<h2 id="九、-github"><a href="#九、-github" class="headerlink" title="九、 github"></a>九、 github</h2><p>github已经使用了10几年吧，<a target="_blank" rel="noopener" href="https://github.com/yinanwang1">https://github.com/yinanwang1</a>。凡是创建项目都是默认就创建一个代码仓库，方便代码的管理。后来考虑到很多代码不方便公开，就在公司的git服务器上创建仓库。</p>
 <p>DONE</p>
 
     </div>

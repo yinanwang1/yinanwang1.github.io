@@ -1,0 +1,428 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>展示的字体突然奔放了 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="展示的字体突然奔放了 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/08/11/%E5%B1%95%E7%A4%BA%E7%9A%84%E5%AD%97%E4%BD%93%E7%AA%81%E7%84%B6%E5%A5%94%E6%94%BE%E4%BA%86/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+    <meta property="og:image" content="https://p.ipic.vip/7m8xub.jpg" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="展示的字体突然奔放了 | 益烟雨江南 · 工程札记" />
+    
+    
+    <meta name="twitter:image" content="https://p.ipic.vip/7m8xub.jpg" />
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/08/11/%E5%B1%95%E7%A4%BA%E7%9A%84%E5%AD%97%E4%BD%93%E7%AA%81%E7%84%B6%E5%A5%94%E6%94%BE%E4%BA%86/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            展示的字体突然奔放了
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-08-11">2026/08/11</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>开始的时候好好的</p>
+<p>突然就奔放起来了</p>
+<p>没想到，没想到啊</p>
+<h2 id="一、现象"><a href="#一、现象" class="headerlink" title="一、现象"></a>一、现象</h2><p>界面突然风格变了。</p>
+<p><img src="https://p.ipic.vip/7m8xub.jpg" alt="异常"></p>
+<p>字体变大了，而且没有指定颜色的，用了大红色。 Text都有黄色的双下划线。</p>
+<p>这个代码没有改动的。正常情况应该是：</p>
+<p><img src="https://p.ipic.vip/ul22r8.jpg" alt="right_pitch"></p>
+<p>这是想要的效果。</p>
+<h2 id="二、结论"><a href="#二、结论" class="headerlink" title="二、结论"></a>二、结论</h2><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter_easyloading: ^<span class="number">4.0</span>.<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>升级后导致问题。上一个版本3.0.5是2022.05.23 发布的，终于发布4.X版本，<a target="_blank" rel="noopener" href="https://pub.dev/packages/flutter_easyloading/changelog">更新日志</a>没有说会影响到啥。没想到对于<code>showCupertinoModalPopup()</code>竟然会有样式的影响。</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p>在<code>EasyLoading</code>初始化的时候，修改为：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">builder: EasyLoading.init(</span><br><span class="line">  builder: (context, child) &#123;</span><br><span class="line">    <span class="keyword">return</span> DefaultTextStyle(style: Theme.of(context).textTheme.bodyMedium!, child: child!);</span><br><span class="line">  &#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>找了很久没有找到原因，还是AI帮我找到的。以后我应该是测试人员，而不是开发人员了。</p>
+<h2 id="三、原因"><a href="#三、原因" class="headerlink" title="三、原因"></a>三、原因</h2><p>对<code>EasyLoading</code>的初始化是一样的。</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MaterialApp(</span><br><span class="line">    initialRoute: <span class="string">&quot;/&quot;</span>,</span><br><span class="line">    builder: EasyLoading.init(),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-旧版本"><a href="#1-旧版本" class="headerlink" title="1. 旧版本"></a>1. 旧版本</h3><p><code>EasyLoading</code>在3.0.5版本中:</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> Material(</span><br><span class="line">      child: Overlay(</span><br><span class="line">        initialEntries: [</span><br><span class="line">          EasyLoadingOverlayEntry(</span><br><span class="line">            builder: (BuildContext context) &#123;</span><br><span class="line">              <span class="keyword">if</span> (widget.child != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> widget.child!;</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> Container();</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">          ),</span><br><span class="line">          _overlayEntry,</span><br><span class="line">        ],</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个 <code>Material</code> 会给下面的根 <code>Navigator/Overlay</code> 提供正常的 Material 默认文字样式。</p>
+<p>所以在使用   <code>showCupertinoModalPopup</code>的时候用到了<code>EasyLoading</code>设置的<code>Material</code>。</p>
+<h3 id="2-新版本"><a href="#2-新版本" class="headerlink" title="2. 新版本"></a>2. 新版本</h3><p><code>EasyLoading</code>在4.X版本中:</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    _syncOverlay();</span><br><span class="line">    <span class="keyword">final</span> session = easyLoadingRuntime.session;</span><br><span class="line">    <span class="keyword">return</span> Stack(</span><br><span class="line">      fit: StackFit.passthrough,</span><br><span class="line">      clipBehavior: Clip.none,</span><br><span class="line">      children: &lt;Widget&gt;[</span><br><span class="line">        Material(</span><br><span class="line">          type: MaterialType.transparency,</span><br><span class="line">          textStyle: DefaultTextStyle.of(context).style,</span><br><span class="line">          child: widget.child ?? <span class="keyword">const</span> SizedBox.shrink(),</span><br><span class="line">        ),</span><br><span class="line">        <span class="keyword">if</span> (session != <span class="keyword">null</span>)</span><br><span class="line">          Positioned.fill(</span><br><span class="line">            child: _EasyLoadingOverlay(</span><br><span class="line">              key: _overlayKey,</span><br><span class="line">              session: session,</span><br><span class="line">              onPresented: () =&gt; easyLoadingRuntime.didPresent(session.id),</span><br><span class="line">              onDismiss: () &#123;</span><br><span class="line">                unawaited(</span><br><span class="line">                  easyLoadingRuntime.dismiss(</span><br><span class="line">                    reason: EasyLoadingDismissReason.tap,</span><br><span class="line">                  ),</span><br><span class="line">                );</span><br><span class="line">              &#125;,</span><br><span class="line">            ),</span><br><span class="line">          ),</span><br><span class="line">      ],</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>设置的<code>textStyle</code>为 <code>DefaultTextStyle.of(context).style</code>, 也就是<code>MaterialApp</code>中的样式。</p>
+<p>SO    <code>showCupertinoModalPopup</code>使用到了<code>EasyLoading</code>设置的<code>Material</code>。</p>
+<h3 id="3-原因"><a href="#3-原因" class="headerlink" title="3. 原因"></a>3. 原因</h3><p>执行了<code>showCupertinoModalPopup</code>后的图层结构为：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MaterialApp</span><br><span class="line">└─ EasyLoading 包装层</span><br><span class="line">   └─ 根 Navigator</span><br><span class="line">      └─ Overlay</span><br><span class="line">         ├─ 原页面 Route</span><br><span class="line">         │  └─ Scaffold</span><br><span class="line">         │     └─ 正常 Material 文字环境</span><br><span class="line">         │</span><br><span class="line">         └─ CupertinoModalPopupRoute</span><br><span class="line">            └─ CouponPackageDetail</span><br></pre></td></tr></table></figure>
+
+<p><code>CouponPackageDetail</code>  为弹窗中的视图，它没有设置<code>Material</code>。SO 继承了<code>根Navigator</code>上面的<code>EasyLoading</code>包装层的<code>Material</code>。</p>
+<h4 id="旧版本"><a href="#旧版本" class="headerlink" title="旧版本"></a>旧版本</h4><p>没有指定<code>textStyle</code>,所以使用了默认的<code>Theme.of(context).textTheme.bodyMedium</code>.</p>
+<h4 id="新版本"><a href="#新版本" class="headerlink" title="新版本"></a>新版本</h4><p>指定<code>textStyle</code>为<code>DefaultTextStyle.of(context).style</code>，此<code>DefaultTextStyle</code>获取到的是<code>MaterialApp</code>中的<code>textStyle</code>:</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Widget _buildWidgetApp(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">final</span> Color materialColor = widget.color ?? widget.theme?.primaryColor ?? Colors.blue;</span><br><span class="line">    <span class="keyword">if</span> (_usesRouter) &#123;</span><br><span class="line">      <span class="keyword">return</span> WidgetsApp.router(</span><br><span class="line">        key: GlobalObjectKey(<span class="keyword">this</span>),</span><br><span class="line">        routeInformationProvider: widget.routeInformationProvider,</span><br><span class="line">        routeInformationParser: widget.routeInformationParser,</span><br><span class="line">        routerDelegate: widget.routerDelegate,</span><br><span class="line">        routerConfig: widget.routerConfig,</span><br><span class="line">        backButtonDispatcher: widget.backButtonDispatcher,</span><br><span class="line">        onNavigationNotification: widget.onNavigationNotification,</span><br><span class="line">        builder: _materialBuilder,</span><br><span class="line">        title: widget.title,</span><br><span class="line">        onGenerateTitle: widget.onGenerateTitle,</span><br><span class="line">        textStyle: _errorTextStyle,</span><br><span class="line">        color: materialColor,</span><br><span class="line">        locale: widget.locale,</span><br><span class="line">        localizationsDelegates: _localizationsDelegates,</span><br><span class="line">        localeResolutionCallback: widget.localeResolutionCallback,</span><br><span class="line">        localeListResolutionCallback: widget.localeListResolutionCallback,</span><br><span class="line">        supportedLocales: widget.supportedLocales,</span><br><span class="line">        showPerformanceOverlay: widget.showPerformanceOverlay,</span><br><span class="line">        showSemanticsDebugger: widget.showSemanticsDebugger,</span><br><span class="line">        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,</span><br><span class="line">        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,</span><br><span class="line">        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,</span><br><span class="line">        tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,</span><br><span class="line">        shortcuts: widget.shortcuts,</span><br><span class="line">        actions: widget.actions,</span><br><span class="line">        restorationScopeId: widget.restorationScopeId,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>_MaterialAppState</code>中<code>build</code>设置为<code>_errorTextStyle</code>:</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> TextStyle _errorTextStyle = TextStyle(</span><br><span class="line">  color: Color(<span class="number">0xD0FF0000</span>),</span><br><span class="line">  fontFamily: <span class="string">&#x27;monospace&#x27;</span>,</span><br><span class="line">  fontSize: <span class="number">48.0</span>,</span><br><span class="line">  fontWeight: FontWeight.w900,</span><br><span class="line">  decoration: TextDecoration.underline,</span><br><span class="line">  decorationColor: Color(<span class="number">0xFFFFFF00</span>),</span><br><span class="line">  decorationStyle: TextDecorationStyle.<span class="built_in">double</span>,</span><br><span class="line">  debugLabel: <span class="string">&#x27;fallback style; consider putting your text in a Material&#x27;</span>,</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>对，就是它，看到的就是它。</p>
+<p>如果弹窗等<code>Material</code>没有指定，那么使用的都是<code>_errorTextStyle</code>的样式。</p>
+<h2 id="四、-Overlay"><a href="#四、-Overlay" class="headerlink" title="四、 Overlay"></a>四、 Overlay</h2><p><strong>Overlay 是 Flutter 中专门用来“叠加显示 UI”的一个容器。它允许新的 Widget 覆盖在当前页面上面，而不需要替换当前页面。</strong></p>
+<p><code>Navigator</code>中的<code>Overlay</code>有很多<code>Route</code>:</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Navigator</span><br><span class="line">└─ Overlay</span><br><span class="line">   ├─ Route A</span><br><span class="line">   ├─ Route B</span><br><span class="line">   ├─ Dialog Route</span><br><span class="line">   ├─ Popup Route</span><br><span class="line">   └─ 其他浮层</span><br></pre></td></tr></table></figure>
+
+<p>在执行<code>showCupertinoModalPopup</code>的时候：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MaterialApp</span><br><span class="line">│</span><br><span class="line">└─ EasyLoading</span><br><span class="line">   │</span><br><span class="line">   └─ Navigator</span><br><span class="line">      │</span><br><span class="line">      └─ Overlay</span><br><span class="line">         │</span><br><span class="line">         ├─ 原页面 Route</span><br><span class="line">         │  └─ Scaffold</span><br><span class="line">         │     └─ 页面内容</span><br><span class="line">         │</span><br><span class="line">         ├─ ModalBarrier</span><br><span class="line">         │  └─ 半透明遮罩</span><br><span class="line">         │</span><br><span class="line">         └─ CupertinoModalPopupRoute</span><br><span class="line">            └─ CouponPackageDetail</span><br></pre></td></tr></table></figure>
+
+<p><code>CouponPackageDetail</code>不是弹窗所在的页面的<code>child</code>，而是创建了一个<code>route</code>: <code>CupertinoModalPopupRoute</code>, 所以不会继承原页面的<code>Material</code>。</p>
+<h2 id="完结"><a href="#完结" class="headerlink" title="完结"></a>完结</h2><p>AI时代，没有AI解决不了的问题。如果不能，请升级套餐。 <del>_</del></p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/08/11/Android%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E5%92%8C%E5%88%86%E4%BA%AB%E6%80%BB%E7%BB%93/" class="post-nav-link group text-right" title="Android文件读写和分享总结">
+            <span class="post-nav-title">Android文件读写和分享总结</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

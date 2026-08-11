@@ -1,0 +1,733 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>Android文件读写和分享总结 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Android文件读写和分享总结 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/08/11/Android%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E5%92%8C%E5%88%86%E4%BA%AB%E6%80%BB%E7%BB%93/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Android文件读写和分享总结 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/08/11/Android%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E5%92%8C%E5%88%86%E4%BA%AB%E6%80%BB%E7%BB%93/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            Android文件读写和分享总结
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-08-11">2026/08/11</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <h1 id="一、目录怎么选"><a href="#一、目录怎么选" class="headerlink" title="一、目录怎么选"></a><strong>一、目录怎么选</strong></h1><table>
+<thead>
+<tr>
+<th><strong>目录</strong></th>
+<th><strong>示例路径</strong></th>
+<th><strong>权限</strong></th>
+<th><strong>谁用</strong></th>
+<th><strong>是否推荐</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>内部私有目录</td>
+<td><code>/data/data/包名/files/</code></td>
+<td>不需要</td>
+<td>App 自己保存配置、缓存、数据库、token</td>
+<td>强烈推荐</td>
+</tr>
+<tr>
+<td>内部缓存目录</td>
+<td><code>/data/data/包名/cache/</code></td>
+<td>不需要</td>
+<td>临时文件、网络缓存</td>
+<td>推荐</td>
+</tr>
+<tr>
+<td>外部专属目录</td>
+<td><code>/storage/emulated/0/Android/data/包名/files/</code></td>
+<td>不需要</td>
+<td>App 自己的大文件、日志、导出前临时文件</td>
+<td>推荐</td>
+</tr>
+<tr>
+<td>公共图片&#x2F;视频&#x2F;音频</td>
+<td><code>Pictures/</code>、<code>Movies/</code>、<code>Music/</code></td>
+<td>Android 10+ 写自己文件不需要权限</td>
+<td>用户可见媒体</td>
+<td>推荐用 MediaStore</td>
+</tr>
+<tr>
+<td>公共下载目录</td>
+<td><code>/storage/emulated/0/Download/</code></td>
+<td>Android 10+ 用 MediaStore&#x2F;SAF</td>
+<td>PDF、Excel、ZIP、导出文件</td>
+<td>推荐用 SAF 或 MediaStore Downloads</td>
+</tr>
+<tr>
+<td>任意用户选择文件</td>
+<td>用户手动选择</td>
+<td>不需要传统存储权限</td>
+<td>打开 PDF、Excel、TXT、ZIP</td>
+<td>推荐用 SAF</td>
+</tr>
+<tr>
+<td>根目录&#x2F;系统目录</td>
+<td><code>/system/</code>、<code>/data/</code>、其他 App 目录</td>
+<td>普通 App 不能访问</td>
+<td>系统&#x2F;Root</td>
+<td>不要碰</td>
+</tr>
+</tbody></table>
+<p>Android 11 起，分区存储对外部存储访问限制更严格，target API 30+ 必须使用 scoped storage；Android 10 之前还能靠路径和 <code>READ/WRITE_EXTERNAL_STORAGE</code>，但现在不建议这样做。</p>
+<p><code>READ/WRITE_EXTERNAL_STORAGE</code> 用来访问<code>/storage/emulated/0/*/</code>中公共的内容。</p>
+<hr>
+<h1 id="二、权限规则"><a href="#二、权限规则" class="headerlink" title="二、权限规则"></a><strong>二、权限规则</strong></h1><h2 id="1-App-自己目录：不需要权限"><a href="#1-App-自己目录：不需要权限" class="headerlink" title="1. App 自己目录：不需要权限"></a><strong>1. App 自己目录：不需要权限</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">context.filesDir</span><br><span class="line">context.cacheDir</span><br><span class="line">context.getExternalFilesDir(<span class="literal">null</span>)</span><br><span class="line">context.externalCacheDir</span><br></pre></td></tr></table></figure>
+
+<p>这些 Android 7–16 都稳定可用。</p>
+<hr>
+<h2 id="2-访问相册图片-视频-音频"><a href="#2-访问相册图片-视频-音频" class="headerlink" title="2. 访问相册图片&#x2F;视频&#x2F;音频"></a><strong>2. 访问相册图片&#x2F;视频&#x2F;音频</strong></h2><p>Android 13+：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_IMAGES&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_VIDEO&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_AUDIO&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Android 12 及以下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;32&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Android 官方说明：访问其他 App 创建的媒体文件，需要声明对应的媒体读取权限；但 Android 10+ 访问自己写入 MediaStore 的媒体文件，不需要存储权限。</p>
+<hr>
+<h2 id="3-写入图片、视频、音频、下载文件"><a href="#3-写入图片、视频、音频、下载文件" class="headerlink" title="3. 写入图片、视频、音频、下载文件"></a><strong>3. 写入图片、视频、音频、下载文件</strong></h2><p>推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Android 10+：MediaStore</span><br><span class="line">Android 7-9：WRITE_EXTERNAL_STORAGE 或退回 App 专属目录</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="内部目录"><a href="#内部目录" class="headerlink" title="内部目录"></a>内部目录</h3><p>&#x2F;data&#x2F;data&#x2F;包名&#x2F;files&#x2F;<br>Android&#x2F;data&#x2F;包名&#x2F;files&#x2F;</p>
+<p>永远不需要存储权限</p>
+<h3 id="公共目录"><a href="#公共目录" class="headerlink" title="公共目录"></a>公共目录</h3><p>Download&#x2F;DCIM&#x2F;Pictures</p>
+<p>Android 9及以下：<br>READ&#x2F;WRITE_EXTERNAL_STORAGE</p>
+<p>Android 10~12：<br>MediaStore &#x2F; SAF</p>
+<p>Android 13+：<br>READ_MEDIA_* &#x2F; Photo Picker</p>
+<h2 id="4-PDF、Excel、ZIP、TXT-等普通文件"><a href="#4-PDF、Excel、ZIP、TXT-等普通文件" class="headerlink" title="4. PDF、Excel、ZIP、TXT 等普通文件"></a><strong>4. PDF、Excel、ZIP、TXT 等普通文件</strong></h2><p>推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">让用户选择保存位置：ACTION_CREATE_DOCUMENT</span><br><span class="line">让用户选择打开文件：ACTION_OPEN_DOCUMENT</span><br></pre></td></tr></table></figure>
+
+<p>也就是 SAF，优点是 Android 7–16 都能用，而且不需要传统存储权限。</p>
+<hr>
+<h1 id="三、Manifest-权限"><a href="#三、Manifest-权限" class="headerlink" title="三、Manifest 权限"></a><strong>三、Manifest 权限</strong></h1><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- Android 12 及以下读取公共文件 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;32&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- Android 9 及以下写公共目录 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;28&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- Android 13+ 读取媒体 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_IMAGES&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_VIDEO&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_AUDIO&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四、Android-7–16-通用文件存储"><a href="#四、Android-7–16-通用文件存储" class="headerlink" title="四、Android 7–16 通用文件存储"></a><strong>四、Android 7–16 通用文件存储</strong></h1><h2 id="1-保存-App-私有文件"><a href="#1-保存-App-私有文件" class="headerlink" title="1. 保存 App 私有文件"></a><strong>1. 保存 App 私有文件</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">savePrivateFile</span><span class="params">(context: <span class="type">Context</span>, fileName: <span class="type">String</span>, content: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> file = File(context.filesDir, fileName)</span><br><span class="line">    file.writeText(content)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">readPrivateFile</span><span class="params">(context: <span class="type">Context</span>, fileName: <span class="type">String</span>)</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">val</span> file = File(context.filesDir, fileName)</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">if</span> (file.exists()) file.readText() <span class="keyword">else</span> <span class="string">&quot;&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>适合保存：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">配置</span><br><span class="line">草稿</span><br><span class="line">token</span><br><span class="line">用户偏好</span><br><span class="line">App 内部数据</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2-保存外部-App-专属文件"><a href="#2-保存外部-App-专属文件" class="headerlink" title="2. 保存外部 App 专属文件"></a><strong>2. 保存外部 App 专属文件</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">saveExternalAppFile</span><span class="params">(context: <span class="type">Context</span>, fileName: <span class="type">String</span>, content: <span class="type">String</span>)</span></span>: File &#123;</span><br><span class="line">    <span class="keyword">val</span> dir = context.getExternalFilesDir(<span class="string">&quot;logs&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> (dir != <span class="literal">null</span> &amp;&amp; !dir.exists()) &#123;</span><br><span class="line">        dir.mkdirs()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> file = File(dir, fileName)</span><br><span class="line">    file.writeText(content)</span><br><span class="line">    <span class="keyword">return</span> file</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>路径类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/storage/emulated/0/Android/data/你的包名/files/logs/app.log</span><br></pre></td></tr></table></figure>
+
+<p>特点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">不需要权限</span><br><span class="line">用户一般看不到</span><br><span class="line">App 卸载后会被删除</span><br><span class="line">适合日志、临时导出文件、大缓存</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-保存图片到相册-MediaStore"><a href="#3-保存图片到相册-MediaStore" class="headerlink" title="3. 保存图片到相册 MediaStore"></a><strong>3. 保存图片到相册 MediaStore</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">saveImageToPictures</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    context: <span class="type">Context</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    fileName: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    bytes: <span class="type">ByteArray</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: Uri? &#123;</span><br><span class="line">    <span class="keyword">val</span> resolver = context.contentResolver</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> values = ContentValues().apply &#123;</span><br><span class="line">        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)</span><br><span class="line">        put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpeg&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            put(MediaStore.Images.Media.RELATIVE_PATH, <span class="string">&quot;Pictures/MyApp&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> uri = resolver.insert(</span><br><span class="line">        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,</span><br><span class="line">        values</span><br><span class="line">    ) ?: <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    resolver.openOutputStream(uri)?.use &#123; output -&gt;</span><br><span class="line">        output.write(bytes)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">        values.clear()</span><br><span class="line">        values.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">        resolver.update(uri, values, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> uri</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>适合：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">保存图片</span><br><span class="line">保存截图</span><br><span class="line">保存二维码</span><br><span class="line">保存用户能在相册看到的图片</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4-保存文件到-Download-目录"><a href="#4-保存文件到-Download-目录" class="headerlink" title="4. 保存文件到 Download 目录"></a><strong>4. 保存文件到 Download 目录</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">saveFileToDownload</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    context: <span class="type">Context</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    fileName: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    mimeType: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    bytes: <span class="type">ByteArray</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: Uri? &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">        <span class="keyword">val</span> resolver = context.contentResolver</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> values = ContentValues().apply &#123;</span><br><span class="line">            put(MediaStore.Downloads.DISPLAY_NAME, fileName)</span><br><span class="line">            put(MediaStore.Downloads.MIME_TYPE, mimeType)</span><br><span class="line">            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + <span class="string">&quot;/MyApp&quot;</span>)</span><br><span class="line">            put(MediaStore.Downloads.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> uri = resolver.insert(</span><br><span class="line">            MediaStore.Downloads.EXTERNAL_CONTENT_URI,</span><br><span class="line">            values</span><br><span class="line">        ) ?: <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">        resolver.openOutputStream(uri)?.use &#123;</span><br><span class="line">            it.write(bytes)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        values.clear()</span><br><span class="line">        values.put(MediaStore.Downloads.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">        resolver.update(uri, values, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line"></span><br><span class="line">        uri</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Android 10+ 推荐这样写。</p>
+<hr>
+<h2 id="5-Android-7–9-保存到-Download"><a href="#5-Android-7–9-保存到-Download" class="headerlink" title="5. Android 7–9 保存到 Download"></a><strong>5. Android 7–9 保存到 Download</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Suppress(<span class="string">&quot;DEPRECATION&quot;</span>)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">saveFileToDownloadLegacy</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    fileName: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    bytes: <span class="type">ByteArray</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: File &#123;</span><br><span class="line">    <span class="keyword">val</span> dir = Environment.getExternalStoragePublicDirectory(</span><br><span class="line">        Environment.DIRECTORY_DOWNLOADS</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!dir.exists()) &#123;</span><br><span class="line">        dir.mkdirs()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> file = File(dir, fileName)</span><br><span class="line">    file.writeBytes(bytes)</span><br><span class="line">    <span class="keyword">return</span> file</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：Android 7–9 需要申请：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;28&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="6-SAF：让用户选择保存位置"><a href="#6-SAF：让用户选择保存位置" class="headerlink" title="6. SAF：让用户选择保存位置"></a><strong>6. SAF：让用户选择保存位置</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">createDocumentLauncher</span><span class="params">(activity: <span class="type">Activity</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">        addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">        type = <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">        putExtra(Intent.EXTRA_TITLE, <span class="string">&quot;demo.txt&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    activity.startActivityForResult(intent, <span class="number">1001</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>写入用户选择的文件：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">writeToUri</span><span class="params">(context: <span class="type">Context</span>, uri: <span class="type">Uri</span>, content: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    context.contentResolver.openOutputStream(uri)?.use &#123; output -&gt;</span><br><span class="line">        output.write(content.toByteArray())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>适合：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PDF</span><br><span class="line">Excel</span><br><span class="line">Word</span><br><span class="line">ZIP</span><br><span class="line">TXT</span><br><span class="line">用户自己决定保存到哪里</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-SAF：让用户选择打开文件"><a href="#7-SAF：让用户选择打开文件" class="headerlink" title="7. SAF：让用户选择打开文件"></a><strong>7. SAF：让用户选择打开文件</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">openDocument</span><span class="params">(activity: <span class="type">Activity</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">        addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">        type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    activity.startActivityForResult(intent, <span class="number">1002</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>读取：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">readFromUri</span><span class="params">(context: <span class="type">Context</span>, uri: <span class="type">Uri</span>)</span></span>: ByteArray &#123;</span><br><span class="line">    <span class="keyword">return</span> context.contentResolver.openInputStream(uri)?.use &#123;</span><br><span class="line">        it.readBytes()</span><br><span class="line">    &#125; ?: ByteArray(<span class="number">0</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="五、权限申请代码"><a href="#五、权限申请代码" class="headerlink" title="五、权限申请代码"></a><strong>五、权限申请代码</strong></h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">requestStoragePermission</span><span class="params">(activity: <span class="type">Activity</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">33</span>) &#123;</span><br><span class="line">        activity.requestPermissions(</span><br><span class="line">            arrayOf(</span><br><span class="line">                android.Manifest.permission.READ_MEDIA_IMAGES,</span><br><span class="line">                android.Manifest.permission.READ_MEDIA_VIDEO</span><br><span class="line">            ),</span><br><span class="line">            <span class="number">2001</span></span><br><span class="line">        )</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">23</span>) &#123;</span><br><span class="line">        activity.requestPermissions(</span><br><span class="line">            arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),</span><br><span class="line">            <span class="number">2001</span></span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="六、实际开发推荐方案"><a href="#六、实际开发推荐方案" class="headerlink" title="六、实际开发推荐方案"></a><strong>六、实际开发推荐方案</strong></h1><table>
+<thead>
+<tr>
+<th><strong>场景</strong></th>
+<th><strong>推荐方案</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>保存登录信息、配置</td>
+<td><code>filesDir</code></td>
+</tr>
+<tr>
+<td>保存缓存</td>
+<td><code>cacheDir</code></td>
+</tr>
+<tr>
+<td>保存日志</td>
+<td><code>getExternalFilesDir(&quot;logs&quot;)</code></td>
+</tr>
+<tr>
+<td>保存图片到相册</td>
+<td><code>MediaStore.Images</code></td>
+</tr>
+<tr>
+<td>保存视频到相册</td>
+<td><code>MediaStore.Video</code></td>
+</tr>
+<tr>
+<td>保存音频</td>
+<td><code>MediaStore.Audio</code></td>
+</tr>
+<tr>
+<td>导出 PDF&#x2F;Excel</td>
+<td><code>ACTION_CREATE_DOCUMENT</code></td>
+</tr>
+<tr>
+<td>用户选择文件上传</td>
+<td><code>ACTION_OPEN_DOCUMENT</code></td>
+</tr>
+<tr>
+<td>下载文件给用户看</td>
+<td>Android 10+ 用 <code>MediaStore.Downloads</code>，或者 SAF</td>
+</tr>
+<tr>
+<td>扫描整个手机文件</td>
+<td>不建议，除非文件管理器类 App</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1><h1 id="FileProvider是-Android-文件共享机制。"><a href="#FileProvider是-Android-文件共享机制。" class="headerlink" title="FileProvider是 Android 文件共享机制。"></a>FileProvider是 Android 文件共享机制。</h1><p><code>FileProvider </code>不负责存文件，它负责把文件安全地分享给其他 App。**</p>
+<hr>
+<h1 id="一、为什么需要-FileProvider"><a href="#一、为什么需要-FileProvider" class="headerlink" title="一、为什么需要 FileProvider"></a><strong>一、为什么需要 FileProvider</strong></h1><p>Android 7.0（API 24）开始禁止暴露 <code>file://</code></p>
+<p>以前：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/sdcard/test.jpg&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">Intent</span> <span class="variable">intent</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Intent</span>(Intent.ACTION_VIEW);</span><br><span class="line">intent.setDataAndType(</span><br><span class="line">        Uri.fromFile(file),</span><br><span class="line">        <span class="string">&quot;image/*&quot;</span></span><br><span class="line">);</span><br><span class="line">startActivity(intent);</span><br></pre></td></tr></table></figure>
+
+<p>得到的 URI：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file:///sdcard/test.jpg</span><br></pre></td></tr></table></figure>
+
+<p>Android 7 开始直接崩溃：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FileUriExposedException</span><br></pre></td></tr></table></figure>
+
+<p>因为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">你的 App</span><br><span class="line">↓</span><br><span class="line">直接暴露真实路径</span><br><span class="line">↓</span><br><span class="line">其它 App</span><br></pre></td></tr></table></figure>
+
+<p>存在安全问题。</p>
+<p>于是 Google 推出了：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content://</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content://com.demo.fileprovider/images/test.jpg</span><br></pre></td></tr></table></figure>
+
+<p>这时候真实路径被隐藏。</p>
+<hr>
+<h1 id="二、什么时候必须用"><a href="#二、什么时候必须用" class="headerlink" title="二、什么时候必须用"></a><strong>二、什么时候必须用</strong></h1><h2 id="场景1：安装-APK"><a href="#场景1：安装-APK" class="headerlink" title="场景1：安装 APK"></a><strong>场景1：安装 APK</strong></h2><p>最常见。</p>
+<p>错误写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Uri</span> <span class="variable">uri</span> <span class="operator">=</span> Uri.fromFile(apkFile);</span><br></pre></td></tr></table></figure>
+
+<p>正确写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Uri</span> <span class="variable">uri</span> <span class="operator">=</span> FileProvider.getUriForFile(</span><br><span class="line">        context,</span><br><span class="line">        <span class="string">&quot;com.demo.fileprovider&quot;</span>,</span><br><span class="line">        apkFile</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>然后：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">intent.addFlags(</span><br><span class="line">        Intent.FLAG_GRANT_READ_URI_PERMISSION</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="场景2：调用相机拍照"><a href="#场景2：调用相机拍照" class="headerlink" title="场景2：调用相机拍照"></a><strong>场景2：调用相机拍照</strong></h2><p>相机需要写入照片。</p>
+<p>错误：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Uri.fromFile(photoFile)</span><br></pre></td></tr></table></figure>
+
+<p>正确：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">FileProvider.getUriForFile(...)</span><br><span class="line">intent.putExtra(</span><br><span class="line">        MediaStore.EXTRA_OUTPUT,</span><br><span class="line">        photoUri</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="场景3：分享图片"><a href="#场景3：分享图片" class="headerlink" title="场景3：分享图片"></a><strong>场景3：分享图片</strong></h2><p>微信</p>
+<p>QQ</p>
+<p>钉钉</p>
+<p>邮件</p>
+<p>浏览器</p>
+<p>等。</p>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Intent.ACTION_SEND</span><br><span class="line">content:<span class="comment">//</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="场景4：打开-PDF"><a href="#场景4：打开-PDF" class="headerlink" title="场景4：打开 PDF"></a><strong>场景4：打开 PDF</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ACTION_VIEW</span><br><span class="line">application/pdf</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="场景5：打开-Excel"><a href="#场景5：打开-Excel" class="headerlink" title="场景5：打开 Excel"></a><strong>场景5：打开 Excel</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">application/vnd.ms-excel</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="场景6：打开-Word"><a href="#场景6：打开-Word" class="headerlink" title="场景6：打开 Word"></a><strong>场景6：打开 Word</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">application/msword</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="场景7：查看日志"><a href="#场景7：查看日志" class="headerlink" title="场景7：查看日志"></a><strong>场景7：查看日志</strong></h2><p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.log</span><br></pre></td></tr></table></figure>
+
+<p>分享给技术支持。</p>
+<hr>
+<h1 id="三、什么时候不需要"><a href="#三、什么时候不需要" class="headerlink" title="三、什么时候不需要"></a><strong>三、什么时候不需要</strong></h1><h2 id="读取自己的文件"><a href="#读取自己的文件" class="headerlink" title="读取自己的文件"></a><strong>读取自己的文件</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(getFilesDir(),<span class="string">&quot;a.txt&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>直接读：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file.readText()</span><br></pre></td></tr></table></figure>
+
+<p>即可。</p>
+<hr>
+<h2 id="写自己的文件"><a href="#写自己的文件" class="headerlink" title="写自己的文件"></a><strong>写自己的文件</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">filesDir</span><br><span class="line">cacheDir</span><br></pre></td></tr></table></figure>
+
+<p>不需要。</p>
+<hr>
+<h2 id="MediaStore"><a href="#MediaStore" class="headerlink" title="MediaStore"></a><strong>MediaStore</strong></h2><p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MediaStore.Images</span><br></pre></td></tr></table></figure>
+
+<p>已经返回：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content://</span><br></pre></td></tr></table></figure>
+
+<p>不需要 FileProvider。</p>
+<hr>
+<h2 id="SAF"><a href="#SAF" class="headerlink" title="SAF"></a><strong>SAF</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ACTION_OPEN_DOCUMENT</span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content://</span><br></pre></td></tr></table></figure>
+
+<p>不需要 FileProvider。</p>
+<hr>
+<h1 id="四、配置方法"><a href="#四、配置方法" class="headerlink" title="四、配置方法"></a><strong>四、配置方法</strong></h1><h2 id="AndroidManifest"><a href="#AndroidManifest" class="headerlink" title="AndroidManifest"></a><strong>AndroidManifest</strong></h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.core.content.FileProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.fileprovider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:grantUriPermissions</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;android.support.FILE_PROVIDER_PATHS&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:resource</span>=<span class="string">&quot;@xml/file_paths&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="res-xml-file-paths-xml"><a href="#res-xml-file-paths-xml" class="headerlink" title="res&#x2F;xml&#x2F;file_paths.xml"></a><strong>res&#x2F;xml&#x2F;file_paths.xml</strong></h2><p>允许共享哪些目录</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">paths</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">files-path</span></span></span><br><span class="line"><span class="tag">        <span class="attr">name</span>=<span class="string">&quot;files&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">path</span>=<span class="string">&quot;.&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">cache-path</span></span></span><br><span class="line"><span class="tag">        <span class="attr">name</span>=<span class="string">&quot;cache&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">path</span>=<span class="string">&quot;.&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">external-files-path</span></span></span><br><span class="line"><span class="tag">        <span class="attr">name</span>=<span class="string">&quot;external&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">path</span>=<span class="string">&quot;.&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">paths</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="五、完整示例"><a href="#五、完整示例" class="headerlink" title="五、完整示例"></a><strong>五、完整示例</strong></h1><p>假设：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/storage/emulated/0/Android/data/com.demo/files/test.pdf</span><br></pre></td></tr></table></figure>
+
+<p>分享 PDF：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(</span><br><span class="line">        getExternalFilesDir(<span class="literal">null</span>),</span><br><span class="line">        <span class="string">&quot;test.pdf&quot;</span></span><br><span class="line">);</span><br><span class="line"><span class="type">Uri</span> <span class="variable">uri</span> <span class="operator">=</span> FileProvider.getUriForFile(</span><br><span class="line">        <span class="built_in">this</span>,</span><br><span class="line">        getPackageName()+<span class="string">&quot;.fileprovider&quot;</span>,</span><br><span class="line">        file</span><br><span class="line">);</span><br><span class="line"><span class="type">Intent</span> <span class="variable">intent</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Intent</span>(Intent.ACTION_VIEW);</span><br><span class="line">intent.setDataAndType(</span><br><span class="line">        uri,</span><br><span class="line">        <span class="string">&quot;application/pdf&quot;</span></span><br><span class="line">);</span><br><span class="line">intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);</span><br><span class="line">startActivity(intent);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="六、和-MediaStore、SAF-的关系"><a href="#六、和-MediaStore、SAF-的关系" class="headerlink" title="六、和 MediaStore、SAF 的关系"></a><strong>六、和 MediaStore、SAF 的关系</strong></h1><table>
+<thead>
+<tr>
+<th><strong>方案</strong></th>
+<th><strong>用途</strong></th>
+<th><strong>是否需要 FileProvider</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>filesDir</td>
+<td>App私有文件</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>cacheDir</td>
+<td>缓存</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>getExternalFilesDir</td>
+<td>App专属目录</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>MediaStore</td>
+<td>图片视频音频</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>SAF</td>
+<td>用户选文件</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>分享文件给别的App</td>
+<td>文件共享</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>安装APK</td>
+<td>文件共享</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>调用相机拍照</td>
+<td>文件共享</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>打开PDF</td>
+<td>文件共享</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>分享日志</td>
+<td>文件共享</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<hr>
+<p>读写包名下面的文件，都不需要权限了。 </p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <a href="/2026/08/11/%E5%B1%95%E7%A4%BA%E7%9A%84%E5%AD%97%E4%BD%93%E7%AA%81%E7%84%B6%E5%A5%94%E6%94%BE%E4%BA%86/" class="post-nav-link group text-left" title="展示的字体突然奔放了">
+             <span aria-hidden="true">&larr;</span>
+             <span class="post-nav-title">展示的字体突然奔放了</span>
+        </a>
+        
+
+        
+        <a href="/2026/04/30/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93/" class="post-nav-link group text-right" title="">
+            <span class="post-nav-title"></span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

@@ -1,0 +1,488 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>iOS-APP与蓝牙设备长连接的可行性方案 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="iOS-APP与蓝牙设备长连接的可行性方案 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/11/iOS-APP%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+    <meta property="og:image" content="https://p.ipic.vip/o1dma6.png" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="iOS-APP与蓝牙设备长连接的可行性方案 | 益烟雨江南 · 工程札记" />
+    
+    
+    <meta name="twitter:image" content="https://p.ipic.vip/o1dma6.png" />
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/11/iOS-APP%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            iOS-APP与蓝牙设备长连接的可行性方案
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-11">2026/09/11</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <h1 id="iOS-APP与蓝牙设备长连接的可行性方案"><a href="#iOS-APP与蓝牙设备长连接的可行性方案" class="headerlink" title="iOS-APP与蓝牙设备长连接的可行性方案"></a>iOS-APP与蓝牙设备长连接的可行性方案</h1><p>之前编写<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/BpAeDfLQ_R3EkAOW-anmPA">低功耗蓝牙的通信和省电的秘密</a>的时候，了解到蓝牙低功耗的秘密是99%的时间在休眠。那么APP在后台无感又低功耗从蓝牙设备获取到数据，这又是怎么做到的？即：<strong>用户不主动打开 App，蓝牙设备仍能通过 BLE 把数据传给 iPhone，然后 App 再上传服务器。</strong></p>
+<h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>APP处于后台有两种情况:</p>
+<ol>
+<li>用户主动上划杀掉APP。也就是：<strong>用户主动杀进程(Force Quit)</strong>。</li>
+<li>用户切换到其他APP。 也就是：<strong>APP进入后台(Suspend)</strong>.</li>
+</ol>
+<h4 id="1-杀进程"><a href="#1-杀进程" class="headerlink" title="1. 杀进程"></a><strong>1. 杀进程</strong></h4><p>进程已经终止，与蓝牙设备的连接也断开，蓝牙设备后台能力也停止。那么不管什么方案都不能实现数据获取。</p>
+<p><strong>除非</strong></p>
+<p>（1）用户主动打开APP。</p>
+<p>（2）远端服务发送通知，用户点击通知打开APP。</p>
+<p>后端服务监控着用户的数据更新情况，如果用户已经几个小时或一天没有上传数据，那么说明蓝牙设备没电、通讯异常或APP被主动终止。此时进行发送一个通知，提醒用户打开APP查看具体原因。</p>
+<p>用户主动打开APP，那么一切就开始正常执行。</p>
+<h4 id="2-切后台"><a href="#2-切后台" class="headerlink" title="2. 切后台"></a>2. 切后台</h4><p>当APP不在前台即进入后台，一段时间后APP就会被iOS系统挂起。</p>
+<p>此时Apple公司提供了<strong>iOS bluetooth-central 后台模式</strong> ，当蓝牙设备发送数据时，iOS系统会唤醒APP并接受到数据，而且提供短时间的网络通讯能力。</p>
+<p>展开讲讲后台通讯的逻辑。</p>
+<h2 id="一、BLE后台能力"><a href="#一、BLE后台能力" class="headerlink" title="一、BLE后台能力"></a>一、BLE后台能力</h2><p>在APP的开发项目中，给APP添加一个<em>Uses Bluetooth LE accessories</em>的权限。</p>
+<p><img src="https://p.ipic.vip/o1dma6.png" alt="蓝牙LE配件"></p>
+<h2 id="二、维持连接-和-Notify，读写数据"><a href="#二、维持连接-和-Notify，读写数据" class="headerlink" title="二、维持连接 和 Notify，读写数据"></a>二、维持连接 和 Notify，读写数据</h2><h4 id="工作方式："><a href="#工作方式：" class="headerlink" title="工作方式："></a>工作方式：</h4><hr>
+<p>打开 App<br>↓<br>扫描蓝牙设备  （可指定CBUUID，或 kCBAdvDataManufacturerData）<br>↓<br>连接蓝牙设备  （避免使用蓝牙名称，需要使用SN绑定）<br>↓<br>Discover Service （可UUID过滤，或发现所有）<br>↓<br>Discover Characteristic （可UUID过滤，或发现所有）<br>↓<br>打开 Notify &#x2F; Indicate  （监听订阅）<br>↓<br>App 进入后台<br>↓<br>蓝牙设备产生新数据<br>↓<br>Characteristic Notify  &#x2F; Indicate （通过监听传播数据）<br>↓<br>iOS 唤醒 App  （iOS系统将APP唤醒）<br>↓<br>func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?)<br>↓<br>读取 &#x2F; 接收数据</p>
+<hr>
+<p>此方式可以在APP没有被杀进程的情况下，及时的读取到蓝牙设备的发送的信息。</p>
+<p>如果蓝牙设备的数据是不能丢失的，那么外设的特征值需要是**.indicate**。</p>
+<h4 id="蓝牙设备数据的记录建议"><a href="#蓝牙设备数据的记录建议" class="headerlink" title="蓝牙设备数据的记录建议"></a>蓝牙设备数据的记录建议</h4><p>蓝牙设备持续产生数据，如：心率、血氧、步数、睡眠、体温、HRV等。</p>
+<p>不需要实时推送或广播数据，而是先记录在本地的Flash中，持续保存数据。</p>
+<hr>
+<p>积累一定数量后</p>
+<p>​        ↓</p>
+<p>发送Notify： 有新数据了</p>
+<p>​        ↓</p>
+<p>iOS系统被BLE事件唤醒</p>
+<p>​        ↓</p>
+<p>App 发命令：从 timestamp &#x2F; sequenceId 开始同步 （从上一条记录继续）</p>
+<p>​        ↓</p>
+<p>蓝牙设备批量发送历史数据</p>
+<p>​        ↓</p>
+<p>App将数据保存到本地</p>
+<p>​        ↓</p>
+<p>App向服务器同步数据</p>
+<hr>
+<h2 id="三、必须加入-Core-Bluetooth-State-Preservation-Restoration"><a href="#三、必须加入-Core-Bluetooth-State-Preservation-Restoration" class="headerlink" title="三、必须加入 Core Bluetooth State Preservation &amp; Restoration"></a>三、<strong>必须加入 Core Bluetooth State Preservation &amp; Restoration</strong></h2><p>在初始化中央设备的时候，必须：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">CBCentralManager</span>(</span><br><span class="line">    delegate: <span class="keyword">self</span>,</span><br><span class="line">    queue: <span class="literal">nil</span>,</span><br><span class="line">    options: [</span><br><span class="line">        CBCentralManagerOptionRestoreIdentifierKey: <span class="string">&quot;com.xxx.bluetooth.central&quot;</span></span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>设置<code>CBCentralManagerOptionRestoreIdentifierKey</code>后，系统将保存蓝牙上下文信息。</p>
+<p>当系统因为 BLE 事件重新恢复 App 后：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">centralManager</span>(</span><br><span class="line">    <span class="keyword">_</span> <span class="params">central</span>: <span class="type">CBCentralManager</span>,</span><br><span class="line">    <span class="params">willRestoreState</span> <span class="params">dict</span>: [<span class="params">String</span> : <span class="keyword">Any</span>]) &#123;</span><br><span class="line">    <span class="comment">// 恢复 peripheral</span></span><br><span class="line">    <span class="comment">// 恢复 connection</span></span><br><span class="line">    <span class="comment">// 恢复 subscription</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在dict中可以拿到：</p>
+<ol>
+<li><code>CBCentralManagerRestoredStatePeripheralsKey</code>：数组，<strong>CBPeripheral 对象列表</strong>（当时已连接 &#x2F; 正在 pending 等待连接的外设）</li>
+<li><code>CBCentralManagerRestoredStateScanServicesKey</code>：当时正在扫描的服务 UUID 数组</li>
+<li><code>CBCentralManagerRestoredStateScanOptionsKey</code>：扫描配置参数</li>
+</ol>
+<p>Apple 专门提供了 <strong>State Preservation and Restoration</strong>，让 Core Bluetooth 保存中央管理器相关状态，并在系统重新启动或恢复 App 时交还这些状态。拿到CBPeripheral后，进行重新 <code>discoverServices</code> → <code>discoverCharacteristics</code>，然后重新 <code>setNotifyValue(true)</code> <strong>订阅 Notify</strong>。</p>
+<p>**注意：**后台唤醒App是有时间限制的，只有很短的执行窗口。进行大数量的同步，可能会超时。</p>
+<h2 id="四、从蓝牙设备获取到数据，先本地缓存"><a href="#四、从蓝牙设备获取到数据，先本地缓存" class="headerlink" title="四、从蓝牙设备获取到数据，先本地缓存"></a>四、从蓝牙设备获取到数据，先本地缓存</h2><p>后台唤醒App的时间限制，如果进行数据网络上传，而没有进行本地缓存。那么就会发生（1）执行窗口消失。（2）上传数据失败。此时数据就会丢失，而蓝牙设备因为数据已经传输过，则会将本地数据清除。导致数据永久丢失。</p>
+<p>SO，必须缓存在本地</p>
+<hr>
+<p>BLE收到数据<br>↓<br>SQLite &#x2F; CoreData &#x2F; 文件<br>↓<br>标记 pending_upload<br>↓<br>上传服务器<br>↓<br>服务器 ACK<br>↓<br>标记 uploaded</p>
+<hr>
+<p>确保数据被丢失。</p>
+<h2 id="五、上传服务器推荐URLSession"><a href="#五、上传服务器推荐URLSession" class="headerlink" title="五、上传服务器推荐URLSession"></a>五、上传服务器推荐URLSession</h2><p>本地缓存后，可以尝试上传少量的数据。Apple 允许拥有相应后台执行模式的 App，在被系统给予后台执行时间时，也可以使用普通 URLSession 网络请求。</p>
+<p>如果上传文件较大或者希望上传任务脱离 App 生命周期，则可以使用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">URLSessionConfiguration</span>.background(</span><br><span class="line">    withIdentifier: <span class="string">&quot;com.xxx.ring.upload&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>Background URLSession 会把网络传输交给系统独立进程，即使 App 被暂停甚至终止，网络任务在满足条件时仍可继续。</p>
+<p>这个方法可以确认上传成功，如果需要获取到成功结果，然后修改本地数据的状态。那么还是要避免大量数据的操作。 可以缩短蓝牙设备的Notify的周期，然后每次少量上传数据。</p>
+<h2 id="六、蓝牙设备的数据协议"><a href="#六、蓝牙设备的数据协议" class="headerlink" title="六、蓝牙设备的数据协议"></a>六、蓝牙设备的数据协议</h2><p>App和蓝牙设备在后台能够数据通讯后，要确认数据完整、高效并安全的传输到App，数据协议需要有：</p>
+<hr>
+<p>本地数据存储<br>+<br>sequenceId<br>+<br>timestamp<br>+<br>批量读取<br>+<br>断点续传<br>+<br>CRC &#x2F; checksum<br>+<br>ACK</p>
+<hr>
+<p>此方案可以实现：（1）数据不丢失。（2）指定数据读取。（3）断点续传。</p>
+<h2 id="蓝牙设备基础知识"><a href="#蓝牙设备基础知识" class="headerlink" title="蓝牙设备基础知识"></a>蓝牙设备基础知识</h2><ul>
+<li><strong>GAP（访问层）：负责建立蓝牙连接</strong> 角色：Central（中心）、Peripheral（外设），解决：扫描、广播、发起连接。</li>
+<li><strong>GATT（属性层）：连接成功之后的数据交互规则</strong> 角色：<strong>GATT Server（服务端）、GATT Client（客户端）</strong>，解决：读数据、写数据、通知上报。</li>
+</ul>
+<h4 id="蓝牙设备的GAP2个角色："><a href="#蓝牙设备的GAP2个角色：" class="headerlink" title="蓝牙设备的GAP2个角色："></a>蓝牙设备的GAP2个角色：</h4><ol>
+<li><strong>bluetooth-central（中心，主机）</strong>： 手机、电脑、蓝牙网关<ul>
+<li>主动扫描广播包、发起连接请求</li>
+<li>连接建立后，控制通信时序</li>
+<li>一个 central 可以同时连多个 peripheral</li>
+<li>GATT 层面：一般是 <strong>GATT Client（客户端）</strong>，去读写外设的数据</li>
+</ul>
+</li>
+<li><strong>bluetooth-peripheral（外围，从机）</strong>： 手环、温湿度传感器、BLE 按键<ul>
+<li>向外发广播，被动等待别人来连接</li>
+<li>通常同一时间只能被一个 central 连接</li>
+<li>GATT 层面：一般是 <strong>GATT Server（服务端）</strong>，存放数据和服务</li>
+</ul>
+</li>
+</ol>
+<h4 id="GATT（Generic-Attribute-Profile，通用属性配置文件-）："><a href="#GATT（Generic-Attribute-Profile，通用属性配置文件-）：" class="headerlink" title="GATT（Generic Attribute Profile，通用属性配置文件-）："></a>GATT（Generic Attribute Profile，通用属性配置文件-）：</h4><ul>
+<li><strong>GATT Client（客户端)</strong>： 持有所有服务、特征值数据；被动等待对方来读写。</li>
+<li><strong>GATT Server（服务端）</strong>： 主动发起操作：读特征、写特征、开启通知。</li>
+</ul>
+<p>GATT的UUID（服务、特征）是设备厂商提供的协议文档。即指定GATT服务、特征UUID和特征UUID的可读、可写、支持Notify。</p>
+<p>GATT Client指定<em>characteristic</em>执行（1）read 读一次数据。（2）write 下发指令。（3）订阅数据。</p>
+<h4 id="监听订阅的区分（由外设特征决定）："><a href="#监听订阅的区分（由外设特征决定）：" class="headerlink" title="监听订阅的区分（由外设特征决定）："></a>监听订阅的区分（由外设特征决定）：</h4><ul>
+<li><strong>Notify</strong>：GATT 通知，Server 发数据，<strong>不需要 App 回复 ACK</strong>（绝大多数蓝牙设备用这个）</li>
+<li><strong>Indicate</strong>：指示，Server 发数据，<strong>App 必须回复确认</strong>，消费设备很少用</li>
+</ul>
+<p>注： 此方案还是设想阶段，计划买一个可以二创的蓝牙设备进行实践下。</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/08/20/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%B9%B2%E6%B4%BB%E7%9A%84%E6%96%B0%E6%96%B9%E5%BC%8F%EF%BC%8C%E5%92%B1%E4%B9%9F%E6%98%AF%E4%B8%93%E5%AE%B6%E7%BA%A7%E6%B0%B4%E5%B9%B3/" class="post-nav-link group text-right" title="程序员干活的新方式，咱也是专家级水平">
+            <span class="post-nav-title">程序员干活的新方式，咱也是专家级水平</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

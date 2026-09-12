@@ -1,0 +1,530 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>Android-App与蓝牙设备长连接的可行性方案 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Android-App与蓝牙设备长连接的可行性方案 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/13/Android-App%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Android-App与蓝牙设备长连接的可行性方案 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/13/Android-App%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            Android-App与蓝牙设备长连接的可行性方案
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-13">2026/09/13</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>需求和原理同<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/yEZ6Mx79D6QqOskByEgt5A">iOS-APP与蓝牙设备长连接的可行性方案</a>,包括蓝牙的基础名词介绍.</p>
+<h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>当APP操作为：</p>
+<ol>
+<li>系统杀死整个进程</li>
+<li>设置 →  强制停止APP<br>那么将无法在后台执行操作，也无法继续蓝牙设置连接。</li>
+</ol>
+<h2 id="一、可行性方案的架构"><a href="#一、可行性方案的架构" class="headerlink" title="一、可行性方案的架构"></a>一、可行性方案的架构</h2><p>靠谱并且逻辑清晰的方案：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备（具备Flash本地缓存数据）</span><br><span class="line">      ↓</span><br><span class="line">BluetoothGatt（扫描、连接、Notify、ACK，重连）</span><br><span class="line">      ↓</span><br><span class="line">Foreground Service（维持后台，保证BLE通信）</span><br><span class="line">      ↓</span><br><span class="line">Room （本地可靠存储，缓存数据，上传过设置uploaded = true）</span><br><span class="line">      ↓</span><br><span class="line">WorkManager （批量上传 / 失败重试 ）</span><br><span class="line">      ↓</span><br><span class="line">云端服务器 （数据同步到服务器）</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、核心Foreground-Service"><a href="#二、核心Foreground-Service" class="headerlink" title="二、核心Foreground Service"></a>二、核心Foreground Service</h2><p>Foreground Service主要负责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">启动 BLE</span><br><span class="line">建立 GATT 连接</span><br><span class="line">订阅 Characteristic Notify</span><br><span class="line">持续接收蓝牙设备数据</span><br><span class="line">处理 BLE 指令</span><br><span class="line">检测连接状态</span><br><span class="line">断线自动重连</span><br></pre></td></tr></table></figure>
+
+<p>不要把 BLE 连接放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Activity</span><br><span class="line">Fragment</span><br><span class="line">ViewModel</span><br></pre></td></tr></table></figure>
+
+<p>里面。<br>正确关系应该是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Activity</span><br><span class="line">   ↓</span><br><span class="line">启动 / 绑定 BleForegroundService</span><br><span class="line">   ↓</span><br><span class="line">BleConnectionManager</span><br><span class="line">   ↓</span><br><span class="line">BluetoothGatt</span><br><span class="line">   ↓</span><br><span class="line">蓝牙设备</span><br></pre></td></tr></table></figure>
+
+<p>这样即使：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">用户按 Home</span><br><span class="line">切换微信</span><br><span class="line">锁屏</span><br><span class="line">Activity 被销毁</span><br></pre></td></tr></table></figure>
+
+<p>BLE Service 仍然可以继续运行。</p>
+<h2 id="三、Foreground-Service-必须显示通知"><a href="#三、Foreground-Service-必须显示通知" class="headerlink" title="三、Foreground Service 必须显示通知"></a>三、Foreground Service 必须显示通知</h2><p>如果使用 FGS，就要接受一个基本条件：Foreground Service 必须关联一个 Notification。<br>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备</span><br><span class="line">已连接，正在同步健康数据</span><br></pre></td></tr></table></figure>
+
+<p>调用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">startForeground(</span><br><span class="line">    NOTIFICATION_ID,</span><br><span class="line">    notification</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这个通知的含义不是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">App界面在前台</span><br></pre></td></tr></table></figure>
+
+<p>而是： 用户能够知道这个 App 正在持续执行一个重要后台任务。</p>
+<h2 id="四、Android-7-和-Android-8-要分开启动-Service"><a href="#四、Android-7-和-Android-8-要分开启动-Service" class="headerlink" title="四、Android 7 和 Android 8+ 要分开启动 Service"></a>四、Android 7 和 Android 8+ 要分开启动 Service</h2><p>Android 7：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">startService(intent)</span><br></pre></td></tr></table></figure>
+
+<p>Android 8+：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">startForegroundService(intent)</span><br></pre></td></tr></table></figure>
+
+<p>因此代码一般：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line">    context.startForegroundService(intent)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    context.startService(intent)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后 Service 里面调用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">startForeground(...)</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、BLE-连接流程"><a href="#五、BLE-连接流程" class="headerlink" title="五、BLE 连接流程"></a>五、BLE 连接流程</h2><p>完整连接流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">扫描蓝牙设备</span><br><span class="line">   ↓</span><br><span class="line">找到目标设备</span><br><span class="line">   ↓</span><br><span class="line">connectGatt()</span><br><span class="line">   ↓</span><br><span class="line">onConnectionStateChange()</span><br><span class="line">   ↓</span><br><span class="line">CONNECTED</span><br><span class="line">   ↓</span><br><span class="line">discoverServices()</span><br><span class="line">   ↓</span><br><span class="line">找到 Service</span><br><span class="line">   ↓</span><br><span class="line">找到 Characteristic</span><br><span class="line">   ↓</span><br><span class="line">开启 Notify</span><br><span class="line">   ↓</span><br><span class="line">onCharacteristicChanged()</span><br><span class="line">   ↓</span><br><span class="line">持续接收蓝牙设备数据</span><br></pre></td></tr></table></figure>
+
+<p>核心仍然使用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BluetoothGatt</span><br></pre></td></tr></table></figure>
+
+<p>Foreground Service 只是提供长期运行环境，并不替代 BLE API。</p>
+<h2 id="六、收到蓝牙设备数据以后，立即写-Room"><a href="#六、收到蓝牙设备数据以后，立即写-Room" class="headerlink" title="六、收到蓝牙设备数据以后，立即写 Room"></a>六、收到蓝牙设备数据以后，立即写 Room</h2><p>推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备</span><br><span class="line">   ↓</span><br><span class="line">BLE Notify</span><br><span class="line">   ↓</span><br><span class="line">Foreground Service</span><br><span class="line">   ↓</span><br><span class="line">数据解析</span><br><span class="line">   ↓</span><br><span class="line">Room</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ring_health_data</span><br><span class="line"></span><br><span class="line">id</span><br><span class="line">deviceId</span><br><span class="line">sequenceId</span><br><span class="line">timestamp</span><br><span class="line">type</span><br><span class="line">value</span><br><span class="line">uploaded</span><br></pre></td></tr></table></figure>
+
+<p>收到数据：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sequenceId = 10025</span><br><span class="line">heartRate = 72</span><br><span class="line">timestamp = ...</span><br><span class="line">uploaded = false</span><br></pre></td></tr></table></figure>
+
+<p>先保存：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Room</span><br></pre></td></tr></table></figure>
+
+<p>保存成功以后，再给蓝牙设备：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ACK</span><br></pre></td></tr></table></figure>
+
+<p>推荐顺序：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BLE收到数据</span><br><span class="line">   ↓</span><br><span class="line">校验数据</span><br><span class="line">   ↓</span><br><span class="line">写Room</span><br><span class="line">   ↓</span><br><span class="line">数据库事务成功</span><br><span class="line">   ↓</span><br><span class="line">返回ACK给蓝牙设备</span><br></pre></td></tr></table></figure>
+
+<p>不要：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">收到数据</span><br><span class="line">   ↓</span><br><span class="line">立即ACK</span><br><span class="line">   ↓</span><br><span class="line">再写数据库</span><br></pre></td></tr></table></figure>
+
+<p>否则如果 ACK 后 App 进程异常死亡，可能造成数据丢失。</p>
+<h2 id="七、蓝牙设备本身必须具备本地存储"><a href="#七、蓝牙设备本身必须具备本地存储" class="headerlink" title="七、蓝牙设备本身必须具备本地存储"></a>七、蓝牙设备本身必须具备本地存储</h2><p>数据缓存的设计：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备 Flash</span><br><span class="line">   ↓</span><br><span class="line">App Room</span><br><span class="line">   ↓</span><br><span class="line">服务器</span><br></pre></td></tr></table></figure>
+
+<p>三级存储。<br>蓝牙设备记录：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#10001</span><br><span class="line">#10002</span><br><span class="line">#10003</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>App 告诉蓝牙设备：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ACK #10003</span><br></pre></td></tr></table></figure>
+
+<p>表示：#10003 之前的数据已经安全进入手机。<br>如果 BLE 断开：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备继续记录</span><br><span class="line">   ↓</span><br><span class="line">数据存在 Flash</span><br></pre></td></tr></table></figure>
+
+<p>下一次重新连接：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">App：</span><br><span class="line">我最后同步到了 #10003</span><br><span class="line">蓝牙设备：</span><br><span class="line">继续发送 #10004 开始的数据</span><br></pre></td></tr></table></figure>
+
+<p>这样才能真正做到：<br>BLE 可以断，但数据不能丢。</p>
+<h2 id="八、BLE-断线必须自动重连"><a href="#八、BLE-断线必须自动重连" class="headerlink" title="八、BLE 断线必须自动重连"></a>八、BLE 断线必须自动重连</h2><p>长连接不代表永远不断。<br>可能因为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备离开距离</span><br><span class="line">手机蓝牙关闭</span><br><span class="line">蓝牙设备没电</span><br><span class="line">系统蓝牙栈异常</span><br><span class="line">射频干扰</span><br><span class="line">进程被系统回收</span><br></pre></td></tr></table></figure>
+
+<p>因此建议维护状态机：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">DISCONNECTED</span><br><span class="line">     ↓</span><br><span class="line">CONNECTING</span><br><span class="line">     ↓</span><br><span class="line">CONNECTED</span><br><span class="line">     ↓</span><br><span class="line">DISCOVERING</span><br><span class="line">     ↓</span><br><span class="line">READY</span><br></pre></td></tr></table></figure>
+
+<p>断线：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">READY</span><br><span class="line">  ↓</span><br><span class="line">DISCONNECTED</span><br><span class="line">  ↓</span><br><span class="line">等待</span><br><span class="line">  ↓</span><br><span class="line">重新扫描 / 重连</span><br></pre></td></tr></table></figure>
+
+<p>推荐退避：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 秒</span><br><span class="line">2 秒</span><br><span class="line">5 秒</span><br><span class="line">10 秒</span><br><span class="line">30 秒</span><br><span class="line">60 秒</span><br></pre></td></tr></table></figure>
+
+<p>避免持续高频扫描和连接。</p>
+<h2 id="九、后台上传使用WorkManager上传"><a href="#九、后台上传使用WorkManager上传" class="headerlink" title="九、后台上传使用WorkManager上传"></a>九、后台上传使用WorkManager上传</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">BLE</span><br><span class="line"> ↓</span><br><span class="line">Room</span><br><span class="line"> ↓</span><br><span class="line">WorkManager</span><br><span class="line"> ↓</span><br><span class="line">服务器</span><br></pre></td></tr></table></figure>
+
+<p>这样 BLE 和网络完全解耦。<br>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BLE收到50条数据</span><br><span class="line">      ↓</span><br><span class="line">全部写Room</span><br><span class="line">      ↓</span><br><span class="line">WorkManager</span><br><span class="line">      ↓</span><br><span class="line">批量上传50条</span><br><span class="line">      ↓</span><br><span class="line">服务器成功</span><br><span class="line">      ↓</span><br><span class="line">uploaded = true</span><br></pre></td></tr></table></figure>
+
+<p>网络失败：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Result.retry()</span><br></pre></td></tr></table></figure>
+
+<p>WorkManager 之后继续调度。</p>
+<h2 id="十、WorkManager-可以直接访问-Room"><a href="#十、WorkManager-可以直接访问-Room" class="headerlink" title="十、WorkManager 可以直接访问 Room"></a>十、WorkManager 可以直接访问 Room</h2><p>不需要：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Worker</span><br><span class="line"> ↓</span><br><span class="line">把数据返回Activity</span><br><span class="line"> ↓</span><br><span class="line">Activity保存Room</span><br></pre></td></tr></table></figure>
+
+<p>正确方式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Worker</span><br><span class="line"> ↓</span><br><span class="line">直接读取Room</span><br><span class="line"> ↓</span><br><span class="line">上传服务器</span><br><span class="line"> ↓</span><br><span class="line">直接更新Room</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">doWork</span><span class="params">()</span></span>: Result &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> dao = AppDatabase</span><br><span class="line">        .getInstance(applicationContext)</span><br><span class="line">        .ringDataDao()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> <span class="keyword">data</span> = dao.getNotUploaded()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">try</span> &#123;</span><br><span class="line">        api.upload(<span class="keyword">data</span>)</span><br><span class="line"></span><br><span class="line">        dao.markUploaded(</span><br><span class="line">            <span class="keyword">data</span>.map &#123; it.id &#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        Result.success()</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        Result.retry()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上传成功后，直接将Room中的数据设置 <code>uploaded = true</code>.</p>
+<h2 id="十一、权限适配"><a href="#十一、权限适配" class="headerlink" title="十一、权限适配"></a>十一、权限适配</h2><p>最低 Android 7，所以需要分版本处理。</p>
+<h3 id="Android-7-～-Android-11"><a href="#Android-7-～-Android-11" class="headerlink" title="Android 7 ～ Android 11"></a><strong>Android 7 ～ Android 11</strong></h3><p>BLE 基础权限：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.BLUETOOTH&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.BLUETOOTH_ADMIN&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>BLE 扫描通常还涉及定位权限：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_FINE_LOCATION&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Android-12"><a href="#Android-12" class="headerlink" title="Android 12+"></a><strong>Android 12+</strong></h3><p>新增：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.BLUETOOTH_SCAN&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.BLUETOOTH_CONNECT&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这两个需要按实际场景申请运行时权限。</p>
+<h2 id="十二、Foreground-Service-权限"><a href="#十二、Foreground-Service-权限" class="headerlink" title="十二、Foreground Service 权限"></a>十二、Foreground Service 权限</h2><p>基础：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;android.permission.FOREGROUND_SERVICE&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Android 14+ 如果使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">foregroundServiceType=&quot;connectedDevice&quot;</span><br></pre></td></tr></table></figure>
+
+<p>还需要：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Service：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">service</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;.ble.BleForegroundService&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:foregroundServiceType</span>=<span class="string">&quot;connectedDevice&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对于 Android 新版本，蓝牙设备持续 BLE 通信正属于 <code>connectedDevice</code> 这类 FGS。</p>
+<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><p>Android 8 推出了<code>CompanionDeviceManager</code>（配套设备管理器）用来将<code>APP</code>和<code>外部设备</code>设置关联，并提供相应的后台工作能力。此方案比<code>Foreground Service</code>采用通知方式来告诉用户一直在长期执行重要人物，更加合适长期绑定蓝牙设备。但是面临着不同Android版本接口不一致和需要FGS辅助，导致逻辑会复杂很多。</p>
+<p>让App保持与蓝牙设备的通讯，并将数据上传到云服务。同时蓝牙设备和App都需要支持本地缓存，增量更新和断点续传的功能。</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/11/iOS-APP%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/" class="post-nav-link group text-right" title="iOS-APP与蓝牙设备长连接的可行性方案">
+            <span class="post-nav-title">iOS-APP与蓝牙设备长连接的可行性方案</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

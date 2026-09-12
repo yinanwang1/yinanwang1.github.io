@@ -301,76 +301,37 @@
     
 
     <div class="prose-shiro">
-        <h1 id="iOS-APP与蓝牙设备长连接的可行性方案"><a href="#iOS-APP与蓝牙设备长连接的可行性方案" class="headerlink" title="iOS-APP与蓝牙设备长连接的可行性方案"></a>iOS-APP与蓝牙设备长连接的可行性方案</h1><p>之前编写<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/BpAeDfLQ_R3EkAOW-anmPA">低功耗蓝牙的通信和省电的秘密</a>的时候，了解到蓝牙低功耗的秘密是99%的时间在休眠。那么APP在后台无感又低功耗从蓝牙设备获取到数据，这又是怎么做到的？即：<strong>用户不主动打开 App，蓝牙设备仍能通过 BLE 把数据传给 iPhone，然后 App 再上传服务器。</strong></p>
+        <p>之前编写<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/BpAeDfLQ_R3EkAOW-anmPA">低功耗蓝牙的通信和省电的秘密</a>的时候，了解到蓝牙低功耗的秘密是99%的时间在休眠。那么APP在后台无感又低功耗从蓝牙设备获取到数据，这又是怎么做到的？即：<strong>用户不主动打开 App，蓝牙设备仍能通过 BLE 把数据传给 iPhone，然后 App 再上传服务器。</strong></p>
 <h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>APP处于后台有两种情况:</p>
 <ol>
 <li>用户主动上划杀掉APP。也就是：<strong>用户主动杀进程(Force Quit)</strong>。</li>
 <li>用户切换到其他APP。 也就是：<strong>APP进入后台(Suspend)</strong>.</li>
 </ol>
-<h4 id="1-杀进程"><a href="#1-杀进程" class="headerlink" title="1. 杀进程"></a><strong>1. 杀进程</strong></h4><p>进程已经终止，与蓝牙设备的连接也断开，蓝牙设备后台能力也停止。那么不管什么方案都不能实现数据获取。</p>
-<p><strong>除非</strong></p>
-<p>（1）用户主动打开APP。</p>
-<p>（2）远端服务发送通知，用户点击通知打开APP。</p>
-<p>后端服务监控着用户的数据更新情况，如果用户已经几个小时或一天没有上传数据，那么说明蓝牙设备没电、通讯异常或APP被主动终止。此时进行发送一个通知，提醒用户打开APP查看具体原因。</p>
-<p>用户主动打开APP，那么一切就开始正常执行。</p>
-<h4 id="2-切后台"><a href="#2-切后台" class="headerlink" title="2. 切后台"></a>2. 切后台</h4><p>当APP不在前台即进入后台，一段时间后APP就会被iOS系统挂起。</p>
-<p>此时Apple公司提供了<strong>iOS bluetooth-central 后台模式</strong> ，当蓝牙设备发送数据时，iOS系统会唤醒APP并接受到数据，而且提供短时间的网络通讯能力。</p>
-<p>展开讲讲后台通讯的逻辑。</p>
-<h2 id="一、BLE后台能力"><a href="#一、BLE后台能力" class="headerlink" title="一、BLE后台能力"></a>一、BLE后台能力</h2><p>在APP的开发项目中，给APP添加一个<em>Uses Bluetooth LE accessories</em>的权限。</p>
-<p><img src="https://p.ipic.vip/o1dma6.png" alt="蓝牙LE配件"></p>
-<h2 id="二、维持连接-和-Notify，读写数据"><a href="#二、维持连接-和-Notify，读写数据" class="headerlink" title="二、维持连接 和 Notify，读写数据"></a>二、维持连接 和 Notify，读写数据</h2><h4 id="工作方式："><a href="#工作方式：" class="headerlink" title="工作方式："></a>工作方式：</h4><hr>
-<p>打开 App<br>↓<br>扫描蓝牙设备  （可指定CBUUID，或 kCBAdvDataManufacturerData）<br>↓<br>连接蓝牙设备  （避免使用蓝牙名称，需要使用SN绑定）<br>↓<br>Discover Service （可UUID过滤，或发现所有）<br>↓<br>Discover Characteristic （可UUID过滤，或发现所有）<br>↓<br>打开 Notify &#x2F; Indicate  （监听订阅）<br>↓<br>App 进入后台<br>↓<br>蓝牙设备产生新数据<br>↓<br>Characteristic Notify  &#x2F; Indicate （通过监听传播数据）<br>↓<br>iOS 唤醒 App  （iOS系统将APP唤醒）<br>↓<br>func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?)<br>↓<br>读取 &#x2F; 接收数据</p>
-<hr>
-<p>此方式可以在APP没有被杀进程的情况下，及时的读取到蓝牙设备的发送的信息。</p>
-<p>如果蓝牙设备的数据是不能丢失的，那么外设的特征值需要是**.indicate**。</p>
-<h4 id="蓝牙设备数据的记录建议"><a href="#蓝牙设备数据的记录建议" class="headerlink" title="蓝牙设备数据的记录建议"></a>蓝牙设备数据的记录建议</h4><p>蓝牙设备持续产生数据，如：心率、血氧、步数、睡眠、体温、HRV等。</p>
-<p>不需要实时推送或广播数据，而是先记录在本地的Flash中，持续保存数据。</p>
-<hr>
-<p>积累一定数量后</p>
-<p>​        ↓</p>
-<p>发送Notify： 有新数据了</p>
-<p>​        ↓</p>
-<p>iOS系统被BLE事件唤醒</p>
-<p>​        ↓</p>
-<p>App 发命令：从 timestamp &#x2F; sequenceId 开始同步 （从上一条记录继续）</p>
-<p>​        ↓</p>
-<p>蓝牙设备批量发送历史数据</p>
-<p>​        ↓</p>
-<p>App将数据保存到本地</p>
-<p>​        ↓</p>
-<p>App向服务器同步数据</p>
-<hr>
+<h4 id="1-杀进程"><a href="#1-杀进程" class="headerlink" title="1. 杀进程"></a><strong>1. 杀进程</strong></h4><p>进程已经终止，与蓝牙设备的连接也断开，蓝牙设备后台能力也停止。那么不管什么方案都不能实现数据获取。<br><strong>除非</strong><br>（1）用户主动打开APP。<br>（2）远端服务发送通知，用户点击通知打开APP。<br>后端服务监控着用户的数据更新情况，如果用户已经几个小时或一天没有上传数据，那么说明蓝牙设备没电、通讯异常或APP被主动终止。此时进行发送一个通知，提醒用户打开APP查看具体原因。<br>用户主动打开APP，那么一切就开始正常执行。</p>
+<h4 id="2-切后台"><a href="#2-切后台" class="headerlink" title="2. 切后台"></a>2. 切后台</h4><p>当APP不在前台即进入后台，一段时间后APP就会被iOS系统挂起。<br>此时Apple公司提供了<strong>iOS bluetooth-central 后台模式</strong> ，当蓝牙设备发送数据时，iOS系统会唤醒APP并接受到数据，而且提供短时间的网络通讯能力。<br>展开讲讲后台通讯的逻辑。</p>
+<h2 id="一、BLE后台能力"><a href="#一、BLE后台能力" class="headerlink" title="一、BLE后台能力"></a>一、BLE后台能力</h2><p>在APP的开发项目中，给APP添加一个<em>Uses Bluetooth LE accessories</em>的权限。<br><img src="https://p.ipic.vip/o1dma6.png" alt="蓝牙LE配件"></p>
+<h2 id="二、维持连接-和-Notify，读写数据"><a href="#二、维持连接-和-Notify，读写数据" class="headerlink" title="二、维持连接 和 Notify，读写数据"></a>二、维持连接 和 Notify，读写数据</h2><h4 id="工作方式："><a href="#工作方式：" class="headerlink" title="工作方式："></a>工作方式：</h4><p>打开 App<br>    ↓<br>扫描蓝牙设备  （可指定CBUUID，或 kCBAdvDataManufacturerData）<br>    ↓<br>连接蓝牙设备  （避免使用蓝牙名称，需要使用SN绑定）<br>    ↓<br>Discover Service （可UUID过滤，或发现所有）<br>    ↓<br>Discover Characteristic （可UUID过滤，或发现所有）<br>    ↓<br>打开 Notify &#x2F; Indicate  （监听订阅）<br>    ↓<br>App 进入后台<br>    ↓<br>蓝牙设备产生新数据<br>    ↓<br>Characteristic Notify  &#x2F; Indicate （通过监听传播数据）<br>    ↓<br>iOS 唤醒 App  （iOS系统将APP唤醒）<br>    ↓<br>func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?)<br>    ↓<br>读取 &#x2F; 接收数据</p>
+<p>此方式可以在APP没有被杀进程的情况下，及时的读取到蓝牙设备的发送的信息。<br>如果蓝牙设备的数据是不能丢失的，那么外设的特征值需要是**.indicate**。</p>
+<h4 id="蓝牙设备数据的记录建议"><a href="#蓝牙设备数据的记录建议" class="headerlink" title="蓝牙设备数据的记录建议"></a>蓝牙设备数据的记录建议</h4><p>蓝牙设备持续产生数据，如：心率、血氧、步数、睡眠、体温、HRV等。<br>不需要实时推送或广播数据，而是先记录在本地的Flash中，持续保存数据。</p>
+<p>积累一定数量后<br>        ↓<br>发送Notify： 有新数据了<br>        ↓<br>iOS系统被BLE事件唤醒<br>        ↓<br>App 发命令：从 timestamp &#x2F; sequenceId 开始同步 （从上一条记录继续）<br>        ↓<br>蓝牙设备批量发送历史数据<br>        ↓<br>App将数据保存到本地<br>        ↓<br>App向服务器同步数据</p>
 <h2 id="三、必须加入-Core-Bluetooth-State-Preservation-Restoration"><a href="#三、必须加入-Core-Bluetooth-State-Preservation-Restoration" class="headerlink" title="三、必须加入 Core Bluetooth State Preservation &amp; Restoration"></a>三、<strong>必须加入 Core Bluetooth State Preservation &amp; Restoration</strong></h2><p>在初始化中央设备的时候，必须：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">CBCentralManager</span>(</span><br><span class="line">    delegate: <span class="keyword">self</span>,</span><br><span class="line">    queue: <span class="literal">nil</span>,</span><br><span class="line">    options: [</span><br><span class="line">        CBCentralManagerOptionRestoreIdentifierKey: <span class="string">&quot;com.xxx.bluetooth.central&quot;</span></span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>设置<code>CBCentralManagerOptionRestoreIdentifierKey</code>后，系统将保存蓝牙上下文信息。</p>
-<p>当系统因为 BLE 事件重新恢复 App 后：</p>
+<p>设置<code>CBCentralManagerOptionRestoreIdentifierKey</code>后，系统将保存蓝牙上下文信息。<br>当系统因为 BLE 事件重新恢复 App 后：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">centralManager</span>(</span><br><span class="line">    <span class="keyword">_</span> <span class="params">central</span>: <span class="type">CBCentralManager</span>,</span><br><span class="line">    <span class="params">willRestoreState</span> <span class="params">dict</span>: [<span class="params">String</span> : <span class="keyword">Any</span>]) &#123;</span><br><span class="line">    <span class="comment">// 恢复 peripheral</span></span><br><span class="line">    <span class="comment">// 恢复 connection</span></span><br><span class="line">    <span class="comment">// 恢复 subscription</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>在dict中可以拿到：</p>
 <ol>
 <li><code>CBCentralManagerRestoredStatePeripheralsKey</code>：数组，<strong>CBPeripheral 对象列表</strong>（当时已连接 &#x2F; 正在 pending 等待连接的外设）</li>
 <li><code>CBCentralManagerRestoredStateScanServicesKey</code>：当时正在扫描的服务 UUID 数组</li>
-<li><code>CBCentralManagerRestoredStateScanOptionsKey</code>：扫描配置参数</li>
+<li><code>CBCentralManagerRestoredStateScanOptionsKey</code>：扫描配置参数<br>Apple 专门提供了 <strong>State Preservation and Restoration</strong>，让 Core Bluetooth 保存中央管理器相关状态，并在系统重新启动或恢复 App 时交还这些状态。拿到CBPeripheral后，进行重新 <code>discoverServices</code> → <code>discoverCharacteristics</code>，然后重新 <code>setNotifyValue(true)</code> <strong>订阅 Notify</strong>。<br>**注意：**后台唤醒App是有时间限制的，只有很短的执行窗口。进行大数量的同步，可能会超时。</li>
 </ol>
-<p>Apple 专门提供了 <strong>State Preservation and Restoration</strong>，让 Core Bluetooth 保存中央管理器相关状态，并在系统重新启动或恢复 App 时交还这些状态。拿到CBPeripheral后，进行重新 <code>discoverServices</code> → <code>discoverCharacteristics</code>，然后重新 <code>setNotifyValue(true)</code> <strong>订阅 Notify</strong>。</p>
-<p>**注意：**后台唤醒App是有时间限制的，只有很短的执行窗口。进行大数量的同步，可能会超时。</p>
-<h2 id="四、从蓝牙设备获取到数据，先本地缓存"><a href="#四、从蓝牙设备获取到数据，先本地缓存" class="headerlink" title="四、从蓝牙设备获取到数据，先本地缓存"></a>四、从蓝牙设备获取到数据，先本地缓存</h2><p>后台唤醒App的时间限制，如果进行数据网络上传，而没有进行本地缓存。那么就会发生（1）执行窗口消失。（2）上传数据失败。此时数据就会丢失，而蓝牙设备因为数据已经传输过，则会将本地数据清除。导致数据永久丢失。</p>
-<p>SO，必须缓存在本地</p>
-<hr>
-<p>BLE收到数据<br>↓<br>SQLite &#x2F; CoreData &#x2F; 文件<br>↓<br>标记 pending_upload<br>↓<br>上传服务器<br>↓<br>服务器 ACK<br>↓<br>标记 uploaded</p>
-<hr>
+<h2 id="四、从蓝牙设备获取到数据，先本地缓存"><a href="#四、从蓝牙设备获取到数据，先本地缓存" class="headerlink" title="四、从蓝牙设备获取到数据，先本地缓存"></a>四、从蓝牙设备获取到数据，先本地缓存</h2><p>后台唤醒App的时间限制，如果进行数据网络上传，而没有进行本地缓存。那么就会发生（1）执行窗口消失。（2）上传数据失败。此时数据就会丢失，而蓝牙设备因为数据已经传输过，则会将本地数据清除。导致数据永久丢失。<br>SO，必须缓存在本地</p>
+<p>BLE收到数据<br>    ↓<br>SQLite &#x2F; CoreData &#x2F; 文件<br>    ↓<br>标记 pending_upload<br>    ↓<br>上传服务器<br>    ↓<br>服务器 ACK<br>    ↓<br>标记 uploaded</p>
 <p>确保数据被丢失。</p>
-<h2 id="五、上传服务器推荐URLSession"><a href="#五、上传服务器推荐URLSession" class="headerlink" title="五、上传服务器推荐URLSession"></a>五、上传服务器推荐URLSession</h2><p>本地缓存后，可以尝试上传少量的数据。Apple 允许拥有相应后台执行模式的 App，在被系统给予后台执行时间时，也可以使用普通 URLSession 网络请求。</p>
-<p>如果上传文件较大或者希望上传任务脱离 App 生命周期，则可以使用：</p>
+<h2 id="五、上传服务器推荐URLSession"><a href="#五、上传服务器推荐URLSession" class="headerlink" title="五、上传服务器推荐URLSession"></a>五、上传服务器推荐URLSession</h2><p>本地缓存后，可以尝试上传少量的数据。Apple 允许拥有相应后台执行模式的 App，在被系统给予后台执行时间时，也可以使用普通 URLSession 网络请求。<br>如果上传文件较大或者希望上传任务脱离 App 生命周期，则可以使用：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">URLSessionConfiguration</span>.background(</span><br><span class="line">    withIdentifier: <span class="string">&quot;com.xxx.ring.upload&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>Background URLSession 会把网络传输交给系统独立进程，即使 App 被暂停甚至终止，网络任务在满足条件时仍可继续。</p>
-<p>这个方法可以确认上传成功，如果需要获取到成功结果，然后修改本地数据的状态。那么还是要避免大量数据的操作。 可以缩短蓝牙设备的Notify的周期，然后每次少量上传数据。</p>
+<p>Background URLSession 会把网络传输交给系统独立进程，即使 App 被暂停甚至终止，网络任务在满足条件时仍可继续。<br>这个方法可以确认上传成功，如果需要获取到成功结果，然后修改本地数据的状态。那么还是要避免大量数据的操作。 可以缩短蓝牙设备的Notify的周期，然后每次少量上传数据。</p>
 <h2 id="六、蓝牙设备的数据协议"><a href="#六、蓝牙设备的数据协议" class="headerlink" title="六、蓝牙设备的数据协议"></a>六、蓝牙设备的数据协议</h2><p>App和蓝牙设备在后台能够数据通讯后，要确认数据完整、高效并安全的传输到App，数据协议需要有：</p>
-<hr>
-<p>本地数据存储<br>+<br>sequenceId<br>+<br>timestamp<br>+<br>批量读取<br>+<br>断点续传<br>+<br>CRC &#x2F; checksum<br>+<br>ACK</p>
-<hr>
+<p>本地数据存储<br>    +<br>sequenceId<br>    +<br>timestamp<br>    +<br>批量读取<br>    +<br>断点续传<br>    +<br>CRC &#x2F; checksum<br>    +<br>ACK</p>
 <p>此方案可以实现：（1）数据不丢失。（2）指定数据读取。（3）断点续传。</p>
 <h2 id="蓝牙设备基础知识"><a href="#蓝牙设备基础知识" class="headerlink" title="蓝牙设备基础知识"></a>蓝牙设备基础知识</h2><ul>
 <li><strong>GAP（访问层）：负责建立蓝牙连接</strong> 角色：Central（中心）、Peripheral（外设），解决：扫描、广播、发起连接。</li>
@@ -393,10 +354,8 @@
 </ol>
 <h4 id="GATT（Generic-Attribute-Profile，通用属性配置文件-）："><a href="#GATT（Generic-Attribute-Profile，通用属性配置文件-）：" class="headerlink" title="GATT（Generic Attribute Profile，通用属性配置文件-）："></a>GATT（Generic Attribute Profile，通用属性配置文件-）：</h4><ul>
 <li><strong>GATT Client（客户端)</strong>： 持有所有服务、特征值数据；被动等待对方来读写。</li>
-<li><strong>GATT Server（服务端）</strong>： 主动发起操作：读特征、写特征、开启通知。</li>
+<li><strong>GATT Server（服务端）</strong>： 主动发起操作：读特征、写特征、开启通知。<br>GATT的UUID（服务、特征）是设备厂商提供的协议文档。即指定GATT服务、特征UUID和特征UUID的可读、可写、支持Notify。<br>GATT Client指定<em>characteristic</em>执行（1）read 读一次数据。（2）write 下发指令。（3）订阅数据。</li>
 </ul>
-<p>GATT的UUID（服务、特征）是设备厂商提供的协议文档。即指定GATT服务、特征UUID和特征UUID的可读、可写、支持Notify。</p>
-<p>GATT Client指定<em>characteristic</em>执行（1）read 读一次数据。（2）write 下发指令。（3）订阅数据。</p>
 <h4 id="监听订阅的区分（由外设特征决定）："><a href="#监听订阅的区分（由外设特征决定）：" class="headerlink" title="监听订阅的区分（由外设特征决定）："></a>监听订阅的区分（由外设特征决定）：</h4><ul>
 <li><strong>Notify</strong>：GATT 通知，Server 发数据，<strong>不需要 App 回复 ACK</strong>（绝大多数蓝牙设备用这个）</li>
 <li><strong>Indicate</strong>：指示，Server 发数据，<strong>App 必须回复确认</strong>，消费设备很少用</li>
@@ -412,7 +371,10 @@
     <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
     <div class="section-divider flex justify-between items-center text-sm md:text-base">
         
-        <div></div>
+        <a href="/2026/09/13/Android-App%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/" class="post-nav-link group text-left" title="Android-App与蓝牙设备长连接的可行性方案">
+             <span aria-hidden="true">&larr;</span>
+             <span class="post-nav-title">Android-App与蓝牙设备长连接的可行性方案</span>
+        </a>
         
 
         

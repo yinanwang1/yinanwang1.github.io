@@ -1,0 +1,567 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>蓝牙开发基础：Service、Characteristic、Notify到数据解析 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="蓝牙开发基础：Service、Characteristic、Notify到数据解析 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/14/%E8%93%9D%E7%89%99%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%9AService%E3%80%81Characteristic%E3%80%81Notify%E5%88%B0%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%90/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="蓝牙开发基础：Service、Characteristic、Notify到数据解析 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/14/%E8%93%9D%E7%89%99%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%9AService%E3%80%81Characteristic%E3%80%81Notify%E5%88%B0%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%90/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            蓝牙开发基础：Service、Characteristic、Notify到数据解析
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-14">2026/09/14</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>一个 BLE 设备的构成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Peripheral （蓝牙设备 ）</span><br><span class="line">│</span><br><span class="line">├── Service （某种功能模块）</span><br><span class="line">│     │</span><br><span class="line">│     ├── Characteristic  （具体状态或数据）</span><br><span class="line">│     │       ├── UUID        （唯一码）</span><br><span class="line">│     │       ├── Properties  （Read / Write / Write Without Response / Notify  / Indicate）</span><br><span class="line">│     │       ├── Value       （真正的数据）</span><br><span class="line">│     │       └── Descriptor  （对这个 Characteristic 的补充描述或配置）</span><br><span class="line">│     │</span><br><span class="line">│     └── Characteristic （另一个具体状态或数据）</span><br><span class="line">│</span><br><span class="line">└── Service （某种功能模块）</span><br><span class="line">      └── Characteristic</span><br></pre></td></tr></table></figure>
+
+<p>Characteristic的属性说明：</p>
+<table>
+<thead>
+<tr>
+<th><strong>概念</strong></th>
+<th><strong>什么作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UUID</td>
+<td>此Characteristic的唯一ID。</td>
+</tr>
+<tr>
+<td><strong>Properties</strong></td>
+<td>此 Characteristic 有什么能力。</td>
+</tr>
+<tr>
+<td><strong>Value</strong></td>
+<td>此 Characteristic 拥有什么数据。</td>
+</tr>
+<tr>
+<td>Permissions &#x2F; Security</td>
+<td>此 Characteristic 执行操作的条件。如Encryption Required</td>
+</tr>
+<tr>
+<td><strong>Descriptors</strong></td>
+<td>此 Characteristic 的附加说明&#x2F;配置。如CCCD 0x2902</td>
+</tr>
+</tbody></table>
+<p>某种功能模块可以设计成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Watch Service</span><br><span class="line">UUID: FFF0</span><br><span class="line">├── Command Characteristic</span><br><span class="line">│   UUID: FFF1</span><br><span class="line">│   Write</span><br><span class="line">│</span><br><span class="line">├── Data Characteristic</span><br><span class="line">│   UUID: FFF2</span><br><span class="line">│   Notify</span><br><span class="line">│</span><br><span class="line">├── Battery Characteristic</span><br><span class="line">│   UUID: FFF3</span><br><span class="line">│   Read</span><br><span class="line">│</span><br><span class="line">└── Device Info Characteristic</span><br><span class="line">    UUID: FFF4</span><br><span class="line">    Read</span><br></pre></td></tr></table></figure>
+
+<p>找到对应Characteristic后，进行业务数据的读写和处理。</p>
+<h2 id="一、Service-和-Characteristic的UUID"><a href="#一、Service-和-Characteristic的UUID" class="headerlink" title="一、Service 和 Characteristic的UUID"></a>一、Service 和 Characteristic的UUID</h2><p>UUID 可以理解成：<strong>BLE 世界里的接口 ID。</strong></p>
+<ol>
+<li><p>16-bit UUID：<code>Bluetooth SIG</code> 分配的标准 <code>UUID</code>，例如<code> 180F（Battery Service）</code>。完整表示可写成：<code>0000180F-0000-1000-8000-00805F9B34FB</code></p>
+</li>
+<li><p>128-bit UUID。通常用于厂商自定义<code> Service / Characteristic</code>，例如：<code>A4E10000-1234-5678-9ABC-123456789ABC</code>。</p>
+<p>UUID 的标准文本形式通常为 <strong>32 个十六进制字符 + 4 个连字符，共 36 个字符</strong>。</p>
+</li>
+</ol>
+<p>举例说明：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Service UUID</span><br><span class="line">FFF0</span><br><span class="line">Command Characteristic</span><br><span class="line">FFF1</span><br><span class="line">Data Characteristic</span><br><span class="line">FFF2</span><br></pre></td></tr></table></figure>
+
+<p>App 连接BLE成功后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">连接蓝牙设备</span><br><span class="line"> ↓</span><br><span class="line">discoverServices()</span><br><span class="line"> ↓</span><br><span class="line">找到 FFF0</span><br><span class="line"> ↓</span><br><span class="line">discoverCharacteristics()</span><br><span class="line"> ↓</span><br><span class="line">找到 FFF1 / FFF2 / FFF3</span><br></pre></td></tr></table></figure>
+
+<p>此时使用到UUID如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Service UUID: 0000FFF0-0000-1000-8000-00805f9b34fb</span><br><span class="line">Characteristic UUID: 0000FFF1-0000-1000-8000-00805f9b34fb</span><br><span class="line">Property: Write</span><br><span class="line">Characteristic UUID: 0000FFF2-0000-1000-8000-00805f9b34fb</span><br><span class="line">Property: Notify</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Characteristic-的-常用Property"><a href="#二、Characteristic-的-常用Property" class="headerlink" title="二、Characteristic 的 常用Property"></a>二、Characteristic 的 常用Property</h2><h3 id="Read"><a href="#Read" class="headerlink" title="Read"></a><strong>Read</strong></h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Phone → Watch</span><br><span class="line"></span><br><span class="line">读取：</span><br><span class="line">电量</span><br><span class="line">版本</span><br><span class="line">设备状态</span><br><span class="line">配置</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">蓝牙设备 （Read Battery）</span><br><span class="line"> ↓</span><br><span class="line">0x55</span><br><span class="line"></span><br><span class="line">App解析</span><br><span class="line"> ↓</span><br><span class="line">85%</span><br></pre></td></tr></table></figure>
+
+<h3 id="Write"><a href="#Write" class="headerlink" title="Write"></a><strong>Write</strong></h3><p>App 主动发送命令：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">App</span><br><span class="line"> ↓</span><br><span class="line">01 02 03 04</span><br><span class="line"> ↓</span><br><span class="line">蓝牙设备</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">设置时间</span><br><span class="line">开始同步</span><br><span class="line">停止同步</span><br><span class="line">修改配置</span><br><span class="line">查询历史数据</span><br></pre></td></tr></table></figure>
+
+<h3 id="Write-With-Response"><a href="#Write-With-Response" class="headerlink" title="Write With Response"></a><strong>Write With Response</strong></h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">App</span><br><span class="line"> ↓</span><br><span class="line">Write Request</span><br><span class="line"> ↓</span><br><span class="line">蓝牙设备</span><br><span class="line"> ↓</span><br><span class="line">Write Response</span><br></pre></td></tr></table></figure>
+
+<p>可以确认：<strong>ATT&#x2F;GATT 层的写请求得到了外设响应，但不等于厂商业务命令已经执行成功</strong>。</p>
+<h3 id="Write-Without-Response"><a href="#Write-Without-Response" class="headerlink" title="Write Without Response"></a>Write Without Response</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">App</span><br><span class="line"> ↓</span><br><span class="line">Write Command</span><br><span class="line"> ↓</span><br><span class="line">蓝牙设备</span><br></pre></td></tr></table></figure>
+
+<p>没有 GATT 层确认。</p>
+<p>优点：速度快、 吞吐量高。</p>
+<p>缺点：不能确认设备是否成功收到。</p>
+<h3 id="Notify"><a href="#Notify" class="headerlink" title="Notify"></a>Notify</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">App</span><br><span class="line"> ↓</span><br><span class="line">订阅 Notify</span><br><span class="line"> ↓</span><br><span class="line">蓝牙设备有新数据</span><br><span class="line"> ↓</span><br><span class="line">主动通知手机</span><br><span class="line"> ↓</span><br><span class="line">App收到数据</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">App： 开启 FFF2 Notify</span><br><span class="line">         ↓</span><br><span class="line">Watch：81 04 48 00 00 00 （产生数据并通知）</span><br><span class="line">         ↓</span><br><span class="line">App： 解析为： 心率 = 72 bpm</span><br></pre></td></tr></table></figure>
+
+<p>开启 <code>Characteristic </code>的 <code>Notification/Indication</code>成功后，当外设发送新值时，系统通过回调把数据交给 App。</p>
+<h2 id="三、CCCD"><a href="#三、CCCD" class="headerlink" title="三、CCCD"></a>三、CCCD</h2><p>CCCD（<code>Client Characteristic Configuration Descriptor</code>）客户端特征值配置描述符。用来配置<code>Characteristic</code>的<code>Notification</code> 或 <code>Indication</code>是否启用。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">peripheral.setNotifyValue(<span class="literal">true</span>, for: characteristic)</span><br></pre></td></tr></table></figure>
+
+<p><code>App</code> 调用 <code>setNotifyValue(true, for:)</code> 发起订阅后，<code>Core Bluetooth</code> 负责底层 <code>GATT</code> 订阅处理；<code>App</code> 通常不需要直接操作 <code>CCCD</code>。</p>
+<h2 id="四、Notify-和-Indicate-的区别"><a href="#四、Notify-和-Indicate-的区别" class="headerlink" title="四、Notify 和 Indicate 的区别"></a>四、Notify 和 Indicate 的区别</h2><h3 id="Notify-1"><a href="#Notify-1" class="headerlink" title="Notify"></a><strong>Notify</strong></h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">设备</span><br><span class="line"> ↓</span><br><span class="line">数据</span><br><span class="line"> ↓</span><br><span class="line">手机</span><br><span class="line"></span><br><span class="line">不需要确认</span><br></pre></td></tr></table></figure>
+
+<p>特点：快、吞吐量高、不确认。</p>
+<h3 id="Indicate"><a href="#Indicate" class="headerlink" title="Indicate"></a>Indicate</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">设备</span><br><span class="line"> ↓</span><br><span class="line">数据</span><br><span class="line"> ↓</span><br><span class="line">手机</span><br><span class="line"> ↓</span><br><span class="line">确认</span><br></pre></td></tr></table></figure>
+
+<p>特点：可靠性更高、速度更慢。</p>
+<p>Bluetooth SIG 对两者的核心区别就是：Notification 不要求 ATT 层确认，而 Indication 要求接收端确认。</p>
+<h2 id="五、“厂商私有协议”传送数据"><a href="#五、“厂商私有协议”传送数据" class="headerlink" title="五、“厂商私有协议”传送数据"></a>五、“厂商私有协议”传送数据</h2><p>厂家在传输数据的时候规定：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">AA 55 05 01 48 XX</span><br><span class="line"></span><br><span class="line">AA55   帧头</span><br><span class="line">05     长度</span><br><span class="line">01     心率</span><br><span class="line">48     72 bpm</span><br><span class="line">XX     checksum</span><br></pre></td></tr></table></figure>
+
+<p>也就是说：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Bluetooth GATT</span><br><span class="line">负责：把 Byte[] 送过去</span><br><span class="line"></span><br><span class="line">业务协议</span><br><span class="line">负责：这些 Byte 到底是什么意思</span><br></pre></td></tr></table></figure>
+
+<p>App研发人员根据“厂商私有协议”进行数据的解析和处理。</p>
+<h2 id="六、数据拆包和组包"><a href="#六、数据拆包和组包" class="headerlink" title="六、数据拆包和组包"></a>六、数据拆包和组包</h2><p>假设设备有一条完整数据：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AA 55 10 01 02 03 04 05 06 07 08 CRC</span><br></pre></td></tr></table></figure>
+
+<p>你不能假设 App 一次 Notify 一定收到完整一包。</p>
+<p>实际可能：（仅仅是示范，说明厂家协议把一条业务消息拆成多个<code>value/Notify</code>发送）</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">第一次：</span><br><span class="line">AA 55 10 01</span><br><span class="line"></span><br><span class="line">第二次：</span><br><span class="line">02 03 04 05 06</span><br><span class="line"></span><br><span class="line">第三次：</span><br><span class="line">07 08 CRC</span><br></pre></td></tr></table></figure>
+
+<p>所以 App 通常必须有：</p>
+<h3 id="Receive-Buffer"><a href="#Receive-Buffer" class="headerlink" title="Receive Buffer"></a>Receive Buffer</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Notify</span><br><span class="line"> ↓</span><br><span class="line">Byte[]</span><br><span class="line"> ↓</span><br><span class="line">Buffer</span><br><span class="line"> ↓</span><br><span class="line">找帧头</span><br><span class="line"> ↓</span><br><span class="line">解析 Length</span><br><span class="line"> ↓</span><br><span class="line">判断完整数据</span><br><span class="line"> ↓</span><br><span class="line">完整</span><br><span class="line"> ↓</span><br><span class="line">取出 Frame</span><br><span class="line"> ↓</span><br><span class="line">CRC</span><br><span class="line"> ↓</span><br><span class="line">解析业务数据</span><br></pre></td></tr></table></figure>
+
+<p>建议协议本身至少包含：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Header</span><br><span class="line">Length</span><br><span class="line">Command</span><br><span class="line">Sequence</span><br><span class="line">Payload</span><br><span class="line">Checksum / CRC</span><br></pre></td></tr></table></figure>
+
+<p>例如：(由厂家协议决定)</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌────────┬──────┬─────┬─────┬─────────┬─────┐</span><br><span class="line">│   Header    │  Len     │    CMD  │   SEQ  │     Payload   │   CRC  │</span><br><span class="line">└────────┴──────┴─────┴─────┴─────────┴─────┘</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、MTU（Maximum-Transmission-Unit）"><a href="#七、MTU（Maximum-Transmission-Unit）" class="headerlink" title="七、MTU（Maximum Transmission Unit）"></a>七、MTU（Maximum Transmission Unit）</h2><p><code>ATT MTU</code>(最大传输单元)  &#x3D;  一次 ATT 通讯允许的数据大小。</p>
+<p>BLE 一次能传多少数据并不是无限的。例如设备一次要同步：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1000 Bytes</span><br></pre></td></tr></table></figure>
+
+<p>通常不会：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">一次 Notify 1000 Bytes</span><br></pre></td></tr></table></figure>
+
+<p>而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Packet 1</span><br><span class="line">Packet 2</span><br><span class="line">Packet 3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><code>ATT MTU</code> 的实际值取决于双方 BLE 协议栈及连接过程中的协商结果。最终可使用的 <code>ATT MTU</code> 不会超过通信双方所支持的接收能力，具体由 ATT MTU Exchange 过程确定。</p>
+<p>例如对于常见的<code> ATT Notification</code>、<code>Write Request</code> 等具有 <code>3 Byte ATT</code> 头部的操作，<code>MTU=185</code>时 <code>Characteristic Value</code> 最多约为 <code>182 Bytes</code>；不同 <code>ATT</code> 操作的协议开销可能不同。</p>
+<p><strong>提示</strong>： 对于接收 <code>Notify/Indicate</code>，<code>App</code> 通常不需要处理<code> ATT/L2CAP</code> 底层 <code>MTU</code> 分段；<code>didUpdateValueFor</code> 中重点按照厂商业务协议解析收到的<code> Characteristic Value</code>。</p>
+<h2 id="八、字节序（大小端）"><a href="#八、字节序（大小端）" class="headerlink" title="八、字节序（大小端）"></a>八、字节序（大小端）</h2><p>例如蓝牙设备发送：<code>34 12</code></p>
+<p>如果协议规定：<code>Little Endian</code></p>
+<p>那么：<code>0x1234</code></p>
+<p>如果：<code>Big Endian</code></p>
+<p>就是：<code>0x3412</code></p>
+<p>智能硬件协议中非常常见：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">常见基础数据表示：</span><br><span class="line">UInt8</span><br><span class="line">UInt16</span><br><span class="line">UInt32</span><br><span class="line">Int16</span><br><span class="line">Float</span><br><span class="line"></span><br><span class="line">常见编码/组织方式：</span><br><span class="line">Timestamp</span><br><span class="line">Bit Field （位字段）一个整数中的不同 bit 分别代表不同含义。</span><br><span class="line">BCD （Binary-Coded Decimal，二进制编码的十进制数） 十进制：25， BCD:0x25</span><br></pre></td></tr></table></figure>
+
+<p>必须能独立解析。</p>
+<h2 id="九、连接状态机"><a href="#九、连接状态机" class="headerlink" title="九、连接状态机"></a>九、连接状态机</h2><p>完整状态：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Idle</span><br><span class="line"> ↓</span><br><span class="line">Scanning</span><br><span class="line"> ↓</span><br><span class="line">Connecting</span><br><span class="line"> ↓</span><br><span class="line">Connected</span><br><span class="line"> ↓</span><br><span class="line">Discovering Service</span><br><span class="line"> ↓</span><br><span class="line">Discovering Characteristic</span><br><span class="line"> ↓</span><br><span class="line">Enabling Notify</span><br><span class="line"> ↓</span><br><span class="line">Ready</span><br><span class="line"> ↓</span><br><span class="line">Synchronizing</span><br></pre></td></tr></table></figure>
+
+<p>异常：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Disconnected</span><br><span class="line"> ↓</span><br><span class="line">Retry</span><br><span class="line"> ↓</span><br><span class="line">Connecting</span><br></pre></td></tr></table></figure>
+
+<p>最终最好设计为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">BluetoothManager</span><br><span class="line">├── BLE基础能力</span><br><span class="line">│    ├── Scan</span><br><span class="line">│    ├── Connect / Disconnect</span><br><span class="line">│    ├── Discover Service</span><br><span class="line">│    ├── Discover Characteristic</span><br><span class="line">│    ├── Read</span><br><span class="line">│    ├── Write</span><br><span class="line">│    └── Notify</span><br><span class="line">└── App自己实现的通信管理</span><br><span class="line">     ├── Command Queue</span><br><span class="line">     ├── Packet Parser</span><br><span class="line">     ├── Packet Assembler</span><br><span class="line">     ├── Timeout</span><br><span class="line">     ├── Retry</span><br><span class="line">     └── State Machine</span><br></pre></td></tr></table></figure>
+
+<p>创建一个<code>BluetoothManager</code>来统一管理蓝牙扫描、连接、通讯、包解析、重试。</p>
+<h2 id="十、Command-Queue"><a href="#十、Command-Queue" class="headerlink" title="十、Command Queue"></a>十、Command Queue</h2><p>不要这样连续：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">write A</span><br><span class="line">write B</span><br><span class="line">write C</span><br><span class="line">write D</span><br><span class="line">write E</span><br></pre></td></tr></table></figure>
+
+<p>尤其是设备性能比较弱的时候，很容易出问题。</p>
+<p>更可靠的设计：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Command Queue</span><br><span class="line">A</span><br><span class="line">↓</span><br><span class="line">等待 Response / Notify</span><br><span class="line"></span><br><span class="line">B</span><br><span class="line">↓</span><br><span class="line">等待 Response / Notify</span><br><span class="line"></span><br><span class="line">C</span><br><span class="line">↓</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>每条命令：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Command</span><br><span class="line">├─ Data</span><br><span class="line">├─ Timeout</span><br><span class="line">├─ Retry Count</span><br><span class="line">├─ Sequence ID</span><br><span class="line">└─ Response Matcher</span><br></pre></td></tr></table></figure>
+
+<p>创建一个<code>命令队列</code>。将每一条命令记录队列中。如果厂商协议要求串行请求，或者设备并发处理能力有限，可以通过 Command Queue 控制命令顺序，上一条命令完成&#x2F;超时后再执行下一条。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">发送：GetHistoryData #35</span><br><span class="line"></span><br><span class="line">等待： Response SEQ = 35</span><br></pre></td></tr></table></figure>
+
+<p>这样协议层才稳定。</p>
+<h2 id="十一、Timeout-Retry"><a href="#十一、Timeout-Retry" class="headerlink" title="十一、Timeout + Retry"></a>十一、Timeout + Retry</h2><p>出现异常情况：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Write失败</span><br><span class="line">Notify没回来</span><br><span class="line">设备突然断开</span><br><span class="line">设备超出距离</span><br><span class="line">手机关闭蓝牙</span><br><span class="line">蓝牙设备没电</span><br><span class="line">系统杀后台</span><br><span class="line">GATT异常</span><br><span class="line">数据CRC错误</span><br></pre></td></tr></table></figure>
+
+<p>典型：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">发送 CMD</span><br><span class="line"> ↓</span><br><span class="line">等待 3 秒</span><br><span class="line"> ↓</span><br><span class="line">没有响应</span><br><span class="line"> ↓</span><br><span class="line">Retry #1</span><br><span class="line"> ↓</span><br><span class="line">失败</span><br><span class="line"> ↓</span><br><span class="line">Retry #2</span><br><span class="line"> ↓</span><br><span class="line">失败</span><br><span class="line"> ↓</span><br><span class="line">Command Failed</span><br></pre></td></tr></table></figure>
+
+<p>具体时间与重试次数应该根据设备协议测试确定，而不是死套一个固定值。</p>
+<p>注意：Retry 必须结合命令的幂等性、Sequence ID 和厂商协议设计，不能所有失败命令都无条件重发。</p>
+<h2 id="十二、iOS-蓝牙相关对象"><a href="#十二、iOS-蓝牙相关对象" class="headerlink" title="十二、iOS 蓝牙相关对象"></a>十二、iOS 蓝牙相关对象</h2><p>核心关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CBCentralManager</span><br><span class="line">     ↓</span><br><span class="line">CBPeripheral</span><br><span class="line">     ↓</span><br><span class="line">CBService</span><br><span class="line">     ↓</span><br><span class="line">CBCharacteristic</span><br><span class="line">     ↓</span><br><span class="line">CBDescriptor</span><br></pre></td></tr></table></figure>
+
+<p>Apple 的 Core Bluetooth 就是把 GATT Service、Characteristic、Descriptor 等模型封装成这些对象。</p>
+<p>核心流程：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">scanForPeripherals()</span><br><span class="line">        <span class="operator">↓</span></span><br><span class="line">connect()</span><br><span class="line">        <span class="operator">↓</span></span><br><span class="line">discoverServices()</span><br><span class="line">        <span class="operator">↓</span></span><br><span class="line">discoverCharacteristics()</span><br><span class="line">        <span class="operator">↓</span></span><br><span class="line">setNotifyValue()</span><br><span class="line">        <span class="operator">↓</span></span><br><span class="line">writeValue()</span><br><span class="line">        <span class="operator">↓</span></span><br><span class="line">didUpdateValue</span><br></pre></td></tr></table></figure>
+
+<p>熟练处理这些 API 的生命周期、回调顺序和异常状态。</p>
+<h2 id="十三、Android-蓝牙相关对象"><a href="#十三、Android-蓝牙相关对象" class="headerlink" title="十三、Android 蓝牙相关对象"></a>十三、Android 蓝牙相关对象</h2><p>核心关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">BluetoothManager</span><br><span class="line">      ↓</span><br><span class="line">BluetoothAdapter</span><br><span class="line">      ↓</span><br><span class="line">BluetoothLeScanner</span><br><span class="line">      ↓</span><br><span class="line">BluetoothDevice</span><br><span class="line">      ↓</span><br><span class="line">BluetoothGatt</span><br><span class="line">      ↓</span><br><span class="line">BluetoothGattService</span><br><span class="line">      ↓</span><br><span class="line">BluetoothGattCharacteristic</span><br><span class="line">      ↓</span><br><span class="line">BluetoothGattDescriptor</span><br></pre></td></tr></table></figure>
+
+<p>基本过程同样是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Scan</span><br><span class="line"> ↓</span><br><span class="line">Connect</span><br><span class="line"> ↓</span><br><span class="line">Discover Services</span><br><span class="line"> ↓</span><br><span class="line">Find Characteristic</span><br><span class="line"> ↓</span><br><span class="line">Enable Notify</span><br><span class="line"> ↓</span><br><span class="line">Read / Write</span><br><span class="line"> ↓</span><br><span class="line">onCharacteristicChanged()</span><br></pre></td></tr></table></figure>
+
+<p><strong>也就是说：</strong> <code>iOS</code> 和 <code>Android</code> 的<code> API</code> 名字不同，但背后的 <code>GATT</code> 模型完全是一套东西。</p>
+<p><code>Android</code> 开启 <code>Notification/Indication</code> 时，通常还需要处理对应 <code>CCCD</code>；这一点与 <code>iOS Core Bluetooth</code> 的封装方式有所不同。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a><strong>参考资料</strong></h3><p>⁠Bluetooth SIG：Bluetooth LE Primer 中文版<br>⁠Bluetooth SIG：GATT Specification Supplement<br>⁠Bluetooth SIG：Assigned Numbers<br>⁠Apple：Core Bluetooth<br>⁠Android：Bluetooth Low Energy Overview</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/13/Android-App%E4%B8%8E%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E9%95%BF%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88/" class="post-nav-link group text-right" title="Android-App与蓝牙设备长连接的可行性方案">
+            <span class="post-nav-title">Android-App与蓝牙设备长连接的可行性方案</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

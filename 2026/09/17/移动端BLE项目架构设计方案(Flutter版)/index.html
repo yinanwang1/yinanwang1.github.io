@@ -1,0 +1,669 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>移动端BLE项目架构设计方案(Flutter版) | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="移动端BLE项目架构设计方案(Flutter版) | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/17/%E7%A7%BB%E5%8A%A8%E7%AB%AFBLE%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88(Flutter%E7%89%88)/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="移动端BLE项目架构设计方案(Flutter版) | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/17/%E7%A7%BB%E5%8A%A8%E7%AB%AFBLE%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88(Flutter%E7%89%88)/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            移动端BLE项目架构设计方案(Flutter版)
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-17">2026/09/17</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>项目的数据获取和传输如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">智能戒指 / 手环 / BLE设备</span><br><span class="line">        ↓</span><br><span class="line">      手机App</span><br><span class="line">        ↓</span><br><span class="line">   本地数据库</span><br><span class="line">        ↓</span><br><span class="line">     云端服务器</span><br></pre></td></tr></table></figure>
+
+<p>架构核心的规则：</p>
+<ol>
+<li>UI 不直接操作 BLE、数据库和 HTTP。</li>
+<li>BLE 只负责传输 byte，不理解心率、睡眠等业务。</li>
+<li>Protocol 专门负责设备协议。</li>
+<li>Domain 负责业务规则，不关心具体技术实现。</li>
+<li>Repository 隔离业务与数据来源。</li>
+<li>Device Layer 专门处理外部硬件设备。</li>
+<li>设备数据先落本地，再异步上传服务器。</li>
+<li>Riverpod 负责状态传播和 UI 更新，不承担底层业务。</li>
+<li>pp &#x2F; DI 是组装中心，可以知道所有模块。</li>
+<li>各层避免双向依赖和循环依赖。</li>
+<li>公共能力不要全部塞进一个巨大 Core。</li>
+<li>小项目先用文件夹分层，复杂以后再拆 Package。</li>
+</ol>
+<h2 id="一、整体架构"><a href="#一、整体架构" class="headerlink" title="一、整体架构"></a>一、整体架构</h2><p>整个项目可以设计成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">                         App （整个项目的组装中心）</span><br><span class="line">                 Composition Root / DI</span><br><span class="line">                          │</span><br><span class="line">          ┌─────────┼────────┐</span><br><span class="line">          ↓               ↓               ↓</span><br><span class="line">   Presentation         Device           Data</span><br><span class="line">          │              │               │</span><br><span class="line">          ↓               │              │</span><br><span class="line">        Domain ←──────┴────────┘</span><br><span class="line">          │</span><br><span class="line">          ↓</span><br><span class="line">     Repository Interface</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">基础能力：</span><br><span class="line">Network / Database / Log / Security / Utils</span><br></pre></td></tr></table></figure>
+
+<p>App 可以知道：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Presentation</span><br><span class="line">Domain</span><br><span class="line">Device</span><br><span class="line">Data</span><br><span class="line">Platform</span><br></pre></td></tr></table></figure>
+
+<p>因为它的责任就是：<strong>把所有模块组装起来。</strong></p>
+<p>这在架构里通常叫：<strong>Composition Root</strong>。</p>
+<p>架构的分层：App 负责组装，Presentation 负责展示，Riverpod 负责状态，Domain 负责业务，Repository 负责边界，Device 负责设备，Protocol 负责协议，Data 负责数据，Sync 负责同步，Platform 负责系统能力。</p>
+<p>从运行时业务流程来看，则是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Presentation  （UI界面）</span><br><span class="line">      ↓</span><br><span class="line">    Domain  （业务逻辑处理）</span><br><span class="line">      ↓</span><br><span class="line"> Repository  （数据仓库，管理数据来源）</span><br><span class="line">   ↙      ↘</span><br><span class="line">Device    Data</span><br><span class="line">  ↓        ↓</span><br><span class="line"> BLE    DB / HTTP</span><br></pre></td></tr></table></figure>
+
+<p>这里要注意： <strong>“代码依赖方向”和“业务调用方向”并不一定完全相同。</strong></p>
+<h2 id="二、Riverpod-状态管理工具"><a href="#二、Riverpod-状态管理工具" class="headerlink" title="二、Riverpod  状态管理工具"></a>二、Riverpod  状态管理工具</h2><p>Riverpod 负责：<strong>状态管理 + 状态传播 + UI 更新。</strong></p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Device Layer</span><br><span class="line">      ↓</span><br><span class="line">Repository</span><br><span class="line">      ↓</span><br><span class="line">Domain</span><br><span class="line">      ↓</span><br><span class="line">Riverpod Notifier / Provider</span><br><span class="line">      ↓</span><br><span class="line">UI</span><br></pre></td></tr></table></figure>
+
+<p>连接状态：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Disconnected</span><br><span class="line">      ↓</span><br><span class="line">Connecting</span><br><span class="line">      ↓</span><br><span class="line">Connected</span><br><span class="line">      ↓</span><br><span class="line">Synchronizing</span><br><span class="line">      ↓</span><br><span class="line">Riverpod</span><br><span class="line">      ↓</span><br><span class="line">页面刷新</span><br></pre></td></tr></table></figure>
+
+<p>健康数据：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BLE</span><br><span class="line"> ↓</span><br><span class="line">Protocol</span><br><span class="line"> ↓</span><br><span class="line">Local DB</span><br><span class="line"> ↓</span><br><span class="line">Repository</span><br><span class="line"> ↓</span><br><span class="line">Riverpod</span><br><span class="line"> ↓</span><br><span class="line">HealthPage</span><br></pre></td></tr></table></figure>
+
+<p>Riverpod 官方也把 Provider 作为状态描述、缓存和共享状态的重要机制。</p>
+<p>但：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">BLE重连</span><br><span class="line">协议解析</span><br><span class="line">数据库操作</span><br><span class="line">HTTP</span><br><span class="line">CRC</span><br><span class="line">后台任务</span><br></pre></td></tr></table></figure>
+
+<p>不要塞进 Riverpod。</p>
+<h2 id="三、Presentation-Layer：表现层"><a href="#三、Presentation-Layer：表现层" class="headerlink" title="三、Presentation Layer：表现层"></a>三、Presentation Layer：表现层</h2><p>页面展示和用户交互，主要负责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Page</span><br><span class="line">Widget</span><br><span class="line">页面状态</span><br><span class="line">用户操作</span><br><span class="line">Loading</span><br><span class="line">Error</span><br><span class="line">数据展示</span><br></pre></td></tr></table></figure>
+
+<p>建议 Riverpod 主要工作在这里。</p>
+<p>结构例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">presentation/</span><br><span class="line">│</span><br><span class="line">├── home/</span><br><span class="line">├── device/</span><br><span class="line">├── health/</span><br><span class="line">├── sync/</span><br><span class="line">└── settings/</span><br></pre></td></tr></table></figure>
+
+<p>例如设备页面：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DevicePage</span><br><span class="line">     ↓</span><br><span class="line">DeviceNotifier   （Riverpod管理）</span><br><span class="line">     ↓</span><br><span class="line">ConnectDeviceUseCase</span><br></pre></td></tr></table></figure>
+
+<p>Presentation 不应该直接：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">操作 BLE</span><br><span class="line">解析 byte[]</span><br><span class="line">操作 SQLite</span><br><span class="line">发送 HTTP</span><br><span class="line">计算 CRC</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、Domain-Layer：业务层"><a href="#四、Domain-Layer：业务层" class="headerlink" title="四、Domain Layer：业务层"></a>四、Domain Layer：业务层</h2><p>Domain 负责：<strong>描述这个 App 到底要做什么。</strong></p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">domain/</span><br><span class="line">│</span><br><span class="line">├── device/</span><br><span class="line">│   ├── ConnectDeviceUseCase</span><br><span class="line">│   ├── DisconnectDeviceUseCase</span><br><span class="line">│   └── SyncDeviceUseCase</span><br><span class="line">│</span><br><span class="line">├── health/</span><br><span class="line">│   ├── GetHealthDataUseCase</span><br><span class="line">│   └── CalculateHealthSummaryUseCase</span><br><span class="line">│</span><br><span class="line">└── sync/</span><br><span class="line">    └── SyncHealthDataUseCase</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">“同步戒指数据”</span><br></pre></td></tr></table></figure>
+
+<p>Domain 只关心：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">连接设备</span><br><span class="line">↓</span><br><span class="line">获取数据</span><br><span class="line">↓</span><br><span class="line">保存数据</span><br><span class="line">↓</span><br><span class="line">同步服务器</span><br></pre></td></tr></table></figure>
+
+<p>它不应该关心：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BluetoothGatt</span><br><span class="line">CoreBluetooth</span><br><span class="line">Characteristic UUID</span><br><span class="line">HTTP具体URL</span><br><span class="line">SQLite具体SQL</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、Repository：数据访问边界"><a href="#五、Repository：数据访问边界" class="headerlink" title="五、Repository：数据访问边界"></a>五、Repository：数据访问边界</h2><p>Repository 是非常重要的一层。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DeviceRepository</span><br><span class="line">HealthRepository</span><br><span class="line">SyncRepository</span><br></pre></td></tr></table></figure>
+
+<p>业务层只知道：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DeviceRepository</span><br></pre></td></tr></table></figure>
+
+<p>不知道后面到底使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BLE</span><br><span class="line">Wi-Fi</span><br><span class="line">USB</span><br><span class="line">Mock Device</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Domain</span><br><span class="line">│</span><br><span class="line">└── DeviceRepository</span><br><span class="line">        ↑</span><br><span class="line">        │ implements</span><br><span class="line">        │</span><br><span class="line">Device</span><br><span class="line">│</span><br><span class="line">└── BleDeviceRepository</span><br></pre></td></tr></table></figure>
+
+<p><code>BleDeviceRepository</code>实现了<code>DeviceRepository</code>, 在<code>App</code>实例化<code>BleDeviceRepository</code>后将实例赋值给<code>Domain</code>的接口变量。那么<code>Domain</code>则可以直接使用<code>DeviceRepository</code>所有接口的调用。从而<code>Domain</code>和<code>BleDeviceRepository</code>解耦了。</p>
+<p>以后设备通信方式变化：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BleDeviceRepository</span><br><span class="line">       ↓</span><br><span class="line">WifiDeviceRepository</span><br></pre></td></tr></table></figure>
+
+<p>Domain 不需要修改。</p>
+<h2 id="六、Device-Layer：设备层"><a href="#六、Device-Layer：设备层" class="headerlink" title="六、Device Layer：设备层"></a>六、Device Layer：设备层</h2><p>这是 IoT 项目与普通 App 最大的区别。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">device/</span><br><span class="line">│</span><br><span class="line">├── manager/</span><br><span class="line">│   └── DeviceManager</span><br><span class="line">│</span><br><span class="line">├── connection/</span><br><span class="line">│   └── ConnectionManager</span><br><span class="line">│</span><br><span class="line">├── ble/</span><br><span class="line">│   └── BleTransport</span><br><span class="line">│</span><br><span class="line">├── protocol/</span><br><span class="line">│   ├── Command</span><br><span class="line">│   ├── Packet</span><br><span class="line">│   ├── Encoder</span><br><span class="line">│   ├── Decoder</span><br><span class="line">│   └── Parser</span><br><span class="line">│</span><br><span class="line">├── adapter/</span><br><span class="line">│   ├── BonaDeviceAdapter</span><br><span class="line">│   └── OtherDeviceAdapter</span><br><span class="line">│</span><br><span class="line">└── state/</span><br><span class="line">    └── DeviceState</span><br></pre></td></tr></table></figure>
+
+<h3 id="DeviceManager"><a href="#DeviceManager" class="headerlink" title="DeviceManager"></a><strong>DeviceManager</strong></h3><p>作为设备系统统一入口：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">扫描</span><br><span class="line">连接</span><br><span class="line">断开</span><br><span class="line">自动重连</span><br><span class="line">同步</span><br><span class="line">发送命令</span><br><span class="line">查询状态</span><br></pre></td></tr></table></figure>
+
+<p>上层最好只面对：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DeviceManager</span><br></pre></td></tr></table></figure>
+
+<p>而不要知道：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Service UUID</span><br><span class="line">Characteristic UUID</span><br><span class="line">Notify</span><br><span class="line">Write</span><br><span class="line">MTU</span><br></pre></td></tr></table></figure>
+
+<p><strong>这些属性应该封装在 Device Layer 内，其中通用 BLE 能力放在 BLE 模块，厂商特定 UUID 放在 Adapter&#x2F;GATT Profile，厂商数据格式和命令放在 Protocol 模块。</strong></p>
+<h2 id="七、BLE-Transport：只负责运输"><a href="#七、BLE-Transport：只负责运输" class="headerlink" title="七、BLE Transport：只负责运输"></a>七、BLE Transport：只负责运输</h2><p>BLE 层最好非常“纯”。</p>
+<p>负责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Scan</span><br><span class="line">Connect</span><br><span class="line">Disconnect</span><br><span class="line">Discover</span><br><span class="line">Read</span><br><span class="line">Write</span><br><span class="line">Notify</span><br><span class="line">Connection State</span><br></pre></td></tr></table></figure>
+
+<p>它看到的是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">byte[]</span><br></pre></td></tr></table></figure>
+
+<p>不应该看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">心率</span><br><span class="line">睡眠</span><br><span class="line">血氧</span><br><span class="line">步数</span><br><span class="line">体温</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">智能戒指</span><br><span class="line">    ↓</span><br><span class="line">BLE</span><br><span class="line">    ↓</span><br><span class="line">01 AF 02 32...</span><br><span class="line">    ↓</span><br><span class="line">Protocol</span><br><span class="line">    ↓</span><br><span class="line">HeartRateData</span><br></pre></td></tr></table></figure>
+
+<p>BLE 解决：<strong>数据怎么传。</strong></p>
+<p>Protocol 解决：<strong>数据是什么意思。</strong></p>
+<h2 id="八、Protocol：协议层"><a href="#八、Protocol：协议层" class="headerlink" title="八、Protocol：协议层"></a>八、Protocol：协议层</h2><p>设备厂商通常会定义类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Header</span><br><span class="line">Command</span><br><span class="line">Length</span><br><span class="line">Payload</span><br><span class="line">Checksum</span><br></pre></td></tr></table></figure>
+
+<p>所以：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">protocol/</span><br><span class="line">│</span><br><span class="line">├── Packet</span><br><span class="line">├── Command</span><br><span class="line">├── Encoder</span><br><span class="line">├── Decoder</span><br><span class="line">├── Parser</span><br><span class="line">└── Checksum</span><br></pre></td></tr></table></figure>
+
+<p>发送：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">业务指令</span><br><span class="line">   ↓</span><br><span class="line">Command</span><br><span class="line">   ↓</span><br><span class="line">Encoder</span><br><span class="line">   ↓</span><br><span class="line">byte[]</span><br><span class="line">   ↓</span><br><span class="line">BLE</span><br></pre></td></tr></table></figure>
+
+<p>接收：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BLE</span><br><span class="line"> ↓</span><br><span class="line">byte[]</span><br><span class="line"> ↓</span><br><span class="line">Decoder</span><br><span class="line"> ↓</span><br><span class="line">Packet</span><br><span class="line"> ↓</span><br><span class="line">Parser</span><br><span class="line"> ↓</span><br><span class="line">业务数据</span><br></pre></td></tr></table></figure>
+
+<p>UI 永远不应该出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data[3]</span><br><span class="line">0xAF</span><br><span class="line">0x01</span><br></pre></td></tr></table></figure>
+
+<p>这些全部属于 Device &#x2F; Protocol。</p>
+<h2 id="九、Device-Adapter：不同厂商适配"><a href="#九、Device-Adapter：不同厂商适配" class="headerlink" title="九、Device Adapter：不同厂商适配"></a>九、Device Adapter：不同厂商适配</h2><p>考虑 IoT 产品以后可能更换硬件厂商：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">             DeviceRepository</span><br><span class="line">                    │</span><br><span class="line">             DeviceAdapter</span><br><span class="line">                    │</span><br><span class="line">    ┌───────────────┼──────────────┐</span><br><span class="line">    ↓               ↓              ↓</span><br><span class="line"> BonaAdapter     VendorB        VendorC</span><br><span class="line">    │               │              │</span><br><span class="line">Protocol A      Protocol B      Protocol C</span><br></pre></td></tr></table></figure>
+
+<p>业务统一调用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">connect()</span><br><span class="line">sync()</span><br><span class="line">getBattery()</span><br><span class="line">getHeartRate()</span><br></pre></td></tr></table></figure>
+
+<p>至于具体厂商协议，上层完全不知道。</p>
+<p>这样以后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Bona Ring</span><br><span class="line">    ↓</span><br><span class="line">更换供应商</span><br></pre></td></tr></table></figure>
+
+<p>主要改：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Adapter</span><br><span class="line">+</span><br><span class="line">Protocol</span><br></pre></td></tr></table></figure>
+
+<p>而不是整个项目。</p>
+<h2 id="十、Data-Layer：数据层"><a href="#十、Data-Layer：数据层" class="headerlink" title="十、Data Layer：数据层"></a>十、Data Layer：数据层</h2><p>Data Layer 处理：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">本地数据库</span><br><span class="line">服务器 API</span><br><span class="line">缓存</span><br><span class="line">持久化</span><br><span class="line">数据转换</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">data/</span><br><span class="line">│</span><br><span class="line">├── local/</span><br><span class="line">│</span><br><span class="line">├── remote/</span><br><span class="line">│</span><br><span class="line">├── repository/</span><br><span class="line">│</span><br><span class="line">└── entity/</span><br></pre></td></tr></table></figure>
+
+<p>Data Layer 主要由 Repository 和 Service 等部分构成，用于隔离数据库、平台插件和远程 API 等数据来源。</p>
+<h2 id="十一、本地数据库设计"><a href="#十一、本地数据库设计" class="headerlink" title="十一、本地数据库设计"></a>十一、本地数据库设计</h2><p>这里应该明确使用：<strong>数据库表</strong></p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Local Database</span><br><span class="line">│</span><br><span class="line">├── device</span><br><span class="line">├── health_record</span><br><span class="line">├── sync_task</span><br><span class="line">├── device_event</span><br><span class="line">└── device_log</span><br></pre></td></tr></table></figure>
+
+<h3 id="device"><a href="#device" class="headerlink" title="device"></a><strong>device</strong></h3><p>设备信息：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">device_id</span><br><span class="line">device_name</span><br><span class="line">device_type</span><br><span class="line">mac / identifier</span><br><span class="line">firmware_version</span><br><span class="line">bind_time</span><br></pre></td></tr></table></figure>
+
+<h3 id="health-record"><a href="#health-record" class="headerlink" title="health_record"></a><strong>health_record</strong></h3><p>设备产生的数据：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">id</span><br><span class="line">device_id</span><br><span class="line">type</span><br><span class="line">device_time</span><br><span class="line">receive_time</span><br><span class="line">value</span><br><span class="line">sync_state</span><br></pre></td></tr></table></figure>
+
+<h3 id="sync-task"><a href="#sync-task" class="headerlink" title="sync_task"></a><strong>sync_task</strong></h3><p>同步任务：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">id</span><br><span class="line">record_id</span><br><span class="line">status</span><br><span class="line">retry_count</span><br><span class="line">create_time</span><br><span class="line">last_retry_time</span><br></pre></td></tr></table></figure>
+
+<h3 id="device-event"><a href="#device-event" class="headerlink" title="device_event"></a><strong>device_event</strong></h3><p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">连接</span><br><span class="line">断开</span><br><span class="line">电量变化</span><br><span class="line">同步开始</span><br><span class="line">同步结束</span><br><span class="line">固件升级</span><br></pre></td></tr></table></figure>
+
+<h3 id="device-log"><a href="#device-log" class="headerlink" title="device_log"></a><strong>device_log</strong></h3><p>用于 IoT 问题排查：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">时间</span><br><span class="line">设备</span><br><span class="line">命令</span><br><span class="line">数据</span><br><span class="line">方向</span><br><span class="line">结果</span><br><span class="line">异常</span><br></pre></td></tr></table></figure>
+
+<h2 id="十二、数据库-Table-与-Model-要分开"><a href="#十二、数据库-Table-与-Model-要分开" class="headerlink" title="十二、数据库 Table 与 Model 要分开"></a>十二、数据库 Table 与 Model 要分开</h2><p>一个数据可能经历：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">BLE byte[]</span><br><span class="line">    ↓</span><br><span class="line">Protocol Model</span><br><span class="line">    ↓</span><br><span class="line">Domain Model</span><br><span class="line">    ↓</span><br><span class="line">Database Entity</span><br><span class="line">    ↓</span><br><span class="line">Database Table</span><br><span class="line">    ↓</span><br><span class="line">Network DTO</span><br><span class="line">    ↓</span><br><span class="line">Server</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HealthRecord</span><br></pre></td></tr></table></figure>
+
+<p>在不同层可能有不同形式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Device：</span><br><span class="line">HeartRatePacket</span><br><span class="line"></span><br><span class="line">Domain：</span><br><span class="line">HeartRate</span><br><span class="line"></span><br><span class="line">Database：</span><br><span class="line">HealthRecordEntity</span><br><span class="line"></span><br><span class="line">Network：</span><br><span class="line">HealthRecordDTO</span><br></pre></td></tr></table></figure>
+
+<p>不要为了省几个类，让所有层共享一个巨大的 Model。</p>
+<h2 id="十三、Local-First"><a href="#十三、Local-First" class="headerlink" title="十三、Local First"></a>十三、Local First</h2><p>IoT 项目非常建议采用：<strong>先落本地，再同步服务器。</strong></p>
+<p>不要：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BLE</span><br><span class="line"> ↓</span><br><span class="line">直接上传服务器</span><br></pre></td></tr></table></figure>
+
+<p>推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BLE</span><br><span class="line"> ↓</span><br><span class="line">Protocol</span><br><span class="line"> ↓</span><br><span class="line">Local DB</span><br><span class="line"> ↓</span><br><span class="line">标记 Pending</span><br><span class="line"> ↓</span><br><span class="line">SyncEngine</span><br><span class="line"> ↓</span><br><span class="line">Cloud</span><br></pre></td></tr></table></figure>
+
+<p>原因：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BLE正常，但是网络断了</span><br><span class="line"></span><br><span class="line">有网络，但是服务器超时</span><br><span class="line"></span><br><span class="line">App进入后台</span><br><span class="line"></span><br><span class="line">上传中途系统挂起</span><br><span class="line"></span><br><span class="line">服务器临时不可用</span><br></pre></td></tr></table></figure>
+
+<p>数据仍然不会轻易丢失。</p>
+<h2 id="十四、Sync-Engine：独立同步模块"><a href="#十四、Sync-Engine：独立同步模块" class="headerlink" title="十四、Sync Engine：独立同步模块"></a>十四、Sync Engine：独立同步模块</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sync/</span><br><span class="line">│</span><br><span class="line">├── SyncEngine</span><br><span class="line">├── SyncScheduler</span><br><span class="line">├── UploadQueue</span><br><span class="line">├── RetryPolicy</span><br><span class="line">└── SyncState</span><br></pre></td></tr></table></figure>
+
+<p>数据流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">BLE收到数据</span><br><span class="line">    ↓</span><br><span class="line">写Local DB</span><br><span class="line">    ↓</span><br><span class="line">产生Pending记录</span><br><span class="line">    ↓</span><br><span class="line">SyncEngine</span><br><span class="line">    ↓</span><br><span class="line">批量上传</span><br><span class="line">    ↓</span><br><span class="line">Server</span><br><span class="line">    ↓</span><br><span class="line">Success</span><br><span class="line">    ↓</span><br><span class="line">更新Local DB</span><br></pre></td></tr></table></figure>
+
+<p>失败：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Uploading</span><br><span class="line">    ↓</span><br><span class="line">Failed</span><br><span class="line">    ↓</span><br><span class="line">Pending</span><br><span class="line">    ↓</span><br><span class="line">Retry</span><br></pre></td></tr></table></figure>
+
+<p>UI 不负责上传。</p>
+<p>UI 只展示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">最近同步：17:30</span><br><span class="line"></span><br><span class="line">待上传：28条</span><br></pre></td></tr></table></figure>
+
+<h2 id="十五、Platform-Layer：系统平台能力"><a href="#十五、Platform-Layer：系统平台能力" class="headerlink" title="十五、Platform Layer：系统平台能力"></a>十五、Platform Layer：系统平台能力</h2><p>iOS 与 Android 后台能力差异很大，因此应该隔离：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">platform/</span><br><span class="line">│</span><br><span class="line">├── bluetooth/</span><br><span class="line">├── background/</span><br><span class="line">├── permission/</span><br><span class="line">├── notification/</span><br><span class="line">└── storage/</span><br></pre></td></tr></table></figure>
+
+<p>逻辑：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> Device Layer</span><br><span class="line">       ↓</span><br><span class="line">Platform API</span><br><span class="line">  ↙       ↘</span><br><span class="line">iOS      Android</span><br></pre></td></tr></table></figure>
+
+<p>iOS：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CoreBluetooth</span><br><span class="line">Bluetooth Background Mode</span><br><span class="line">State Restoration</span><br></pre></td></tr></table></figure>
+
+<p>Android：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BluetoothGatt</span><br><span class="line">Foreground Service</span><br><span class="line">WorkManager</span><br></pre></td></tr></table></figure>
+
+<p>上层不应该知道这些平台细节。</p>
+<h2 id="十六、依赖方向"><a href="#十六、依赖方向" class="headerlink" title="十六、依赖方向"></a>十六、依赖方向</h2><p>这是整个架构中最重要的规则之一。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Presentation → Domain</span><br><span class="line"></span><br><span class="line">Device       → Domain</span><br><span class="line"></span><br><span class="line">Data         → Domain</span><br></pre></td></tr></table></figure>
+
+<p>因为：<code>Domain</code>定义抽象。 <code>Device / Data</code>实现抽象。</p>
+<p>最终：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  Presentation</span><br><span class="line">        │</span><br><span class="line">        ↓</span><br><span class="line">     Domain</span><br><span class="line">     ↑     ↑</span><br><span class="line">    /       \</span><br><span class="line">Device      Data</span><br></pre></td></tr></table></figure>
+
+<p>而 App：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">        App</span><br><span class="line"> ┌──────┼──────┐</span><br><span class="line"> ↓      ↓      ↓</span><br><span class="line">UI    Device   Data</span><br><span class="line"> \      |      /</span><br><span class="line">     Domain</span><br></pre></td></tr></table></figure>
+
+<p>所以不要简单理解成：<strong>上层永远 import 下层。</strong></p>
+<p>更准确的是：<strong>依赖只能按照架构规定的方向流动，并避免循环依赖。</strong></p>
+<h2 id="十七、Core-设计"><a href="#十七、Core-设计" class="headerlink" title="十七、Core 设计"></a>十七、Core 设计</h2><p>不要建立一个巨大：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">core/</span><br></pre></td></tr></table></figure>
+
+<p>然后所有模块：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import core.dart</span><br></pre></td></tr></table></figure>
+
+<p>否则 Core 一改：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">UI</span><br><span class="line">Domain</span><br><span class="line">Device</span><br><span class="line">Data</span><br></pre></td></tr></table></figure>
+
+<p>可能全部受到影响。</p>
+<p>更推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">core/</span><br><span class="line">│</span><br><span class="line">├── common/</span><br><span class="line">├── log/</span><br><span class="line">├── network/</span><br><span class="line">├── database/</span><br><span class="line">├── security/</span><br><span class="line">└── utils/</span><br></pre></td></tr></table></figure>
+
+<p>各模块按需依赖。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Device</span><br><span class="line">├── core_log</span><br><span class="line">└── core_common</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">├── core_network</span><br><span class="line">├── core_database</span><br><span class="line">└── core_log</span><br><span class="line"></span><br><span class="line">Presentation</span><br><span class="line">└── core_common</span><br></pre></td></tr></table></figure>
+
+<p>核心原则：<strong>越多人依赖的模块，越应该小、稳定、低变化。</strong></p>
+<p>判断方法：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">脱离这个项目，还能不能直接使用？</span><br><span class="line"></span><br><span class="line">      ↓</span><br><span class="line">   ┌─────┐</span><br><span class="line">   │ 能      │ → Core</span><br><span class="line">   └─────┘</span><br><span class="line"></span><br><span class="line">   ┌─────┐</span><br><span class="line">   │不能     │ → 对应业务模块</span><br><span class="line">   └─────┘</span><br></pre></td></tr></table></figure>
+
+<p>Core·适合：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Logger</span><br><span class="line">DateUtils</span><br><span class="line">ByteUtils</span><br><span class="line">通用Result</span><br><span class="line">基础Exception</span><br><span class="line">基础Extension</span><br><span class="line">通用加解密</span><br></pre></td></tr></table></figure>
+
+<p>不适合：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">RingManager</span><br><span class="line">HeartRateParser</span><br><span class="line">HealthManager</span><br><span class="line">SyncManager</span><br><span class="line">DeviceCommand</span><br></pre></td></tr></table></figure>
+
+<h2 id="十八、文件夹分层"><a href="#十八、文件夹分层" class="headerlink" title="十八、文件夹分层"></a>十八、文件夹分层</h2><p>这个 IoT 项目初期完全没必要一上来拆几十个 Package。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">lib/</span><br><span class="line">│</span><br><span class="line">├── app/</span><br><span class="line">│   ├── app.dart</span><br><span class="line">│   └── di/</span><br><span class="line">│</span><br><span class="line">├── presentation/</span><br><span class="line">│   ├── home/</span><br><span class="line">│   ├── device/</span><br><span class="line">│   ├── health/</span><br><span class="line">│   └── settings/</span><br><span class="line">│</span><br><span class="line">├── domain/</span><br><span class="line">│   ├── device/</span><br><span class="line">│   ├── health/</span><br><span class="line">│   ├── sync/</span><br><span class="line">│   └── repository/</span><br><span class="line">│</span><br><span class="line">├── device/</span><br><span class="line">│   ├── ble/</span><br><span class="line">│   ├── connection/</span><br><span class="line">│   ├── protocol/</span><br><span class="line">│   ├── adapter/</span><br><span class="line">│   └── manager/</span><br><span class="line">│</span><br><span class="line">├── data/</span><br><span class="line">│   ├── local/</span><br><span class="line">│   ├── remote/</span><br><span class="line">│   ├── entity/</span><br><span class="line">│   └── repository/</span><br><span class="line">│</span><br><span class="line">├── sync/</span><br><span class="line">│   ├── engine/</span><br><span class="line">│   ├── queue/</span><br><span class="line">│   └── retry/</span><br><span class="line">│</span><br><span class="line">├── platform/</span><br><span class="line">│   ├── bluetooth/</span><br><span class="line">│   ├── background/</span><br><span class="line">│   └── permission/</span><br><span class="line">│</span><br><span class="line">└── core/</span><br><span class="line">    ├── log/</span><br><span class="line">    ├── network/</span><br><span class="line">    ├── database/</span><br><span class="line">    ├── security/</span><br><span class="line">    └── utils/</span><br></pre></td></tr></table></figure>
+
+<h2 id="十九、最终架构图"><a href="#十九、最终架构图" class="headerlink" title="十九、最终架构图"></a>十九、最终架构图</h2><h3 id="连接设备"><a href="#连接设备" class="headerlink" title="连接设备"></a><strong>连接设备</strong></h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">DevicePage</span><br><span class="line">    ↓</span><br><span class="line">Riverpod DeviceNotifier</span><br><span class="line">    ↓</span><br><span class="line">ConnectDeviceUseCase</span><br><span class="line">    ↓</span><br><span class="line">DeviceRepository</span><br><span class="line">    ↓</span><br><span class="line">BleDeviceRepository</span><br><span class="line">    ↓</span><br><span class="line">DeviceManager</span><br><span class="line">    ↓</span><br><span class="line">BleTransport</span><br><span class="line">    ↓</span><br><span class="line">Platform BLE</span><br><span class="line">    ↓</span><br><span class="line">智能戒指</span><br></pre></td></tr></table></figure>
+
+<h3 id="设备数据回来"><a href="#设备数据回来" class="headerlink" title="设备数据回来"></a><strong>设备数据回来</strong></h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">智能戒指</span><br><span class="line">    ↓</span><br><span class="line">Platform BLE</span><br><span class="line">    ↓</span><br><span class="line">BleTransport</span><br><span class="line">    ↓</span><br><span class="line">Protocol Decoder</span><br><span class="line">    ↓</span><br><span class="line">Parser</span><br><span class="line">    ↓</span><br><span class="line">Domain Data</span><br><span class="line">    ↓</span><br><span class="line">Local DB</span><br></pre></td></tr></table></figure>
+
+<p>然后分成两条：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">       Local DB</span><br><span class="line">      /        \</span><br><span class="line">     ↓          ↓</span><br><span class="line">Repository    SyncEngine</span><br><span class="line">     ↓          ↓</span><br><span class="line">  Riverpod    Server</span><br><span class="line">     ↓</span><br><span class="line">     UI</span><br></pre></td></tr></table></figure>
+
+
+
+<p>把全部内容放到一张图里：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">                  ┌────────────────┐</span><br><span class="line">                  │      App       │</span><br><span class="line">                  │ Composition DI │</span><br><span class="line">                  └───────┬────────┘</span><br><span class="line">                          │</span><br><span class="line">        ┌─────────────────┼─────────────────┐</span><br><span class="line">        │                 │                 │</span><br><span class="line">        ↓                 ↓                 ↓</span><br><span class="line">┌──────────────┐   ┌──────────────┐  ┌──────────────┐</span><br><span class="line">│ Presentation 					│   │    Device    						│  │     Data     				│</span><br><span class="line">│              │   │              │  │              │</span><br><span class="line">│ Page         │   │ DeviceManager│  │ Local        │</span><br><span class="line">│ Widget       │   │ Connection   │  │ Remote       │</span><br><span class="line">│ Riverpod     │   │ BLE          │  │ Repository   │</span><br><span class="line">└──────┬───────┘   │ Protocol     │  └──────┬───────┘</span><br><span class="line">       │           │ Adapter      │         │</span><br><span class="line">       │           └──────┬───────┘         │</span><br><span class="line">       │                  │                 │</span><br><span class="line">       └──────────────────↓─────────────────┘</span><br><span class="line">                 ┌────────────────┐</span><br><span class="line">                 │     Domain     │</span><br><span class="line">                 │                │</span><br><span class="line">                 │ UseCase        │</span><br><span class="line">                 │ Domain Model   │</span><br><span class="line">                 │ Repository API │</span><br><span class="line">                 └────────────────┘</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        ┌──────────────────────────────────┐</span><br><span class="line">        │           Sync Engine            │</span><br><span class="line">        │ Queue / Retry / Scheduler        │</span><br><span class="line">        └──────────────────────────────────┘</span><br><span class="line"></span><br><span class="line">        ┌──────────────────────────────────┐</span><br><span class="line">        │          Platform Layer          │</span><br><span class="line">        │                                  │</span><br><span class="line">        │ iOS                Android       │</span><br><span class="line">        │ CoreBluetooth      BLE           │</span><br><span class="line">        │ Background         FGS           │</span><br><span class="line">        │ Restoration        WorkManager   │</span><br><span class="line">        └──────────────────────────────────┘</span><br><span class="line"></span><br><span class="line">        ┌──────────────────────────────────┐</span><br><span class="line">        │          Infrastructure          │</span><br><span class="line">        │                                  │</span><br><span class="line">        │ Log │ Network │ DB │ Security    │</span><br><span class="line">        └──────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a><strong>参考文献</strong></h3><ul>
+<li>Flutter 官方：App Architecture Guide<br><a target="_blank" rel="noopener" href="https://docs.flutter.dev/app-architecture/guide">https://docs.flutter.dev/app-architecture/guide</a></li>
+<li>Flutter 官方：Common Architecture Concepts<br><a target="_blank" rel="noopener" href="https://docs.flutter.dev/app-architecture/concepts">https://docs.flutter.dev/app-architecture/concepts</a></li>
+<li>Flutter 官方：Dependency Injection &#x2F; Communicating Between Layers<br><a target="_blank" rel="noopener" href="https://docs.flutter.dev/app-architecture/case-study/dependency-injection">https://docs.flutter.dev/app-architecture/case-study/dependency-injection</a></li>
+<li>Flutter 官方：Architectural Overview<br><a target="_blank" rel="noopener" href="https://docs.flutter.dev/resources/architectural-overview">https://docs.flutter.dev/resources/architectural-overview</a></li>
+<li>Riverpod 官方：Providers<br><a target="_blank" rel="noopener" href="https://riverpod.dev/docs/concepts2/providers">https://riverpod.dev/docs/concepts2/providers</a></li>
+</ul>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/14/%E8%93%9D%E7%89%99%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80%EF%BC%9AService%E3%80%81Characteristic%E3%80%81Notify%E5%88%B0%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%90/" class="post-nav-link group text-right" title="蓝牙开发基础：Service、Characteristic、Notify到数据解析">
+            <span class="post-nav-title">蓝牙开发基础：Service、Characteristic、Notify到数据解析</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

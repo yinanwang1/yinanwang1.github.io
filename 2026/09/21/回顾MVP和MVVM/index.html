@@ -1,0 +1,558 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>回顾MVP和MVVM | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="回顾MVP和MVVM | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/21/%E5%9B%9E%E9%A1%BEMVP%E5%92%8CMVVM/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="回顾MVP和MVVM | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/21/%E5%9B%9E%E9%A1%BEMVP%E5%92%8CMVVM/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            回顾MVP和MVVM
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-21">2026/09/21</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>看到Google提供的架构模版<a target="_blank" rel="noopener" href="https://github.com/android/architecture-templates/tree/base">architecture-templates</a>，代码是真的精炼，寥寥几个文件将（1）UI和数据层隔离，（2）采用MVVM架构，（3）单向数据流，设计得明明白白。一直在维护Java + Xml的老项目，对于现在Android的新架构，值得好好学习一下。</p>
+<p><strong>MVP：Presenter 告诉 View“你应该怎么显示”。</strong> （已经过时了）<br><strong>MVVM：ViewModel 告诉 View“现在是什么状态”，View 自己决定怎么显示。</strong></p>
+<h3 id="一、MVP"><a href="#一、MVP" class="headerlink" title="一、MVP"></a><strong>一、MVP</strong></h3><p>MVP &#x3D; <strong>Model - View - Presenter</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>层</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>数据、网络、数据库、业务数据</td>
+</tr>
+<tr>
+<td>View</td>
+<td>页面展示、用户交互</td>
+</tr>
+<tr>
+<td>Presenter</td>
+<td>处理业务逻辑，并主动控制 View</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">View</span><br><span class="line">  ↕</span><br><span class="line">Presenter</span><br><span class="line">  ↕</span><br><span class="line">Model</span><br></pre></td></tr></table></figure>
+
+<p>例如登录：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">用户点击登录</span><br><span class="line">    ↓</span><br><span class="line">View</span><br><span class="line">    ↓</span><br><span class="line">Presenter.login()</span><br><span class="line">    ↓</span><br><span class="line">Repository（从 DataSource：API / Database / BLE / Cache 获取数据）</span><br><span class="line">    ↓</span><br><span class="line">Presenter （控制view执行业务操作）</span><br><span class="line">    ↓</span><br><span class="line">View.showLoading()</span><br><span class="line">View.showSuccess()</span><br><span class="line">View.showError()</span><br></pre></td></tr></table></figure>
+
+<p>Presenter 通常会持有一个 View 接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">LoginView</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">showLoading</span><span class="params">()</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">showSuccess</span><span class="params">()</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">showError</span><span class="params">(String message)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Presenter：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LoginPresenter</span> &#123;</span><br><span class="line">    LoginView view;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">login</span><span class="params">()</span> &#123;</span><br><span class="line">        view.showLoading();</span><br><span class="line">        <span class="comment">// 请求接口...</span></span><br><span class="line">        view.showSuccess();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以 MVP 最大的特点是：<strong>Presenter 主动命令 View 做什么。</strong></p>
+<p>比如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">显示 Loading</span><br><span class="line">隐藏 Loading</span><br><span class="line">显示错误</span><br><span class="line">跳转页面</span><br><span class="line">刷新列表</span><br></pre></td></tr></table></figure>
+
+<p>Presenter 对 View 的控制比较直接。</p>
+<hr>
+<h3 id="二、MVVM"><a href="#二、MVVM" class="headerlink" title="二、MVVM"></a><strong>二、MVVM</strong></h3><p>MVVM &#x3D; <strong>Model - View - ViewModel</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">View</span><br><span class="line">  ↕</span><br><span class="line">ViewModel</span><br><span class="line">  ↕</span><br><span class="line">Model</span><br></pre></td></tr></table></figure>
+
+<p>核心思想变成：<strong>ViewModel 不直接操作 View，而是提供“状态”，View 根据状态自己更新。</strong></p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用户点击登录</span><br><span class="line">    ↓</span><br><span class="line">ViewModel.login()</span><br><span class="line">    ↓</span><br><span class="line">Repository（从 DataSource：API / Database / BLE / Cache 获取数据）</span><br><span class="line">    ↓</span><br><span class="line">ViewModel 更新 State</span><br><span class="line">    ↓</span><br><span class="line">View 观察 State</span><br><span class="line">    ↓</span><br><span class="line">自动刷新 UI</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LoginState</span><br><span class="line">├── loading</span><br><span class="line">├── success</span><br><span class="line">└── error</span><br></pre></td></tr></table></figure>
+
+<p>ViewModel：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">login() &#123;</span><br><span class="line">    state = Loading;</span><br><span class="line">    // 请求接口</span><br><span class="line">    state = Success;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>View：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">监听 state</span><br><span class="line"></span><br><span class="line">Loading → 显示进度条</span><br><span class="line">Success → 显示主页</span><br><span class="line">Error   → 显示错误信息</span><br></pre></td></tr></table></figure>
+
+<p>因此 ViewModel 不需要知道：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Activity</span><br><span class="line">Fragment</span><br><span class="line">UIViewController</span><br><span class="line">Widget</span><br></pre></td></tr></table></figure>
+
+<p>它只负责：<strong>现在是什么状态</strong>. <code>View</code>根据<code>State</code>展示不同内容。</p>
+<h3 id="三、MVP和MVVM对比"><a href="#三、MVP和MVVM对比" class="headerlink" title="三、MVP和MVVM对比"></a><strong>三、MVP和MVVM对比</strong></h3><p><code>MVP</code>和<code>MVVM</code>都有<code>Model</code>和<code>View</code>, 不同的是中间层<code>Presenter</code>和<code>ViewModel</code>。</p>
+<table>
+<thead>
+<tr>
+<th><strong>对比</strong></th>
+<th><strong>MVP</strong></th>
+<th><strong>MVVM</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>中间层</td>
+<td>Presenter</td>
+<td>ViewModel</td>
+</tr>
+<tr>
+<td>UI 更新</td>
+<td>Presenter 主动调用 View</td>
+<td>View 观察 State</td>
+</tr>
+<tr>
+<td>View 接口</td>
+<td>通常需要</td>
+<td>通常不需要</td>
+</tr>
+<tr>
+<td>ViewModel&#x2F;Presenter 是否知道 View</td>
+<td>Presenter 通常知道 View 接口</td>
+<td>ViewModel 尽量不知道 View</td>
+</tr>
+<tr>
+<td><strong>数据绑定&#x2F;状态监听</strong></td>
+<td>不强调</td>
+<td>核心思想</td>
+</tr>
+<tr>
+<td>UI 与逻辑耦合</td>
+<td>较低</td>
+<td>更低</td>
+</tr>
+<tr>
+<td>单元测试</td>
+<td>容易</td>
+<td>容易</td>
+</tr>
+<tr>
+<td>状态驱动 UI</td>
+<td>较弱</td>
+<td>很适合</td>
+</tr>
+<tr>
+<td>现代移动端开发</td>
+<td>使用减少</td>
+<td>非常常见</td>
+</tr>
+</tbody></table>
+<h3 id="四、-Flutter-Android-iOS-的MVVM实现"><a href="#四、-Flutter-Android-iOS-的MVVM实现" class="headerlink" title="四、 Flutter &#x2F; Android &#x2F; iOS  的MVVM实现"></a>四、 Flutter &#x2F; Android &#x2F; iOS  的MVVM实现</h3><table>
+<thead>
+<tr>
+<th><strong>平台</strong></th>
+<th><strong>ViewModel 常用实现</strong></th>
+<th><strong>UI 如何监听状态</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Flutter</td>
+<td>Riverpod <code>Notifier</code> &#x2F; <code>AsyncNotifier</code>、Provider + ChangeNotifier</td>
+<td><code>ref.watch()</code> &#x2F; <code>Consumer</code></td>
+</tr>
+<tr>
+<td>Android</td>
+<td>Jetpack <code>ViewModel</code></td>
+<td><code>StateFlow</code> + Compose <code>collectAsStateWithLifecycle()</code></td>
+</tr>
+<tr>
+<td>iOS SwiftUI</td>
+<td><code>@Observable</code> 对象</td>
+<td>SwiftUI Observation 自动跟踪</td>
+</tr>
+<tr>
+<td>iOS UIKit</td>
+<td>自己定义 ViewModel + Observation&#x2F;Combine&#x2F;闭包等</td>
+<td>订阅&#x2F;绑定状态</td>
+</tr>
+</tbody></table>
+<h3 id="Flutter"><a href="#Flutter" class="headerlink" title="Flutter"></a>Flutter</h3><p>Flutter 使用 Riverpod &#x2F; Provider &#x2F; Bloc 进行状态管理是实现<strong>状态驱动 UI</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UI watch(state)</span><br><span class="line">   ↑</span><br><span class="line">  Notifier</span><br><span class="line">   ↓</span><br><span class="line"> Repository</span><br></pre></td></tr></table></figure>
+
+<h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a><strong>Android</strong></h3><p>Android 现在有非常明确的官方 <code>ViewModel</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository: UserRepository</span><br><span class="line">) : ViewModel() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> _uiState = MutableStateFlow(LoginUiState())</span><br><span class="line">    <span class="keyword">val</span> uiState = _uiState.asStateFlow()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Repository 获取数据</span></span><br><span class="line">        <span class="comment">// 更新 _uiState</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    viewModel: <span class="type">LoginViewModel</span> = viewModel()</span></span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">val</span> state <span class="keyword">by</span> viewModel.uiState.collectAsStateWithLifecycle()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据 state 绘制 UI</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>整个关系就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Compose UI</span><br><span class="line">    ↓</span><br><span class="line">Android ViewModel</span><br><span class="line">    ↓</span><br><span class="line">Repository</span><br><span class="line">    ↓</span><br><span class="line">DataSource</span><br><span class="line">    ↓</span><br><span class="line">API / Room / BLE / Cache</span><br><span class="line"></span><br><span class="line">ViewModel</span><br><span class="line">    ↓</span><br><span class="line">StateFlow</span><br><span class="line">    ↓</span><br><span class="line">Compose UI</span><br></pre></td></tr></table></figure>
+
+<p>因此 Android 这套组合非常典型： <strong>ViewModel + StateFlow + Jetpack Compose</strong></p>
+<p>其中 <code>ViewModel</code> 负责保存和管理 UI 状态，<code>StateFlow</code> 负责状态流转，<code>Compose</code>观察状态并刷新 UI。</p>
+<hr>
+<h3 id="iOS"><a href="#iOS" class="headerlink" title="iOS"></a><strong>iOS</strong></h3><p>在 SwiftUI 中，可以使用 Observation 的 <code>@Observable</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Observable</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> isLoading <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">    <span class="keyword">var</span> errorMessage: <span class="type">String</span>?</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">let</span> repository: <span class="type">UserRepository</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">repository</span>: <span class="type">UserRepository</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.repository <span class="operator">=</span> repository</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">login</span>() <span class="keyword">async</span> &#123;</span><br><span class="line">        isLoading <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">        <span class="comment">// repository.login()</span></span><br><span class="line">        isLoading <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>SwiftUI：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">LoginView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> viewModel <span class="operator">=</span> <span class="type">LoginViewModel</span>(<span class="operator">...</span>)</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> viewModel.isLoading &#123;</span><br><span class="line">            <span class="type">ProgressView</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SwiftUI View</span><br><span class="line">    ↓</span><br><span class="line">ViewModel（@Observable）</span><br><span class="line">    ↓</span><br><span class="line">Repository</span><br><span class="line">    ↓</span><br><span class="line">DataSource</span><br><span class="line">    ↓</span><br><span class="line">API / Core Data / BLE / Cache</span><br><span class="line">    ↓</span><br><span class="line">ViewModel</span><br><span class="line">    ↓</span><br><span class="line">Observable State</span><br><span class="line">    ↓</span><br><span class="line">SwiftUI View</span><br></pre></td></tr></table></figure>
+
+<p>以前 SwiftUI 项目中则很常见：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ObservableObject</span><br><span class="line">@Published</span><br><span class="line">@StateObject</span><br><span class="line">@ObservedObject</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span>: <span class="title class_ inherited__">ObservableObject</span> &#123;</span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> isLoading <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在的新项目可以优先了解新的 Observation &#x2F; <code>@Observable</code>。</p>
+<h2 id="DONE"><a href="#DONE" class="headerlink" title="DONE"></a>DONE</h2>
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/17/%E7%A7%BB%E5%8A%A8%E7%AB%AFBLE%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88(Flutter%E7%89%88)/" class="post-nav-link group text-right" title="移动端BLE项目架构设计方案(Flutter版)">
+            <span class="post-nav-title">移动端BLE项目架构设计方案(Flutter版)</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

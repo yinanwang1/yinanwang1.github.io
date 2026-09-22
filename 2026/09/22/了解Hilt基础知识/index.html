@@ -1,0 +1,505 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>了解Hilt基础知识 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="了解Hilt基础知识 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/22/%E4%BA%86%E8%A7%A3Hilt%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="了解Hilt基础知识 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/22/%E4%BA%86%E8%A7%A3Hilt%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            了解Hilt基础知识
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-22">2026/09/22</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>Hilt 是一个依赖注入（Dependency Injection，DI）框架。</p>
+<p><strong>以前：</strong> 对象由你自己<code>new</code>创建。</p>
+<p><strong>Hilt：</strong> 你告诉 Hilt“这个对象怎么创建”，以后需要它的地方，Hilt 自动帮你创建并传进来。</p>
+<h3 id="1-常见的对象创建和依赖"><a href="#1-常见的对象创建和依赖" class="headerlink" title="1. 常见的对象创建和依赖"></a>1. 常见的对象创建和依赖</h3><p>如 ViewModel 需要 Repository：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span> : <span class="type">ViewModel</span>() &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository = UserRepository()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>依赖关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">LoginViewModel</span><br><span class="line">    ↓</span><br><span class="line">UserRepository</span><br><span class="line">    ↓</span><br><span class="line">UserApi</span><br><span class="line">    ↓</span><br><span class="line">OkHttp</span><br></pre></td></tr></table></figure>
+
+<p>实例化对象，作为传入参数：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UserApi(...)</span><br><span class="line">UserRepository(userApi)</span><br><span class="line">LoginViewModel(repository)</span><br></pre></td></tr></table></figure>
+
+<p>对象之间一层套一层，创建和管理越来越麻烦。</p>
+<hr>
+<h3 id="2-使用-Hilt-后的对象创建"><a href="#2-使用-Hilt-后的对象创建" class="headerlink" title="2. 使用 Hilt 后的对象创建"></a>2. 使用 Hilt 后的对象创建</h3><p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserRepository</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> api: UserApi</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>ViewModel：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HiltViewModel</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository: UserRepository</span><br><span class="line">) : ViewModel() &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Compose 页面：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    viewModel: <span class="type">LoginViewModel</span> = hiltViewModel&lt;LoginViewModel&gt;()</span></span></span><br><span class="line">) &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时就不需要手动初始化对象：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UserRepository(...)</span><br><span class="line">LoginViewModel(...)</span><br></pre></td></tr></table></figure>
+
+<p>Hilt 会分析：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LoginViewModel</span><br><span class="line">      ↓ 需要</span><br><span class="line">UserRepository</span><br><span class="line">      ↓ 需要</span><br><span class="line">UserApi</span><br></pre></td></tr></table></figure>
+
+<p>Hilt 完成了**“对象创建 + 对象组装 + 生命周期管理器”。**</p>
+<h3 id="3-Hilt-最常见的注解"><a href="#3-Hilt-最常见的注解" class="headerlink" title="3. Hilt 最常见的注解"></a><strong>3. Hilt 最常见的注解</strong></h3><table>
+<thead>
+<tr>
+<th><strong>注解</strong></th>
+<th><strong>大概作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@HiltAndroidApp</code></td>
+<td>告诉 Hilt：这是整个 App 的入口</td>
+</tr>
+<tr>
+<td><code>@AndroidEntryPoint</code></td>
+<td>Activity&#x2F;Fragment 需要使用 Hilt</td>
+</tr>
+<tr>
+<td><code>@HiltViewModel</code></td>
+<td>这个 ViewModel 交给 Hilt 管理</td>
+</tr>
+<tr>
+<td><code>@Inject</code></td>
+<td>告诉 Hilt 如何注入&#x2F;创建对象</td>
+</tr>
+<tr>
+<td><code>@Module</code></td>
+<td>定义依赖提供规则</td>
+</tr>
+<tr>
+<td><code>@Provides</code></td>
+<td>告诉 Hilt 某个对象怎么创建</td>
+</tr>
+<tr>
+<td><code>@Binds</code></td>
+<td>告诉 Hilt 接口对应哪个实现</td>
+</tr>
+<tr>
+<td><code>@Singleton</code></td>
+<td>整个 App 范围通常只创建一个实例</td>
+</tr>
+<tr>
+<td><code>@InstallIn</code></td>
+<td>将当前的类安装到指定组件中。</td>
+</tr>
+</tbody></table>
+<h3 id="4-Inject是给Hilt声明类"><a href="#4-Inject是给Hilt声明类" class="headerlink" title="4. @Inject是给Hilt声明类"></a>4. <code>@Inject</code>是给<code>Hilt</code>声明类</h3><p>是<code>Hilt</code>最核心的注解之一：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserRepository</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> api: UserApi</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>告诉 Hilt：创建<code>UserRepository</code> 的构造函数，如果需要 <code>UserRepository</code>，就按照这个构造函数创建。</p>
+<p>当<code>Hilt</code>发现构造函数又需要<code>UserApi</code>, 则寻找<code>UserApi</code>并创建。</p>
+<p>多级的寻找和创建，形成了一张<strong>依赖关系图（Dependency Graph）</strong>。</p>
+<hr>
+<h3 id="5-Inject实例化一个接口"><a href="#5-Inject实例化一个接口" class="headerlink" title="5. @Inject实例化一个接口"></a>5. <code>@Inject</code>实例化一个接口</h3><p>接口：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">DeviceRepository</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">connect</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">BleDeviceRepository</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> bluetoothManager: BluetoothManager</span><br><span class="line">) : DeviceRepository</span><br></pre></td></tr></table></figure>
+
+<p>如果：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DeviceViewModel</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository: DeviceRepository</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>Hilt 查找 <code>DeviceRepository</code>时，发现它是接口，不能直接创建。</p>
+<p>解决办法是：需要告诉 Hilt：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="meta">@InstallIn(SingletonComponent::class)</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">RepositoryModule</span> &#123;</span><br><span class="line">    <span class="meta">@Binds</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">bindDeviceRepository</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">      impl: <span class="type">BleDeviceRepository</span></span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>: DeviceRepository</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个<code>RepositoryModule</code>不是给其他代码调用，而是给<code>Hilt</code>使用的。</p>
+<p>代码实现的作用是：如果<code>Hilt</code>查找<code>DeviceRepository</code>就实例化<code>BleDeviceRepository</code>返回。</p>
+<h3 id="6-Provides-创建第三方类"><a href="#6-Provides-创建第三方类" class="headerlink" title="6. @Provides 创建第三方类"></a><strong>6.</strong> <strong><code>@Provides</code></strong> 创建第三方类</h3><p>当类无法在构造函数加<code>@Inject constructor</code>时，使用<code>@Provides</code>指定。</p>
+<p>举例<code>Retrofit</code>在项目中用到时，怎么让<code>Hilt</code>查找到。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="meta">@InstallIn(SingletonComponent::class)</span></span><br><span class="line"><span class="keyword">object</span> NetworkModule &#123;</span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">provideRetrofit</span><span class="params">()</span></span>: Retrofit &#123;</span><br><span class="line">        <span class="keyword">return</span> Retrofit.Builder()</span><br><span class="line">            .baseUrl(<span class="string">&quot;https://api.example.com/&quot;</span>)</span><br><span class="line">            .build()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>告诉<code> Hilt</code>：需要 <code>Retrofit </code>的时候，就调用这个方法创建。 而<code>provideRetrofit</code>这个方法名不重要，重要的是<code>Retrofit</code>类型。使用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserRepository</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> retrofit: Retrofit</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>此时就可以找到<code>Retrofit</code>然后实例化返回。并且<code>@Singleton</code>申明了<code>Retrofit</code>在App整个生命周期中，只会存在一个实例。</p>
+<hr>
+<h3 id="7-Hilt就是MVVM-吗？-不是的"><a href="#7-Hilt就是MVVM-吗？-不是的" class="headerlink" title="7. Hilt就是MVVM 吗？ 不是的"></a>7. Hilt就是MVVM 吗？ 不是的</h3><p><strong>MVVM 解决</strong>： UI、状态、业务逻辑怎么组织</p>
+<p><strong>Hilt 解决</strong>： 这些对象由谁创建、怎么组装、活多久</p>
+<p>例如MVVM的架构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Compose / Activity</span><br><span class="line">        ↓</span><br><span class="line">     ViewModel</span><br><span class="line">        ↓</span><br><span class="line">    Repository</span><br><span class="line">        ↓</span><br><span class="line">    DataSource</span><br><span class="line">     ↙     ↘</span><br><span class="line"> Retrofit   Room</span><br></pre></td></tr></table></figure>
+
+<p>而对象的创建：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Hilt</span><br><span class="line"> ↓</span><br><span class="line">负责创建和组装</span><br><span class="line"> ↓</span><br><span class="line">ViewModel</span><br><span class="line">Repository</span><br><span class="line">Retrofit</span><br><span class="line">Room</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>两者组合使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Compose + ViewModel + Repository + Hilt + Room + Retrofit</span><br></pre></td></tr></table></figure>
+
+
+
+<p>了解后，觉得与<code>Spring Boot</code>的<code>@Autowired</code>一模一样的效果。</p>
+<p>个人的见解，详细请看<a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/dependency-injection/hilt-android?hl=zh-cn">使用 Hilt 实现依赖项注入</a>。</p>
+<h2 id="DONE"><a href="#DONE" class="headerlink" title="DONE"></a>DONE</h2><p>恍如隔世，旧项目一直在开发，一直在迭代。而新技术也是日新月异啊。</p>
+<p>说是被时代的浪潮推倒岸边，或者说是守着一口不深的井。</p>
+<p>希望蓦然回首，每一步都没有辜负自己的努力。</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/21/%E5%9B%9E%E9%A1%BEMVP%E5%92%8CMVVM/" class="post-nav-link group text-right" title="回顾MVP和MVVM">
+            <span class="post-nav-title">回顾MVP和MVVM</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

@@ -1,0 +1,1182 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>快速入门JetpackCompose | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="快速入门JetpackCompose | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/09/24/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8JetpackCompose/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="快速入门JetpackCompose | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/09/24/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8JetpackCompose/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            快速入门JetpackCompose
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-09-24">2026/09/24</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>写了那么多年的xml，突然说现在不流行了。<strong>现在直接用 Kotlin 函数描述 UI</strong>，即使用<code>Compose</code>的 <strong>UI 开发方式</strong>。学起来！！！</p>
+<hr>
+<h1 id="一、最简单的-Compose-页面"><a href="#一、最简单的-Compose-页面" class="headerlink" title="一、最简单的 Compose 页面"></a><strong>一、最简单的 Compose 页面</strong></h1><p>传统 XML：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Hello&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;登录&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">()</span></span> &#123;</span><br><span class="line">    Column &#123;</span><br><span class="line">        Text(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line"></span><br><span class="line">        Button(</span><br><span class="line">            onClick = &#123;</span><br><span class="line">                <span class="comment">// 登录</span></span><br><span class="line">            &#125;</span><br><span class="line">        ) &#123;</span><br><span class="line">            Text(<span class="string">&quot;登录&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应关系非常直观：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">XML                         Compose</span><br><span class="line"></span><br><span class="line">LinearLayout(vertical)  →   Column</span><br><span class="line">LinearLayout(horizontal)→   Row</span><br><span class="line">FrameLayout             →   Box</span><br><span class="line">TextView                →   Text</span><br><span class="line">Button                  →   Button</span><br><span class="line">ImageView               →   Image</span><br><span class="line">RecyclerView            →   LazyColumn</span><br></pre></td></tr></table></figure>
+
+<p>所以看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个<code>LoginScrren</code>没有返回值，仅仅是<strong>描述构建和更新UI</strong>，也就是声明了<code>UI</code>。</p>
+<hr>
+<h1 id="二、-Composable-声明一个UI"><a href="#二、-Composable-声明一个UI" class="headerlink" title="二、@Composable 声明一个UI"></a>二、@Composable 声明一个UI</h1><p>Compose 最核心的东西就是：<code>@Composable</code> 。</p>
+<p>普通 Kotlin 函数：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserName</span><span class="params">()</span></span>: String</span><br></pre></td></tr></table></figure>
+
+<p>是执行逻辑。</p>
+<p>而：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">UserName</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure>
+
+<p>表示：这是一个可以参与 Compose UI 构建的函数。</p>
+<p>所以看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">UserItem</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">UserAvatar</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure>
+
+<p>基本都可以理解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LoginScreen → 一个页面</span><br><span class="line">UserItem    → 一块 UI</span><br><span class="line">UserAvatar  → 一个小组件</span><br></pre></td></tr></table></figure>
+
+<p>注意：<strong>Composable 不一定是完整页面。</strong></p>
+<p>它可以大到整个页面，也可以小到一个按钮。</p>
+<hr>
+<h1 id="三、Compose-不再需要-XML"><a href="#三、Compose-不再需要-XML" class="headerlink" title="三、Compose 不再需要 XML"></a><strong>三、Compose 不再需要 XML</strong></h1><p>传统 Android：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LoginActivity.kt</span><br><span class="line">        ↓</span><br><span class="line">activity_login.xml</span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LoginActivity.kt</span><br><span class="line">        ↓</span><br><span class="line">LoginScreen()</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MainActivity</span> : <span class="type">ComponentActivity</span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContent &#123;</span><br><span class="line">            LoginScreen()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里：<code>setContent {}</code>, 可以简单理解成传统的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setContentView(...)</span><br></pre></td></tr></table></figure>
+
+<p>只不过以前加载 XML：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setContentView(R.layout.activity_main);</span><br></pre></td></tr></table></figure>
+
+<p>现在加载 Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setContent &#123;</span><br><span class="line">    LoginScreen()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四、Column、Row、Box"><a href="#四、Column、Row、Box" class="headerlink" title="四、Column、Row、Box"></a><strong>四、Column、Row、Box</strong></h1><p>这是 Compose 最基本的三个布局。</p>
+<h2 id="1-Column"><a href="#1-Column" class="headerlink" title="1. Column"></a><strong>1. Column</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Column &#123;</span><br><span class="line">    Text(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">    Text(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">    Text(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A</span><br><span class="line">B</span><br><span class="line">C</span><br></pre></td></tr></table></figure>
+
+<p>类似：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2-Row"><a href="#2-Row" class="headerlink" title="2. Row"></a><strong>2. Row</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Row &#123;</span><br><span class="line">    Text(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">    Text(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A B</span><br></pre></td></tr></table></figure>
+
+<p>类似：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;horizontal&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-Box"><a href="#3-Box" class="headerlink" title="3. Box"></a><strong>3. Box</strong></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Box &#123;</span><br><span class="line">    Image(...)</span><br><span class="line">    Text(<span class="string">&quot;头像&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>里面的组件可以叠在一起。</p>
+<p>类似以前：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FrameLayout</span><br></pre></td></tr></table></figure>
+
+<p>因此先记：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Column = 竖着排</span><br><span class="line">Row    = 横着排</span><br><span class="line">Box    = 叠着排</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="五、Modifier-设置UI的属性"><a href="#五、Modifier-设置UI的属性" class="headerlink" title="五、Modifier 设置UI的属性"></a>五、Modifier 设置UI的属性</h1><p>设置<code>Text</code>的宽和间距：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Text(</span><br><span class="line">    text = <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">    modifier = Modifier</span><br><span class="line">        .fillMaxWidth()</span><br><span class="line">        .padding(<span class="number">16.</span>dp)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><code>Modifier</code> 就是：<strong>这个 View 的布局参数 + 外观参数 + 行为参数。</strong></p>
+<p>传统 XML：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:padding</span>=<span class="string">&quot;16dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:background</span>=<span class="string">&quot;@color/white&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Text(</span><br><span class="line">    <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">    modifier = Modifier</span><br><span class="line">        .fillMaxWidth()</span><br><span class="line">        .padding(<span class="number">16.</span>dp)</span><br><span class="line">        .background(Color.White)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>所以：<code>Modifier.fillMaxWidth()</code>  ≈  <code>layout_width=&quot;match_parent&quot;</code></p>
+<p>而：<code>Modifier.padding(16.dp)</code> ≈  <code>padding</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Modifier</span><br><span class="line">    .fillMaxWidth()</span><br><span class="line">    .height(<span class="number">50.</span>dp)</span><br><span class="line">    .padding(<span class="number">16.</span>dp)</span><br><span class="line">    .background(Color.White)</span><br><span class="line">    .clickable &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>设置属性：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">宽度</span><br><span class="line">高度</span><br><span class="line">间距</span><br><span class="line">背景</span><br><span class="line">点击事件</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="六、Modifier-的顺序很重要"><a href="#六、Modifier-的顺序很重要" class="headerlink" title="六、Modifier 的顺序很重要"></a><strong>六、Modifier 的顺序很重要</strong></h1><p>这和 XML 不一样。<code>Modifier</code>是从左到右一层一层包装。</p>
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Modifier</span><br><span class="line">    .padding(<span class="number">16.</span>dp)</span><br><span class="line">    .background(Color.Red)  <span class="comment">// 红色背景不包含padding的部分</span></span><br></pre></td></tr></table></figure>
+
+<p>和：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Modifier</span><br><span class="line">    .background(Color.Red)</span><br><span class="line">    .padding(<span class="number">16.</span>dp) <span class="comment">// 红色的背景包含padding的部分</span></span><br></pre></td></tr></table></figure>
+
+<p>理解起来像是<strong>链式调用</strong>，一层实现后返回结果给下一层。顺序会影响最终布局、绘制和交互效果。</p>
+<hr>
+<h1 id="七、Text"><a href="#七、Text" class="headerlink" title="七、Text"></a>七、Text</h1><p>传统：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:text</span>=<span class="string">&quot;Hello&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:textSize</span>=<span class="string">&quot;16sp&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Text(</span><br><span class="line">    text = <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">    fontSize = <span class="number">16.</span>sp</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>常见参数：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Text(</span><br><span class="line">    text = <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">    color = Color.Black,</span><br><span class="line">    fontSize = <span class="number">16.</span>sp,</span><br><span class="line">    fontWeight = FontWeight.Bold,</span><br><span class="line">    maxLines = <span class="number">1</span>,</span><br><span class="line">    overflow = TextOverflow.Ellipsis</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>设置<code>Text</code>的属性。 如果是布局、外观、交互修饰使用<code>Modifier</code>。</p>
+<hr>
+<h1 id="八、Button"><a href="#八、Button" class="headerlink" title="八、Button"></a>八、Button</h1><p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Button(</span><br><span class="line">    onClick = &#123;</span><br><span class="line">        login()</span><br><span class="line">    &#125;</span><br><span class="line">) &#123;</span><br><span class="line">    Text(<span class="string">&quot;登录&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>设置了<code>onClick</code>属性值，再包含一个<code>Text</code>。 Compose 经常采用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">组件 &#123;</span><br><span class="line">    子组件</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="九、Image"><a href="#九、Image" class="headerlink" title="九、Image"></a>九、Image</h1><p>相当于<code> ImageView</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Image(</span><br><span class="line">    painter = painterResource(R.drawable.logo),</span><br><span class="line">    contentDescription = <span class="string">&quot;Logo&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>网络图片项目中经常会看到<code> Coil</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AsyncImage(</span><br><span class="line">    model = user.avatar,  <span class="comment">// URL,Uri,File,drawable resource,ImageRequest</span></span><br><span class="line">    contentDescription = <span class="literal">null</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成以前 Glide：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Glide.with(...)</span><br><span class="line">    .load(url)</span><br><span class="line">    .into(imageView)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="十、Surface是Material风格容器"><a href="#十、Surface是Material风格容器" class="headerlink" title="十、Surface是Material风格容器"></a>十、Surface是Material风格容器</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Surface &#123;</span><br><span class="line">    Text(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Material 风格的容器。</strong></p>
+<p>它可以负责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">背景颜色</span><br><span class="line">圆角</span><br><span class="line">边框</span><br><span class="line">阴影</span><br><span class="line">elevation</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Surface(</span><br><span class="line">    color = Color.White,</span><br><span class="line">    shape = RoundedCornerShape(<span class="number">12.</span>dp)</span><br><span class="line">) &#123;</span><br><span class="line">    Text(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以简单理解为一个：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">带 Material 样式能力的容器</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="十一、Scaffold-页面骨架"><a href="#十一、Scaffold-页面骨架" class="headerlink" title="十一、Scaffold 页面骨架"></a>十一、Scaffold 页面骨架</h1><p>一个页面的整体骨架，和<code>Flutter</code>的<code>Scaffold</code>很像。</p>
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Scaffold(</span><br><span class="line">    topBar = &#123;</span><br><span class="line">        TopAppBar(</span><br><span class="line">            title = &#123;</span><br><span class="line">                Text(<span class="string">&quot;首页&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        )</span><br><span class="line">    &#125;,</span><br><span class="line">    bottomBar = &#123;</span><br><span class="line">        BottomAppBar &#123;</span><br><span class="line">            Text(<span class="string">&quot;底部&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">) &#123; paddingValues -&gt;</span><br><span class="line"></span><br><span class="line">    HomeContent(</span><br><span class="line">        modifier = Modifier.padding(paddingValues)</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结构就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Scaffold</span><br><span class="line">├── TopBar</span><br><span class="line">├── Content</span><br><span class="line">├── BottomBar</span><br><span class="line">├── FloatingActionButton</span><br><span class="line">└── Snackbar</span><br></pre></td></tr></table></figure>
+
+<p>除了自带的数据，还可以添加子组件, 如<code>HomeContent</code>。</p>
+<hr>
+<h1 id="十二、MaterialTheme"><a href="#十二、MaterialTheme" class="headerlink" title="十二、MaterialTheme"></a>十二、MaterialTheme</h1><p>经常看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MaterialTheme &#123;</span><br><span class="line">    App()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MaterialTheme.colorScheme.primary</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成以前的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Theme</span><br><span class="line">styles.xml</span><br><span class="line">colors.xml</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Text(</span><br><span class="line">    color = MaterialTheme.colorScheme.primary</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>就是：使用当前 Material Theme 中定义的主色。</p>
+<p>Material 3 常见：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MaterialTheme.colorScheme</span><br><span class="line">MaterialTheme.typography</span><br><span class="line">MaterialTheme.shapes</span><br></pre></td></tr></table></figure>
+
+<p>分别管理：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">颜色</span><br><span class="line">字体</span><br><span class="line">形状</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="十三、State：Compose-最核心的思想"><a href="#十三、State：Compose-最核心的思想" class="headerlink" title="十三、State：Compose 最核心的思想"></a>十三、State：Compose 最核心的思想</h1><p>传统 Android：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">textView.text = <span class="string">&quot;登录成功&quot;</span></span><br><span class="line">progressBar.visibility = View.GONE</span><br></pre></td></tr></table></figure>
+
+<p>也就是： 主动修改 View。</p>
+<p>Compose 思路不一样：<strong>UI 是 State 的结果。</strong>  像<code>MVVM</code>中<code>UI</code>根据<code>state</code>展示。</p>
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> loading <span class="keyword">by</span> remember &#123;</span><br><span class="line">    mutableStateOf(<span class="literal">false</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>remember</code>是重组过程中保存对象&#x2F;值的机制。 这里设置<code>state</code>为<code>false</code> .</p>
+<p>UI：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (loading) &#123;</span><br><span class="line">    CircularProgressIndicator()</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    Text(<span class="string">&quot;登录&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当：<code>loading = true</code> Compose 会自动重新计算需要变化的 UI。</p>
+<p>你不需要：<code>progressBar.visibility = VISIBLE</code>.</p>
+<hr>
+<h1 id="十四、remember"><a href="#十四、remember" class="headerlink" title="十四、remember"></a>十四、remember</h1><p><code>remember</code>是 <code>Compose</code>提供的一个重组(<code>Recomposition</code>)过程中保存对象&#x2F;值的机制：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> count <span class="keyword">by</span> remember &#123;</span><br><span class="line">    mutableStateOf(<span class="number">0</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>remember</code>返回的<code>mutableStateOf(Int)</code>, <code>mutableStateOf</code>创建一个<code>State</code>，<code>remember</code> 负责记住这个 <code>State</code>。 通过<code>count</code>直接访问<code>State.value</code>。</p>
+<p>如果执行 <code>count = 1</code>，<code>State</code> 的值会变成 1，并触发相关 Composable 重组；重组时 <code>remember</code> 会保留之前的 State，因此 <code>count</code> 仍然是 1，而不会重新变成初始值 0。</p>
+<hr>
+<h1 id="十五、Recomposition是按State更新UI"><a href="#十五、Recomposition是按State更新UI" class="headerlink" title="十五、Recomposition是按State更新UI"></a>十五、Recomposition是按State更新UI</h1><p><strong>Recomposition &#x3D; 重组</strong>是 Compose 非常核心的概念：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">Counter</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> count <span class="keyword">by</span> remember &#123;</span><br><span class="line">        mutableStateOf(<span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    Text(<span class="string">&quot;数量：<span class="variable">$count</span>&quot;</span>)</span><br><span class="line">    Button(</span><br><span class="line">        onClick = &#123;</span><br><span class="line">            count++</span><br><span class="line">        &#125;</span><br><span class="line">    ) &#123;</span><br><span class="line">        Text(<span class="string">&quot;增加&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>点击：<code>count++</code>, 改变了<code>count</code>的值, 也就是<code>State</code>改变，以后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">State 改变</span><br><span class="line">   ↓</span><br><span class="line">Compose 发现 Text 使用了 count</span><br><span class="line">   ↓</span><br><span class="line">重新执行相关 Compose UI</span><br><span class="line">   ↓</span><br><span class="line">显示新的数字</span><br></pre></td></tr></table></figure>
+
+<p>**注意：**重组不等于把整个 Activity&#x2F;View 树全部销毁重建。 Compose 会尽量只更新受到状态影响的部分。</p>
+<hr>
+<h1 id="十六、State-Hoisting：状态提升"><a href="#十六、State-Hoisting：状态提升" class="headerlink" title="十六、State Hoisting：状态提升"></a>十六、State Hoisting：状态提升</h1><p>Compose 项目里非常常见，<code>State</code>在页面内部声明。<strong>不推荐的示范</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginButton</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> loading <span class="keyword">by</span> remember &#123;</span><br><span class="line">        mutableStateOf(<span class="literal">false</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更常见的是：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginButton</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    loading: <span class="type">Boolean</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    onLoginClick: () -&gt; <span class="type">Unit</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">    Button(</span><br><span class="line">        onClick = onLoginClick</span><br><span class="line">    ) &#123;</span><br><span class="line">        Text(</span><br><span class="line">            <span class="keyword">if</span> (loading) <span class="string">&quot;登录中...&quot;</span> <span class="keyword">else</span> <span class="string">&quot;登录&quot;</span></span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更加推荐的是将状态放在外面。这是<code>Compose</code>非常重要的一种组件形式。子组件只接收：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">状态</span><br><span class="line">+</span><br><span class="line">事件</span><br></pre></td></tr></table></figure>
+
+<p>状态向下传，事件向上传。 实现<strong>UI和状态管理分离</strong>.</p>
+<hr>
+<h1 id="十七、Compose-的单向数据流"><a href="#十七、Compose-的单向数据流" class="headerlink" title="十七、Compose 的单向数据流"></a>十七、Compose 的单向数据流</h1><p>Compose 项目一般是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">          State</span><br><span class="line">ViewModel ───────→ UI</span><br><span class="line">    ↑                    │</span><br><span class="line">    │                    │</span><br><span class="line">    └──── Event ────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>态向下传，事件向上传</strong>。例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">用户点击登录</span><br><span class="line">     ↓</span><br><span class="line">UI</span><br><span class="line">     ↓</span><br><span class="line">viewModel.login()</span><br><span class="line">     ↓</span><br><span class="line">Repository</span><br><span class="line">     ↓</span><br><span class="line">ViewModel 修改 State</span><br><span class="line">     ↓</span><br><span class="line">Compose 收到 State</span><br><span class="line">     ↓</span><br><span class="line">重新显示 UI</span><br></pre></td></tr></table></figure>
+
+<p>这就是：<strong>Unidirectional Data Flow，单向数据流。</strong></p>
+<hr>
+<h1 id="十八、ViewModel"><a href="#十八、ViewModel" class="headerlink" title="十八、ViewModel"></a>十八、ViewModel</h1><p>相当于<code>MVVM</code>中的  <code>ViewModel</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span> : <span class="type">ViewModel</span>() &#123;</span><br><span class="line">    <span class="keyword">var</span> loading <span class="keyword">by</span> mutableStateOf(<span class="literal">false</span>)</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">set</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        loading = <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>UI：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    viewModel: <span class="type">LoginViewModel</span> = viewModel()</span></span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">if</span> (viewModel.loading) &#123;</span><br><span class="line">        CircularProgressIndicator()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ViewModel</span><br><span class="line">   ↓</span><br><span class="line">State</span><br><span class="line">   ↓</span><br><span class="line">Compose UI</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>ViewModel</code></strong> **持有并管理 ** <strong><code>State</code></strong>，通过 <strong><code>Repository</code></strong> **获取或更新数据；<code>UI</code> **观察 <code>State</code>，并根据状态展示不同内容。</p>
+<hr>
+<h1 id="十九、viewModel-获取可用的viewModel"><a href="#十九、viewModel-获取可用的viewModel" class="headerlink" title="十九、viewModel() 获取可用的viewModel"></a>十九、viewModel() 获取可用的viewModel</h1><p>使用的时候：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> viewModel: LoginViewModel = viewModel()</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>viewModel()</code>会推导出<code>viewModel&lt;LoginViewModel&gt;()</code>。</p>
+<p>通过 Android <code>Compose</code> 提供的 <code>ViewModel</code> 获取机制：获取当前 <code>ViewModelStoreOwner</code> 对应的 <code>LoginViewModel</code>。</p>
+<p>Android <code>ViewModel</code> 生命周期不是和<code>Activity</code>的实例绑定，而是与<code>ViewModelStoreOwner</code>的作用域绑定。</p>
+<p>所以配置变化导致<code>Activity</code>重建时<code>ViewModel</code>会保留。</p>
+<p><code>Activity</code>真正结束（<code>Finish</code>）时<code>ViewModel</code>才会被清除。</p>
+<hr>
+<h1 id="二十、hiltViewModel"><a href="#二十、hiltViewModel" class="headerlink" title="二十、hiltViewModel()"></a>二十、hiltViewModel()</h1><p>使用 Hilt 的项目经常看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    viewModel: <span class="type">LoginViewModel</span> = hiltViewModel()</span></span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>hiltViewModel()</code>替代了<code>viewModel()</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HiltViewModel</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository: UserRepository</span><br><span class="line">) : ViewModel()</span><br></pre></td></tr></table></figure>
+
+<p>可以简单理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hiltViewModel()</span><br><span class="line">      ↓</span><br><span class="line">Hilt 帮你获取/创建 ViewModel</span><br><span class="line">      ↓</span><br><span class="line">同时把 Repository 等依赖注入进去</span><br></pre></td></tr></table></figure>
+
+<p>比<code>viewModel()</code>多了自动创建对象和添加依赖的功能。</p>
+<hr>
+<h1 id="二十一、StateFlow"><a href="#二十一、StateFlow" class="headerlink" title="二十一、StateFlow"></a>二十一、StateFlow</h1><p><code>StateFlow</code>是一种状态数据流，一个可以被观察、会持续发布最新状态的容器。</p>
+<p>项目中使用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> _uiState = MutableStateFlow(LoginUiState())</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uiState: StateFlow&lt;LoginUiState&gt; = _uiState.asStateFlow()</span><br></pre></td></tr></table></figure>
+
+<p>简单理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MutableStateFlow</span><br><span class="line">       ↓</span><br><span class="line">ViewModel 内部可以修改。使用_uiState进行值的修改。</span><br><span class="line"></span><br><span class="line">StateFlow</span><br><span class="line">       ↓</span><br><span class="line">UI 对外观察。 uiState只能观察，不能修改。</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">LoginUiState</span>(</span><br><span class="line">    <span class="keyword">val</span> loading: <span class="built_in">Boolean</span> = <span class="literal">false</span>,</span><br><span class="line">    <span class="keyword">val</span> username: String = <span class="string">&quot;&quot;</span>,</span><br><span class="line">    <span class="keyword">val</span> error: String? = <span class="literal">null</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>ViewModel：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> _uiState = MutableStateFlow(LoginUiState())</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uiState = _uiState.asStateFlow()</span><br></pre></td></tr></table></figure>
+
+<p>可以修改<code>_uiState</code>的值。</p>
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uiState <span class="keyword">by</span> viewModel.uiState.collectAsStateWithLifecycle()</span><br></pre></td></tr></table></figure>
+
+<p>然后：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (uiState.loading) &#123;</span><br><span class="line">    CircularProgressIndicator()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>UI</code>中观察<code>uiState</code>的值变化。</p>
+<p><code>ViewModel</code> 负责管理状态，<code>StateFlow</code> 负责保存并持续发布状态，<code>Compose</code> 负责订阅状态并刷新 UI。</p>
+<hr>
+<h1 id="二十二、collectAsStateWithLifecycle"><a href="#二十二、collectAsStateWithLifecycle" class="headerlink" title="二十二、collectAsStateWithLifecycle()"></a>二十二、collectAsStateWithLifecycle()</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uiState <span class="keyword">by</span> viewModel.uiState.collectAsStateWithLifecycle()</span><br></pre></td></tr></table></figure>
+
+<p>实现了：<strong>把 ViewModel 的 StateFlow 转成 Compose 可以观察的 State，并结合 Android Lifecycle 管理收集。</strong></p>
+<p>于是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">StateFlow 改变</span><br><span class="line">       ↓</span><br><span class="line">Compose State 改变</span><br><span class="line">       ↓</span><br><span class="line">UI 重组</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="二十三、by-是属性委托"><a href="#二十三、by-是属性委托" class="headerlink" title="二十三、by 是属性委托"></a>二十三、by 是属性委托</h1><p>Compose 中用到<code>by</code>是Kotlin的<strong>属性委托(Property Delegation)</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uiState <span class="keyword">by</span> viewModel.uiState.collectAsStateWithLifecycle()</span><br></pre></td></tr></table></figure>
+
+<p><strong>作用</strong>：<code>by</code>把<code>State&lt;T&gt;</code>拆出来，直接使用里面的<code>T</code>，省略 <code>.value </code>。</p>
+<p>Compose 大量使用。</p>
+<hr>
+<h1 id="二十四、LazyColumn"><a href="#二十四、LazyColumn" class="headerlink" title="二十四、LazyColumn"></a>二十四、LazyColumn</h1><p>它基本可以理解成：<code>RecyclerView</code> 竖向长列表。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LazyColumn &#123;</span><br><span class="line">    items(users) &#123; user -&gt;</span><br><span class="line">        UserItem(user)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于以前：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">RecyclerView</span><br><span class="line">    ↓</span><br><span class="line">Adapter</span><br><span class="line">    ↓</span><br><span class="line">ViewHolder</span><br><span class="line">    ↓</span><br><span class="line">item_user.xml</span><br></pre></td></tr></table></figure>
+
+<p>Compose 不需要这些东西，直接：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LazyColumn</span><br><span class="line">   ↓</span><br><span class="line">items</span><br><span class="line">   ↓</span><br><span class="line">UserItem</span><br></pre></td></tr></table></figure>
+
+<p>所以代码会少很多。</p>
+<hr>
+<h1 id="二十五、LazyRow"><a href="#二十五、LazyRow" class="headerlink" title="二十五、LazyRow"></a>二十五、LazyRow</h1><p>就是横向列表：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LazyRow &#123;</span><br><span class="line">    items(users) &#123; user -&gt;</span><br><span class="line">        UserItem(user)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">RecyclerView</span><br><span class="line">+</span><br><span class="line">LinearLayoutManager.HORIZONTAL</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="二十六、rememberLazyListState"><a href="#二十六、rememberLazyListState" class="headerlink" title="二十六、rememberLazyListState()"></a>二十六、rememberLazyListState()</h1><p><code>Compose</code> 中用来<strong>创建并记住</strong> <strong><code>LazyColumn</code></strong> <strong>&#x2F;</strong> <strong><code>LazyRow</code></strong> <strong>的滚动状态</strong> <strong><code>LazyListState</code></strong> 的。记住列表当前滚到哪里，并且允许你读取、控制列表滚动。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> listState = rememberLazyListState()</span><br><span class="line"></span><br><span class="line">LazyColumn(</span><br><span class="line">    state = listState</span><br><span class="line">) &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它类似保存 RecyclerView 的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">滚动状态</span><br><span class="line">滚动位置</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>listState.scrollToItem(10) </code>  滚到第10个item</li>
+<li><code>listState.animateScrollToItem(50)</code>  带动画滚动第50个item</li>
+<li><code>listState.firstVisibleItemIndex</code> 当前第一个可见Item的下标</li>
+<li><code>listState.firstVisibleItemScrollOffset</code> 第一个可见Item滚出去的像素</li>
+<li><code>listState.canScrollForward</code>  是否还能<strong>朝列表末尾</strong>滚动</li>
+<li><code>listState.canScrollBackward</code>   是否还能<strong>朝列表开头</strong>滚动</li>
+<li><code>listState.isScrollInProgress</code> 当前是否正在滚动</li>
+</ul>
+<hr>
+<h1 id="二十七、Navigation"><a href="#二十七、Navigation" class="headerlink" title="二十七、Navigation"></a>二十七、Navigation</h1><p>Android之前是使用<code>ActivityManager</code>来管理返回栈。现在<code>Compose</code> 项目通常不再依赖：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Activity A</span><br><span class="line">→ Activity B</span><br><span class="line">→ Activity C</span><br></pre></td></tr></table></figure>
+
+<p>来实现每个页面。</p>
+<p>更常见：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Single Activity</span><br><span class="line">       ↓</span><br><span class="line">Compose Navigation</span><br><span class="line">       ↓</span><br><span class="line">多个 Screen</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">NavHost(</span><br><span class="line">    navController = navController,</span><br><span class="line">    startDestination = <span class="string">&quot;home&quot;</span></span><br><span class="line">) &#123;</span><br><span class="line"></span><br><span class="line">    composable(<span class="string">&quot;home&quot;</span>) &#123;</span><br><span class="line">        HomeScreen()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    composable(<span class="string">&quot;detail&quot;</span>) &#123;</span><br><span class="line">        DetailScreen()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NavHost</span><br><span class="line">├── home</span><br><span class="line">│   └── HomeScreen</span><br><span class="line">│</span><br><span class="line">└── detail</span><br><span class="line">    └── DetailScreen</span><br></pre></td></tr></table></figure>
+
+<p>也就是<code>Activity</code>中拥有一整套<code>Compose Navigation Back Stack</code>，进行页面之间的push和pop。</p>
+<hr>
+<h1 id="二十八、NavController"><a href="#二十八、NavController" class="headerlink" title="二十八、NavController"></a>二十八、NavController</h1><p>跳转到 detail 页面：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">navController.navigate(<span class="string">&quot;detail&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>Android以前是：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">startActivity(...)</span><br></pre></td></tr></table></figure>
+
+<p>返回到上一页， <code>Compose</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">navController.popBackStack()</span><br></pre></td></tr></table></figure>
+
+<p>Android之前操作：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">finish / 返回上一页</span><br></pre></td></tr></table></figure>
+
+<p>但是底层的实现已经不一样了。</p>
+<p><strong>Compose 的</strong> <strong><code>NavController.navigate()</code></strong> <strong>和 Flutter 的</strong> <strong><code>Navigator.push()</code></strong> <strong>很类似。</strong></p>
+<hr>
+<h1 id="二十九、rememberNavController"><a href="#二十九、rememberNavController" class="headerlink" title="二十九、rememberNavController()"></a>二十九、rememberNavController()</h1><p><strong>创建并记住一个</strong> <strong><code>NavController</code></strong>，用于管理 Compose <code>Navigation</code> 的页面导航和返回栈。</p>
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> navController = rememberNavController()</span><br></pre></td></tr></table></figure>
+
+<p>在<code>Activity</code>创建并保存： Compose Navigation 的导航控制器。</p>
+<p>然后：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NavHost(navController)</span><br></pre></td></tr></table></figure>
+
+<p>负责显示页面，并设置好多个<code>composable</code>,之后使用<code>navController.navigate()</code>进行跳转和<code>navController.popBackStack()</code>进行返回。</p>
+<hr>
+<h1 id="三十、LaunchedEffect-副作用"><a href="#三十、LaunchedEffect-副作用" class="headerlink" title="三十、LaunchedEffect 副作用"></a>三十、LaunchedEffect 副作用</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LaunchedEffect(<span class="built_in">Unit</span>) &#123;</span><br><span class="line">    viewModel.loadData()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此方法为：在<code>Composable</code>生命周期内执行协程副作用(side effect)。</p>
+<p>例如加载数据：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LaunchedEffect(<span class="built_in">Unit</span>) &#123;</span><br><span class="line">    viewModel.loadUsers()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行条件：</p>
+<ol>
+<li>当 Composable 进入界面，</li>
+<li>指定的 key 发生变化时，启动一段协程代码。 <code>Unit</code>为 <code>key</code></li>
+</ol>
+<hr>
+<h1 id="三十一、DisposableEffect"><a href="#三十一、DisposableEffect" class="headerlink" title="三十一、DisposableEffect"></a>三十一、DisposableEffect</h1><p>进入<code>Composition</code>时执行一段代码，离开<code>Composition</code>时执行清理代码。</p>
+<p>适合需要<code>注册 -&gt; 注销</code>这种成对操作的场景。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DisposableEffect(<span class="built_in">Unit</span>) &#123;</span><br><span class="line">    <span class="comment">// 进入 Composition，或者 key 变化时执行</span></span><br><span class="line">    <span class="comment">// 注册、监听、创建资源……</span></span><br><span class="line">    registerListener()</span><br><span class="line"></span><br><span class="line">    onDispose &#123;</span><br><span class="line">        <span class="comment">// 离开 Composition，或者 key 变化时执行</span></span><br><span class="line">        <span class="comment">// 注销、取消监听、释放资源……</span></span><br><span class="line">        unregisterListener()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">进入</span><br><span class="line">→ 注册</span><br><span class="line"></span><br><span class="line">离开</span><br><span class="line">→ 清理</span><br></pre></td></tr></table></figure>
+
+<p>适合：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Listener</span><br><span class="line">Receiver</span><br><span class="line">Observer</span><br><span class="line">需要释放的资源</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="三十二、SideEffect"><a href="#三十二、SideEffect" class="headerlink" title="三十二、SideEffect"></a>三十二、SideEffect</h1><p>每次<code>Compose</code>成功完成一次<code>Recomposition</code>后，执行一段非<code>Compose</code>代码。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SideEffect &#123;</span><br><span class="line">    <span class="comment">// 同步 Compose 状态到外部对象</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次成功重组以后执行一些副作用。也就是每次UI刷新成功后，就执行一次<code>SideEffect</code>中的代码。</p>
+<hr>
+<h1 id="三十三、remeberSaveable"><a href="#三十三、remeberSaveable" class="headerlink" title="三十三、remeberSaveable"></a>三十三、remeberSaveable</h1><p><code>remember</code>能在<code>Recomposition</code>中保留状态；<code>remeberSaveable</code>除此之外，还能在<code>Activity</code>因配置变化等场景被销毁重建后恢复状态。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> text <span class="keyword">by</span> rememberSaveable &#123;</span><br><span class="line">    mutableStateOf(<span class="string">&quot;&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>rememberSaveable</code>会使用<code>Android</code>的<code>saved instance state</code>机制保存可保存的数据。</p>
+<p>可保存的数据的类型：整型、字符串、boolean等。复杂对象需要<code>Saver</code>或<code>parcelable</code>等方式。</p>
+<hr>
+<h1 id="三十四、TextField"><a href="#三十四、TextField" class="headerlink" title="三十四、TextField"></a>三十四、TextField</h1><p>相当于传统Android的<code>XML / View</code>中的<code>EditText</code>，都用于文本输入。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> username <span class="keyword">by</span> remember &#123;</span><br><span class="line">    mutableStateOf(<span class="string">&quot;&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">TextField(</span><br><span class="line">    value = username,</span><br><span class="line">    onValueChange = &#123;</span><br><span class="line">        username = it</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这是非常典型的 Compose：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">State</span><br><span class="line">↓</span><br><span class="line">TextField</span><br><span class="line"></span><br><span class="line">TextField 输入</span><br><span class="line">↓</span><br><span class="line">onValueChange</span><br><span class="line">↓</span><br><span class="line">修改 State</span><br><span class="line">↓</span><br><span class="line">UI 更新</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="三十五、-value-和-onValueChange-分开"><a href="#三十五、-value-和-onValueChange-分开" class="headerlink" title="三十五、 value 和 onValueChange 分开"></a>三十五、 value 和 onValueChange 分开</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TextField(</span><br><span class="line">    value = username,</span><br><span class="line">    onValueChange = &#123;</span><br><span class="line">        username = it</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这是 Compose 的核心思想，<code>Compose</code>的”状态驱动UI”，单向数据流：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">value</span><br><span class="line">↓</span><br><span class="line">现在应该显示什么</span><br><span class="line"></span><br><span class="line">onValueChange</span><br><span class="line">↓</span><br><span class="line">用户修改了什么</span><br></pre></td></tr></table></figure>
+
+<p>逻辑： <code>username</code> 发生变化 → Compose 安排重组 → <code>TextField(...)</code> 重新执行 → 新的 <code>username</code> 作为 <code>value</code> 传给 <code>TextField</code> → UI 更新。</p>
+<hr>
+<h1 id="三十六、Slot-API-组件嵌套组件"><a href="#三十六、Slot-API-组件嵌套组件" class="headerlink" title="三十六、Slot API 组件嵌套组件"></a>三十六、Slot API 组件嵌套组件</h1><p>Compose 很喜欢这种设计<code>Slot API</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">MyCard</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    content: @<span class="type">Composable</span> () -&gt; <span class="type">Unit</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">    Card &#123;</span><br><span class="line">        content()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MyCard &#123;</span><br><span class="line">    Text(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以简单理解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">组件给你留一个位置</span><br><span class="line">↓</span><br><span class="line">你自己往里面塞 UI</span><br></pre></td></tr></table></figure>
+
+<p>Material 3 大量使用这种方式。</p>
+<hr>
+<h1 id="三十七、Card"><a href="#三十七、Card" class="headerlink" title="三十七、Card"></a>三十七、Card</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Card &#123;</span><br><span class="line">    Text(<span class="string">&quot;用户信息&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就是 Material 卡片容器。</p>
+<p>通常自带：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Shape</span><br><span class="line">背景</span><br><span class="line">Elevation</span><br></pre></td></tr></table></figure>
+
+<p>可以把它理解成自己实现的：<code>MaterialCardView</code>.</p>
+<hr>
+<h1 id="三十八、Spacer"><a href="#三十八、Spacer" class="headerlink" title="三十八、Spacer"></a>三十八、Spacer</h1><p>以前可能写：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">View</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;16dp&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Spacer(</span><br><span class="line">    modifier = Modifier.height(<span class="number">16.</span>dp)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>就是：空白占位。</p>
+<hr>
+<h1 id="三十九、Arrangement-排列"><a href="#三十九、Arrangement-排列" class="headerlink" title="三十九、Arrangement  排列"></a>三十九、Arrangement  排列</h1><p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Column(</span><br><span class="line">    verticalArrangement = Arrangement.spacedBy(<span class="number">16.</span>dp)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每个子组件之间间隔 16dp</span><br></pre></td></tr></table></figure>
+
+<p>还有：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Arrangement.Center</span><br><span class="line">Arrangement.SpaceBetween</span><br><span class="line">Arrangement.SpaceAround</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成：<strong>子 View 怎么排列</strong>。</p>
+<hr>
+<h1 id="四十、Alignment"><a href="#四十、Alignment" class="headerlink" title="四十、Alignment"></a>四十、Alignment</h1><p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Column(</span><br><span class="line">    horizontalAlignment = Alignment.CenterHorizontally</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>就是：子组件怎么对齐。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Center</span><br><span class="line">CenterHorizontally</span><br><span class="line">CenterVertically</span><br><span class="line">Start</span><br><span class="line">End</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四十一、weight"><a href="#四十一、weight" class="headerlink" title="四十一、weight"></a>四十一、weight</h1><p>传统Android中的XML：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">android:layout_weight = &quot;1&quot;</span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Row &#123;</span><br><span class="line">    Text(</span><br><span class="line">        <span class="string">&quot;左边&quot;</span>,</span><br><span class="line">        modifier = Modifier.weight(<span class="number">1f</span>)</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    Text(<span class="string">&quot;右边&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>概念基本一样。</p>
+<hr>
+<h1 id="四十二、fillMaxWidth-fillMaxSize"><a href="#四十二、fillMaxWidth-fillMaxSize" class="headerlink" title="四十二、fillMaxWidth &#x2F; fillMaxSize"></a>四十二、fillMaxWidth &#x2F; fillMaxSize</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Modifier.fillMaxWidth()</span><br></pre></td></tr></table></figure>
+
+<p>≈</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">宽度占满父容器</span><br><span class="line">Modifier.fillMaxHeight()</span><br></pre></td></tr></table></figure>
+
+<p>≈</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">高度占满</span><br><span class="line">Modifier.fillMaxSize()</span><br></pre></td></tr></table></figure>
+
+<p>≈</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">宽高全部占满</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四十三、wrapContentSize"><a href="#四十三、wrapContentSize" class="headerlink" title="四十三、wrapContentSize"></a>四十三、wrapContentSize</h1><p>让组件按照<strong>自身内容</strong>需要的大小来布局，并且可以指定它在可用空间里的对齐方式。</p>
+<p>类似传统Android的XML中的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wrap_content</span><br></pre></td></tr></table></figure>
+
+<p>不过 Compose 默认测量机制和传统 View 不完全一样。</p>
+<hr>
+<h1 id="四十四、padding"><a href="#四十四、padding" class="headerlink" title="四十四、padding"></a>四十四、padding</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Modifier.padding(<span class="number">16.</span>dp)</span><br></pre></td></tr></table></figure>
+
+<p>设置组件的边距，也可以上下左右设置：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Modifier.padding(</span><br><span class="line">    start = <span class="number">16.</span>dp,</span><br><span class="line">    top = <span class="number">8.</span>dp,</span><br><span class="line">    end = <span class="number">16.</span>dp,</span><br><span class="line">    bottom = <span class="number">8.</span>dp</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四十五、clickable"><a href="#四十五、clickable" class="headerlink" title="四十五、clickable"></a>四十五、clickable</h1><p>按钮或View的点击事件。传统Android：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">view.setOnClickListener &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Compose：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Modifier.clickable &#123;</span><br><span class="line">    viewModel.login()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Text(</span><br><span class="line">    text = <span class="string">&quot;点击我&quot;</span>,</span><br><span class="line">    modifier = Modifier.clickable &#123;</span><br><span class="line">        <span class="comment">// 点击</span></span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四十六、条件-UI"><a href="#四十六、条件-UI" class="headerlink" title="四十六、条件 UI"></a>四十六、条件 UI</h1><p>传统Android显示或隐藏View：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">View.VISIBLE</span><br><span class="line">View.GONE</span><br></pre></td></tr></table></figure>
+
+<p>Compose 不需要，而是直接：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (loading) &#123;</span><br><span class="line">    CircularProgressIndicator()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">loading == <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>那么这个 UI 就不存在。</p>
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (error != <span class="literal">null</span>) &#123;</span><br><span class="line">    Text(error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四十七、when-控制-UI"><a href="#四十七、when-控制-UI" class="headerlink" title="四十七、when 控制 UI"></a>四十七、when 控制 UI</h1><p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">when</span> (state) &#123;</span><br><span class="line">    <span class="keyword">is</span> Loading -&gt; &#123;</span><br><span class="line">        CircularProgressIndicator()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">is</span> Success -&gt; &#123;</span><br><span class="line">        UserList()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">is</span> Error -&gt; &#123;</span><br><span class="line">        ErrorView()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这在 Compose 项目里非常常见。</p>
+<p>可以理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">不同 State</span><br><span class="line">↓</span><br><span class="line">显示不同 UI</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="四十八、Preview-预览视图"><a href="#四十八、Preview-预览视图" class="headerlink" title="四十八、Preview  预览视图"></a>四十八、Preview  预览视图</h1><p>你会经常看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Preview</span></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreenPreview</span><span class="params">()</span></span> &#123;</span><br><span class="line">    LoginScreen()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个不是正式业务逻辑。</p>
+<p>它用于：</p>
+<p>Android Studio 直接预览 Compose UI。</p>
+<p>类似以前 XML 的 Design Preview。</p>
+<hr>
+<h1 id="四十九、LocalContext"><a href="#四十九、LocalContext" class="headerlink" title="四十九、LocalContext"></a>四十九、LocalContext</h1><p>在<code>Composable</code>里需要使用传统<code>Android</code>的<code>Context</code>时,通过<code>LocalContext.current</code>获取。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> context = LocalContext.current</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成：获取当前 <code>Android Context</code>。</p>
+<p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Toast.makeText(</span><br><span class="line">    context,</span><br><span class="line">    <span class="string">&quot;登录成功&quot;</span>,</span><br><span class="line">    Toast.LENGTH_SHORT</span><br><span class="line">).show()</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="五十、LocalXXX"><a href="#五十、LocalXXX" class="headerlink" title="五十、LocalXXX"></a>五十、LocalXXX</h1><p>Compose 中经常出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LocalContext.current</span><br><span class="line">LocalDensity.current</span><br><span class="line">LocalConfiguration.current</span><br><span class="line">LocalLifecycleOwner.current</span><br></pre></td></tr></table></figure>
+
+<p>这些通常来自<code>CompositionLocal</code>, 从当前 Compose 环境中获取某个上下文信息。</p>
+<hr>
+<h1 id="五十一、CompositionLocal"><a href="#五十一、CompositionLocal" class="headerlink" title="五十一、CompositionLocal"></a>五十一、CompositionLocal</h1><p>一种向下层<code>COmposable</code>隐式传递数据的机制。</p>
+<p>以前很多对象可能：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">一层一层参数传递</span><br></pre></td></tr></table></figure>
+
+<p>Compose 可以通过 <code>CompositionLocal</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">上层提供</span><br><span class="line">↓</span><br><span class="line">下面很多 Composable 获取</span><br></pre></td></tr></table></figure>
+
+<p>例如 <code>val context = LocalContext.current</code>直接获取<code>context</code>。</p>
+<hr>
+<h1 id="五十二、Coroutine-协程"><a href="#五十二、Coroutine-协程" class="headerlink" title="五十二、Coroutine 协程"></a>五十二、Coroutine 协程</h1><p><code>Compose</code> 项目基本离不开 <code>Kotlin Coroutine</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">viewModelScope.launch &#123;</span><br><span class="line">    repository.login()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>viewModelScope.launch</code>的作用为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">启动一个协程执行异步任务</span><br></pre></td></tr></table></figure>
+
+<p>可以进行很多耗时的操作，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">网络请求</span><br><span class="line">数据库</span><br><span class="line">BLE</span><br><span class="line">文件操作</span><br></pre></td></tr></table></figure>
+
+<p><code>viewModelScope</code>是<code>ViewModel</code>自带的<code>CoroutineScope</code>（协程作用域）。生命周期由<code>ViewModel</code>自动管理。</p>
+<hr>
+<h1 id="五十三、rememberCoroutineScope"><a href="#五十三、rememberCoroutineScope" class="headerlink" title="五十三、rememberCoroutineScope"></a>五十三、rememberCoroutineScope</h1><p>在<code>Composable</code>中获取一个与当前<code>Composition</code>生命周期绑定的<code>CoroutineScope</code>,可以在事件回调里手动启动协程。</p>
+<p>Compose 里可能看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = rememberCoroutineScope()</span><br><span class="line"></span><br><span class="line">Button(</span><br><span class="line">    onClick = &#123;</span><br><span class="line">        scope.launch &#123;</span><br><span class="line">            <span class="comment">// 异步操作</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>就是：获取一个与当前 Compose 生命周期相关的 <code>CoroutineScope</code>。</p>
+<p>当函数是<code>suspend</code>的时候，则需要<code>CoroutineScope</code>启动协程来执行。</p>
+<hr>
+<h1 id="五十四、示例代码"><a href="#五十四、示例代码" class="headerlink" title="五十四、示例代码"></a>五十四、示例代码</h1><p>示例代码：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    viewModel: <span class="type">LoginViewModel</span> = hiltViewModel()</span></span>,</span><br><span class="line">    onLoginSuccess: () -&gt; <span class="built_in">Unit</span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">val</span> uiState <span class="keyword">by</span> viewModel.uiState.collectAsStateWithLifecycle()</span><br><span class="line"></span><br><span class="line">    LaunchedEffect(uiState.loginSuccess) &#123;</span><br><span class="line">        <span class="keyword">if</span> (uiState.loginSuccess) &#123;</span><br><span class="line">            onLoginSuccess()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Scaffold(</span><br><span class="line">        topBar = &#123;</span><br><span class="line">            TopAppBar(</span><br><span class="line">                title = &#123;</span><br><span class="line">                    Text(<span class="string">&quot;登录&quot;</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            )</span><br><span class="line">        &#125;</span><br><span class="line">    ) &#123; padding -&gt;</span><br><span class="line"></span><br><span class="line">        Column(</span><br><span class="line">            modifier = Modifier</span><br><span class="line">                .fillMaxSize()</span><br><span class="line">                .padding(padding)</span><br><span class="line">                .padding(<span class="number">16.</span>dp),</span><br><span class="line">            verticalArrangement = Arrangement.spacedBy(<span class="number">16.</span>dp)</span><br><span class="line">        ) &#123;</span><br><span class="line">            TextField(</span><br><span class="line">                value = uiState.username,</span><br><span class="line">                onValueChange = &#123;</span><br><span class="line">                    viewModel.updateUsername(it)</span><br><span class="line">                &#125;,</span><br><span class="line">                label = &#123;</span><br><span class="line">                    Text(<span class="string">&quot;用户名&quot;</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">            Button(</span><br><span class="line">                onClick = &#123;</span><br><span class="line">                    viewModel.login()</span><br><span class="line">                &#125;,</span><br><span class="line">                modifier = Modifier.fillMaxWidth()</span><br><span class="line">            ) &#123;</span><br><span class="line">                <span class="keyword">if</span> (uiState.loading) &#123;</span><br><span class="line">                    CircularProgressIndicator()</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    Text(<span class="string">&quot;登录&quot;</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在可以逐行翻译。</p>
+<hr>
+<h1 id="五十五、逐行翻译上面的代码"><a href="#五十五、逐行翻译上面的代码" class="headerlink" title="五十五、逐行翻译上面的代码"></a>五十五、逐行翻译上面的代码</h1><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LoginScreen</span><span class="params">(...)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>定义一个 Compose 登录页面。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">viewModel: LoginViewModel = hiltViewModel()</span><br></pre></td></tr></table></figure>
+
+<p>获取 LoginViewModel，并由 Hilt 处理依赖注入。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uiState <span class="keyword">by</span> viewModel.uiState.collectAsStateWithLifecycle()</span><br></pre></td></tr></table></figure>
+
+<p>观察 ViewModel 的 UI 状态。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LaunchedEffect(uiState.loginSuccess)</span><br></pre></td></tr></table></figure>
+
+<p>loginSuccess 改变时执行对应逻辑。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Scaffold</span><br></pre></td></tr></table></figure>
+
+<p>建立页面整体结构。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TopAppBar</span><br></pre></td></tr></table></figure>
+
+<p>顶部标题栏。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Column</span><br></pre></td></tr></table></figure>
+
+<p>内容竖向排列。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Modifier</span><br><span class="line">    .fillMaxSize()</span><br><span class="line">    .padding(...)</span><br></pre></td></tr></table></figure>
+
+<p>设置页面大小和间距。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TextField</span><br></pre></td></tr></table></figure>
+
+<p>输入框。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">value = uiState.username</span><br></pre></td></tr></table></figure>
+
+<p>输入框显示 ViewModel State 中的 username。</p>
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">onValueChange = &#123;</span><br><span class="line">    viewModel.updateUsername(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用户输入发生变化：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UI</span><br><span class="line">↓</span><br><span class="line">ViewModel</span><br></pre></td></tr></table></figure>
+
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Button(</span><br><span class="line">    onClick = &#123;</span><br><span class="line">        viewModel.login()</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>用户点击登录：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UI</span><br><span class="line">↓</span><br><span class="line">ViewModel.login()</span><br></pre></td></tr></table></figure>
+
+<hr>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (uiState.loading)</span><br></pre></td></tr></table></figure>
+
+<p>根据 State 决定显示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">加载动画</span><br><span class="line">or</span><br><span class="line">登录文字</span><br></pre></td></tr></table></figure>
+
+<p>整个页面其实就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UI 显示 State</span><br><span class="line"></span><br><span class="line">+</span><br><span class="line"></span><br><span class="line">UI 把 Event 交给 ViewModel</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="五十六、再加上-ViewModel"><a href="#五十六、再加上-ViewModel" class="headerlink" title="五十六、再加上 ViewModel"></a>五十六、再加上 ViewModel</h1><p>例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">LoginUiState</span>(</span><br><span class="line">    <span class="keyword">val</span> username: String = <span class="string">&quot;&quot;</span>,</span><br><span class="line">    <span class="keyword">val</span> loading: <span class="built_in">Boolean</span> = <span class="literal">false</span>,</span><br><span class="line">    <span class="keyword">val</span> loginSuccess: <span class="built_in">Boolean</span> = <span class="literal">false</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>ViewModel：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HiltViewModel</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LoginViewModel</span> <span class="meta">@Inject</span> <span class="keyword">constructor</span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository: UserRepository</span><br><span class="line">) : ViewModel() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> _uiState = MutableStateFlow(LoginUiState())</span><br><span class="line">    <span class="keyword">val</span> uiState = _uiState.asStateFlow()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">updateUsername</span><span class="params">(username: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        _uiState.update &#123;</span><br><span class="line">            it.copy(username = username)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        viewModelScope.launch &#123;</span><br><span class="line">            _uiState.update &#123;</span><br><span class="line">                it.copy(loading = <span class="literal">true</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            repository.login(_uiState.value.username)</span><br><span class="line"></span><br><span class="line">            _uiState.update &#123;</span><br><span class="line">                it.copy(</span><br><span class="line">                    loading = <span class="literal">false</span>,</span><br><span class="line">                    loginSuccess = <span class="literal">true</span></span><br><span class="line">                )</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>抓住主线：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Compose</span><br><span class="line">   │</span><br><span class="line">   │ login()</span><br><span class="line">   ↓</span><br><span class="line">ViewModel</span><br><span class="line">   │</span><br><span class="line">   ↓</span><br><span class="line">Repository</span><br><span class="line">   │</span><br><span class="line">   ↓</span><br><span class="line">Network</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Network</span><br><span class="line">   ↓</span><br><span class="line">Repository</span><br><span class="line">   ↓</span><br><span class="line">ViewModel</span><br><span class="line">   ↓</span><br><span class="line">修改 UiState</span><br><span class="line">   ↓</span><br><span class="line">StateFlow</span><br><span class="line">   ↓</span><br><span class="line">Compose</span><br><span class="line">   ↓</span><br><span class="line">UI 自动变化</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="五十七、data-class-copy"><a href="#五十七、data-class-copy" class="headerlink" title="五十七、data class + copy()"></a>五十七、data class + copy()</h1><p>Compose 项目特别常见：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">LoginUiState</span>(</span><br><span class="line">    <span class="keyword">val</span> loading: <span class="built_in">Boolean</span> = <span class="literal">false</span>,</span><br><span class="line">    <span class="keyword">val</span> username: String = <span class="string">&quot;&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>更新：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">_uiState.update &#123;</span><br><span class="line">    it.copy(</span><br><span class="line">        loading = <span class="literal">true</span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>意思不是修改原对象。而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">旧 LoginUiState</span><br><span class="line">↓</span><br><span class="line">复制一个新的 LoginUiState</span><br><span class="line">↓</span><br><span class="line">loading 改成 true</span><br><span class="line">↓</span><br><span class="line">其他属性保持不变</span><br></pre></td></tr></table></figure>
+
+<p>这和不可变 <code>State </code>的设计有关。 看到：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">state.copy(...)</span><br></pre></td></tr></table></figure>
+
+<p>基本就理解成：创建一个修改部分字段的新 <code>State</code>。</p>
+<hr>
+<h1 id="五十八、remember-和-ViewModel-State-选择"><a href="#五十八、remember-和-ViewModel-State-选择" class="headerlink" title="五十八、remember 和 ViewModel State 选择"></a>五十八、remember 和 ViewModel State 选择</h1><h3 id="1-页面临时-UI-状态"><a href="#1-页面临时-UI-状态" class="headerlink" title="1. 页面临时 UI 状态"></a>1. 页面临时 UI 状态</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Dialog 是否打开</span><br><span class="line">某个菜单是否展开</span><br><span class="line">局部动画状态</span><br></pre></td></tr></table></figure>
+
+<p>选择<code>remember</code>.</p>
+<h3 id="2-业务状态"><a href="#2-业务状态" class="headerlink" title="2. 业务状态"></a>2. 业务状态</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">用户信息</span><br><span class="line">登录状态</span><br><span class="line">设备数据</span><br><span class="line">网络请求结果</span><br><span class="line">订单列表</span><br></pre></td></tr></table></figure>
+
+<p>选择： <code>ViewModel + StateFlow</code></p>
+<hr>
+<h1 id="五十九、传统-Android-与-Compose-完整映射"><a href="#五十九、传统-Android-与-Compose-完整映射" class="headerlink" title="五十九、传统 Android 与 Compose 完整映射"></a>五十九、传统 Android 与 Compose 完整映射</h1><table>
+<thead>
+<tr>
+<th><strong>传统 Android</strong></th>
+<th><strong>Compose</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>XML</td>
+<td>Composable</td>
+</tr>
+<tr>
+<td>View</td>
+<td>Composable</td>
+</tr>
+<tr>
+<td>TextView</td>
+<td>Text</td>
+</tr>
+<tr>
+<td>EditText</td>
+<td>TextField</td>
+</tr>
+<tr>
+<td>Button</td>
+<td>Button</td>
+</tr>
+<tr>
+<td>ImageView</td>
+<td>Image</td>
+</tr>
+<tr>
+<td>LinearLayout vertical</td>
+<td>Column</td>
+</tr>
+<tr>
+<td>LinearLayout horizontal</td>
+<td>Row</td>
+</tr>
+<tr>
+<td>FrameLayout</td>
+<td>Box</td>
+</tr>
+<tr>
+<td>RecyclerView</td>
+<td>LazyColumn &#x2F; LazyRow</td>
+</tr>
+<tr>
+<td>MaterialCardView</td>
+<td>Card</td>
+</tr>
+<tr>
+<td>Toolbar</td>
+<td>TopAppBar</td>
+</tr>
+<tr>
+<td>setContentView</td>
+<td>setContent</td>
+</tr>
+<tr>
+<td>layout_width</td>
+<td>Modifier.width &#x2F; fillMaxWidth</td>
+</tr>
+<tr>
+<td>layout_height</td>
+<td>Modifier.height &#x2F; fillMaxHeight</td>
+</tr>
+<tr>
+<td>padding</td>
+<td>Modifier.padding</td>
+</tr>
+<tr>
+<td>background</td>
+<td>Modifier.background</td>
+</tr>
+<tr>
+<td>OnClickListener</td>
+<td>onClick &#x2F; Modifier.clickable</td>
+</tr>
+<tr>
+<td>View.VISIBLE&#x2F;GONE</td>
+<td>if &#x2F; when</td>
+</tr>
+<tr>
+<td>Adapter</td>
+<td>items</td>
+</tr>
+<tr>
+<td>ViewHolder</td>
+<td>Composable Item</td>
+</tr>
+<tr>
+<td>styles.xml &#x2F; Theme</td>
+<td>MaterialTheme</td>
+</tr>
+<tr>
+<td>Activity 页面跳转</td>
+<td>Navigation Compose</td>
+</tr>
+<tr>
+<td>View 更新 UI</td>
+<td>State 驱动 UI</td>
+</tr>
+<tr>
+<td>setText()</td>
+<td>修改 State</td>
+</tr>
+<tr>
+<td>Observer</td>
+<td>collectAsStateWithLifecycle</td>
+</tr>
+<tr>
+<td>ViewModel</td>
+<td>ViewModel，仍然存在</td>
+</tr>
+<tr>
+<td>LiveData</td>
+<td>常见 StateFlow</td>
+</tr>
+<tr>
+<td>Dagger&#x2F;Hilt</td>
+<td>Hilt，仍然可以使用</td>
+</tr>
+</tbody></table>
+<h3 id="DONE"><a href="#DONE" class="headerlink" title="DONE"></a>DONE</h3><p>第一次研究<code>Compose</code>，是从Flutter的角度来理解的。有不对的地方，请多多在评论下指教，多谢！！！</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/22/%E4%BA%86%E8%A7%A3Hilt%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" class="post-nav-link group text-right" title="了解Hilt基础知识">
+            <span class="post-nav-title">了解Hilt基础知识</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

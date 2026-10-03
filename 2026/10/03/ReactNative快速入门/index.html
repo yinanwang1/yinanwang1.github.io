@@ -1,0 +1,768 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>ReactNative快速入门 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="ReactNative快速入门 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/10/03/ReactNative%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ReactNative快速入门 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/10/03/ReactNative%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            ReactNative快速入门
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-10-03">2026/10/03</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>React Native 的核心可以先理解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">React</span><br><span class="line">+</span><br><span class="line">TypeScript / JavaScript</span><br><span class="line">+</span><br><span class="line">React Native 原生组件</span><br><span class="line">+</span><br><span class="line">移动端能力</span><br></pre></td></tr></table></figure>
+
+<p>React Native 使用 React 的组件、Props、State、Hooks 等编程模型，但最终渲染的是 Android&#x2F;iOS 原生 UI。</p>
+<h2 id="一、整体认识"><a href="#一、整体认识" class="headerlink" title="一、整体认识"></a>一、整体认识</h2><p>一个典型页面：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">React</span>, &#123;useState&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">View</span>,</span><br><span class="line">  <span class="title class_">Text</span>,</span><br><span class="line">  <span class="title class_">Button</span>,</span><br><span class="line">  <span class="title class_">StyleSheet</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="title function_">HomeScreen</span>(<span class="params"></span>) &#123; <span class="comment">// 定义组件/页面</span></span><br><span class="line">  <span class="keyword">const</span> [count, setCount] = <span class="title function_">useState</span>(<span class="number">0</span>); <span class="comment">// 状态</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 描述 UI</span></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="comment">// 容器</span></span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">View</span> <span class="attr">style</span>=<span class="string">&#123;styles.container&#125;</span>&gt;</span> // style 为样式</span></span><br><span class="line"><span class="language-xml">      // 文本</span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">Text</span>&gt;</span>点击次数：&#123;count&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">      // 按钮</span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">Button</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">title</span>=<span class="string">&quot;点击&quot;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        // <span class="attr">点击事件</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">onPress</span>=<span class="string">&#123;()</span> =&gt;</span> setCount(count + 1)&#125; // 修改状态, React 重新渲染 UI</span></span><br><span class="line"><span class="language-xml">      /&gt;</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">View</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> styles = <span class="title class_">StyleSheet</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">  <span class="attr">container</span>: &#123;</span><br><span class="line">    <span class="attr">flex</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">padding</span>: <span class="number">16</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>React Native 官方也把 JSX、Component、Props、State 作为 React 基础核心。</p>
+<h1 id="第一部分：TypeScript-JavaScript-基础"><a href="#第一部分：TypeScript-JavaScript-基础" class="headerlink" title="第一部分：TypeScript &#x2F; JavaScript 基础"></a>第一部分：TypeScript &#x2F; JavaScript 基础</h1><h2 id="1-const和let"><a href="#1-const和let" class="headerlink" title="1.const和let"></a>1.<code>const</code>和<code>let</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="string">&#x27;Tom&#x27;</span>;</span><br><span class="line"><span class="keyword">let</span> age = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line">age = <span class="number">21</span>;</span><br></pre></td></tr></table></figure>
+
+<p>理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const → 变量不能重新赋值</span><br><span class="line">let   → 可以重新赋值</span><br></pre></td></tr></table></figure>
+
+<p>RN 项目中 <code>const</code> 极其常见。</p>
+<h2 id="2-基本类型"><a href="#2-基本类型" class="headerlink" title="2. 基本类型"></a>2. 基本类型</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">name</span>: <span class="built_in">string</span> = <span class="string">&#x27;Tom&#x27;</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">age</span>: <span class="built_in">number</span> = <span class="number">20</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">enabled</span>: <span class="built_in">boolean</span> = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure>
+
+<p>数组：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">users</span>: <span class="built_in">string</span>[] = [<span class="string">&#x27;Tom&#x27;</span>, <span class="string">&#x27;Jack&#x27;</span>];</span><br></pre></td></tr></table></figure>
+
+<p>对象：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>,</span><br><span class="line">  <span class="attr">age</span>: <span class="number">20</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-interface-type"><a href="#3-interface-type" class="headerlink" title="3.interface&#x2F;type"></a>3.<code>interface</code>&#x2F;<code>type</code></h2><p>React Native 项目大量使用 TypeScript 定义数据结构。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="attr">user</span>: <span class="title class_">User</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>,</span><br><span class="line">  <span class="attr">age</span>: <span class="number">20</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>也经常看到：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">User</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>官方的新 React Native 项目默认面向 TypeScript。</p>
+<h2 id="4-可选属性"><a href="#4-可选属性" class="headerlink" title="4. 可选属性?"></a>4. 可选属性<code>?</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>?: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">name → 必须有</span><br><span class="line">age  → 可以没有</span><br></pre></td></tr></table></figure>
+
+<p>所以：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">user</span>: <span class="title class_">User</span> = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>合法。</p>
+<h2 id="5-箭头函数"><a href="#5-箭头函数" class="headerlink" title="5. 箭头函数"></a>5. 箭头函数</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">add</span> = (<span class="params"><span class="attr">a</span>: <span class="built_in">number</span>, <span class="attr">b</span>: <span class="built_in">number</span></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>简写：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">add</span> = (<span class="params"><span class="attr">a</span>: <span class="built_in">number</span>, <span class="attr">b</span>: <span class="built_in">number</span></span>) =&gt; a + b;</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Button</span> onPress=&#123;<span class="function">() =&gt;</span> <span class="title function_">login</span>()&#125; /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这里：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">() =&gt; <span class="title function_">login</span>()</span><br></pre></td></tr></table></figure>
+
+<p>就是一个函数。</p>
+<h2 id="6-解构"><a href="#6-解构" class="headerlink" title="6. 解构"></a>6. 解构</h2><p>对象：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>,</span><br><span class="line">  <span class="attr">age</span>: <span class="number">20</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> &#123;name, age&#125; = user;</span><br></pre></td></tr></table></figure>
+
+<p>数组：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [a, b] = [<span class="number">10</span>, <span class="number">20</span>];</span><br></pre></td></tr></table></figure>
+
+<p>React 最经典的代码：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [count, setCount] = <span class="title function_">useState</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<p>本质就是<strong>数组解构</strong>。</p>
+<h2 id="7-展开运算符"><a href="#7-展开运算符" class="headerlink" title="7. 展开运算符..."></a>7. 展开运算符<code>...</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>,</span><br><span class="line">  <span class="attr">age</span>: <span class="number">20</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> newUser = &#123;</span><br><span class="line">  ...user,</span><br><span class="line">  <span class="attr">age</span>: <span class="number">21</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>,</span><br><span class="line">  <span class="attr">age</span>: <span class="number">21</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>React 状态更新时非常常见：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">setUser</span>(&#123;</span><br><span class="line">  ...user,</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&#x27;Jack&#x27;</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-map"><a href="#8-map" class="headerlink" title="8.map"></a>8.<code>map</code></h2><p>React 代码中极其重要：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> users = [<span class="string">&#x27;Tom&#x27;</span>, <span class="string">&#x27;Jack&#x27;</span>];</span><br><span class="line"></span><br><span class="line">users.<span class="title function_">map</span>(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>&#123;name&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>意思：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">users</span><br><span class="line"> ↓</span><br><span class="line">逐个取元素</span><br><span class="line"> ↓</span><br><span class="line">转换成 UI</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-filter"><a href="#9-filter" class="headerlink" title="9.filter"></a>9.<code>filter</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> users = [</span><br><span class="line">  &#123;<span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>, <span class="attr">age</span>: <span class="number">20</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">name</span>: <span class="string">&#x27;Jack&#x27;</span>, <span class="attr">age</span>: <span class="number">15</span>&#125;,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> adults = users.<span class="title function_">filter</span>(<span class="function"><span class="params">user</span> =&gt;</span> user.<span class="property">age</span> &gt;= <span class="number">18</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-async-await"><a href="#10-async-await" class="headerlink" title="10.async / await"></a>10.<code>async / await</code></h2><p>网络请求大量使用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">loadUser</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(<span class="string">&#x27;/user&#x27;</span>);</span><br><span class="line">  <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="title function_">json</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">async</span><br><span class="line">  ↓</span><br><span class="line">函数中允许 await</span><br><span class="line"></span><br><span class="line">await</span><br><span class="line">  ↓</span><br><span class="line">等待 Promise 完成</span><br></pre></td></tr></table></figure>
+
+<h1 id="第二部分：JSX"><a href="#第二部分：JSX" class="headerlink" title="第二部分：JSX"></a>第二部分：JSX</h1><h2 id="11-JSX-是什么"><a href="#11-JSX-是什么" class="headerlink" title="11. JSX 是什么"></a>11. JSX 是什么</h2><p>React Native UI：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">View</span>&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">&lt;/<span class="title class_">View</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这不是 HTML，而是 JSX。</p>
+<p>React Native 官方明确说明，RN 使用 React，但使用 Native Components 作为 UI 构建块。</p>
+<p>可以先类比：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">React Native       Android        iOS</span><br><span class="line"></span><br><span class="line">View               ViewGroup      UIView</span><br><span class="line">Text               TextView       UITextView</span><br><span class="line">Image              ImageView      UIImageView</span><br><span class="line">TextInput          EditText       UITextField</span><br><span class="line">ScrollView         ScrollView     UIScrollView</span><br></pre></td></tr></table></figure>
+
+<p>官方核心组件也采用类似映射。</p>
+<h2 id="12-JSX-中使用变量"><a href="#12-JSX-中使用变量" class="headerlink" title="12. JSX 中使用变量{}"></a>12. JSX 中使用变量<code>{}</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="string">&#x27;Tom&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> (</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>Hello &#123;name&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>显示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Hello Tom</span><br></pre></td></tr></table></figure>
+
+<p>JSX 中：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>表示：<strong>这里执行 JavaScript 表达式。</strong></p>
+<h2 id="13-条件渲染"><a href="#13-条件渲染" class="headerlink" title="13. 条件渲染"></a>13. 条件渲染</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;loading ? (</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>加载中...<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">) : (</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>加载完成<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">)&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也经常看到：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;user &amp;&amp; <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>&#123;user.name&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>意思：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user 存在</span><br><span class="line">    ↓</span><br><span class="line">显示 Text</span><br></pre></td></tr></table></figure>
+
+<h1 id="第三部分：Component"><a href="#第三部分：Component" class="headerlink" title="第三部分：Component"></a>第三部分：Component</h1><h2 id="14-函数组件"><a href="#14-函数组件" class="headerlink" title="14. 函数组件"></a>14. 函数组件</h2><p>现在最常见：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">HomeScreen</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">View</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">Text</span>&gt;</span>首页<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">View</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">HomeScreen</span> = (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>首页<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>组件本质就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">输入 Props</span><br><span class="line">   ↓</span><br><span class="line">函数</span><br><span class="line">   ↓</span><br><span class="line">返回 JSX</span><br></pre></td></tr></table></figure>
+
+<h2 id="15-自定义组件"><a href="#15-自定义组件" class="headerlink" title="15. 自定义组件"></a>15. 自定义组件</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">UserCard</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">View</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">Text</span>&gt;</span>Tom<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">View</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">UserCard</span> /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>组件可以继续组合组件，这也是 React 的核心思想。</p>
+<h1 id="第四部分：Props"><a href="#第四部分：Props" class="headerlink" title="第四部分：Props"></a>第四部分：Props</h1><h2 id="16-Props"><a href="#16-Props" class="headerlink" title="16. Props"></a>16. Props</h2><p>Props 可以理解成：<strong>父组件传给子组件的参数。</strong></p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">UserCard</span>(<span class="params">props</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>&#123;props.name&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">UserCard</span> name=<span class="string">&quot;Tom&quot;</span> /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>更常见的是解构：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">UserCard</span>(<span class="params">&#123;name&#125;</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>&#123;name&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="17-TypeScript-定义-Props"><a href="#17-TypeScript-定义-Props" class="headerlink" title="17. TypeScript 定义 Props"></a>17. TypeScript 定义 Props</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Props</span> = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">UserCard</span>(<span class="params">&#123;name, age&#125;: <span class="title class_">Props</span></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      &#123;name&#125; - &#123;age&#125;</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这类代码在实际 RN 项目中非常常见。</p>
+<h1 id="第五部分：State"><a href="#第五部分：State" class="headerlink" title="第五部分：State"></a>第五部分：State</h1><h2 id="18-useState"><a href="#18-useState" class="headerlink" title="18.useState"></a>18.<code>useState</code></h2><p>React 最重要的知识点之一：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [count, setCount] = <span class="title function_">useState</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<p>分别是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">count       当前状态</span><br><span class="line"></span><br><span class="line">setCount    修改状态的方法</span><br><span class="line"></span><br><span class="line">0           初始值</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Counter</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> [count, setCount] = <span class="title function_">useState</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Button</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">      <span class="attr">title</span>=<span class="string">&#123;</span>`$&#123;<span class="attr">count</span>&#125;`&#125;</span></span></span><br><span class="line"><span class="tag"><span class="language-xml">      <span class="attr">onPress</span>=<span class="string">&#123;()</span> =&gt;</span> setCount(count + 1)&#125;</span></span><br><span class="line"><span class="language-xml">    /&gt;</span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">count = 0</span><br><span class="line">   ↓</span><br><span class="line">显示 0</span><br><span class="line">   ↓</span><br><span class="line">点击</span><br><span class="line">   ↓</span><br><span class="line">setCount(1)</span><br><span class="line">   ↓</span><br><span class="line">状态变化</span><br><span class="line">   ↓</span><br><span class="line">组件重新执行/渲染</span><br><span class="line">   ↓</span><br><span class="line">显示 1</span><br></pre></td></tr></table></figure>
+
+<p><code>useState</code> 的 setter 会请求 React 使用新状态重新渲染组件。</p>
+<p>这一点和声明式 UI 框架的思想很接近：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">State</span><br><span class="line"> ↓</span><br><span class="line">UI</span><br></pre></td></tr></table></figure>
+
+<h1 id="第六部分：事件"><a href="#第六部分：事件" class="headerlink" title="第六部分：事件"></a>第六部分：事件</h1><h2 id="19-onPress"><a href="#19-onPress" class="headerlink" title="19.onPress"></a>19.<code>onPress</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Button</span></span><br><span class="line">  title=<span class="string">&quot;登录&quot;</span></span><br><span class="line">  onPress=&#123;<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;login&#x27;</span>);</span><br><span class="line">  &#125;&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+<p>也可以：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">login</span> = (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;login&#x27;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">Button</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">  <span class="attr">title</span>=<span class="string">&quot;登录&quot;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">  <span class="attr">onPress</span>=<span class="string">&#123;login&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">/&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">onPress=&#123;login&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是<strong>传函数</strong>。</p>
+<p>而：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">onPress=&#123;<span class="title function_">login</span>()&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是立即执行。这个区别非常重要。</p>
+<h2 id="20-Pressable"><a href="#20-Pressable" class="headerlink" title="20.Pressable"></a>20.<code>Pressable</code></h2><p>实际项目经常使用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Pressable</span></span><br><span class="line">  onPress=&#123;<span class="function">() =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;click&#x27;</span>)&#125;&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>点击我<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">&lt;/<span class="title class_">Pressable</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>Pressable</code> 是 React Native 官方核心交互组件之一。</p>
+<h1 id="第七部分：常用-UI-组件"><a href="#第七部分：常用-UI-组件" class="headerlink" title="第七部分：常用 UI 组件"></a>第七部分：常用 UI 组件</h1><h2 id="21-View"><a href="#21-View" class="headerlink" title="21.View"></a>21.<code>View</code></h2><p>最重要的容器：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">View</span>&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">&lt;/<span class="title class_">View</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以理解成通用布局容器。</p>
+<h2 id="22-Text"><a href="#22-Text" class="headerlink" title="22.Text"></a>22.<code>Text</code></h2><p>React Native 的文字通常必须放在 <code>Text</code> 中：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Text</span>&gt;<span class="title class_">Hello</span> <span class="title class_">React</span> <span class="title class_">Native</span>&lt;/<span class="title class_">Text</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="23-Image"><a href="#23-Image" class="headerlink" title="23.Image"></a>23.<code>Image</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Image</span></span><br><span class="line">  source=&#123;&#123;<span class="attr">uri</span>: user.<span class="property">avatar</span>&#125;&#125;</span><br><span class="line">  style=&#123;&#123;</span><br><span class="line">    <span class="attr">width</span>: <span class="number">100</span>,</span><br><span class="line">    <span class="attr">height</span>: <span class="number">100</span>,</span><br><span class="line">  &#125;&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+<p>本地图片：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Image</span></span><br><span class="line">  source=&#123;<span class="built_in">require</span>(<span class="string">&#x27;./logo.png&#x27;</span>)&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="24-TextInput"><a href="#24-TextInput" class="headerlink" title="24.TextInput"></a>24.<code>TextInput</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [text, setText] = <span class="title function_">useState</span>(<span class="string">&#x27;&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">TextInput</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">  <span class="attr">value</span>=<span class="string">&#123;text&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">  <span class="attr">onChangeText</span>=<span class="string">&#123;setText&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">/&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用户输入</span><br><span class="line"> ↓</span><br><span class="line">onChangeText</span><br><span class="line"> ↓</span><br><span class="line">setText()</span><br><span class="line"> ↓</span><br><span class="line">text 改变</span><br><span class="line"> ↓</span><br><span class="line">重新渲染</span><br><span class="line"> ↓</span><br><span class="line">value=&#123;text&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="25-ScrollView"><a href="#25-ScrollView" class="headerlink" title="25.ScrollView"></a>25.<code>ScrollView</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">ScrollView</span>&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>内容1<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>内容2<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>内容3<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">&lt;/<span class="title class_">ScrollView</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>用于可滚动内容。</p>
+<p>官方核心组件包括 <code>View</code>、<code>Text</code>、<code>Image</code>、<code>TextInput</code>、<code>Pressable</code>、<code>ScrollView</code> 等。</p>
+<h1 id="第八部分：Style"><a href="#第八部分：Style" class="headerlink" title="第八部分：Style"></a>第八部分：Style</h1><h2 id="26-style"><a href="#26-style" class="headerlink" title="26.style"></a>26.<code>style</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">Text</span></span><br><span class="line">  style=&#123;&#123;</span><br><span class="line">    <span class="attr">fontSize</span>: <span class="number">20</span>,</span><br><span class="line">    <span class="attr">fontWeight</span>: <span class="string">&#x27;bold&#x27;</span>,</span><br><span class="line">  &#125;&#125;&gt;</span><br><span class="line">  <span class="title class_">Hello</span></span><br><span class="line">&lt;/<span class="title class_">Text</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>注意 RN 不是传统 CSS：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">font-size</span><br></pre></td></tr></table></figure>
+
+<p>写成：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fontSize</span><br></pre></td></tr></table></figure>
+
+<h2 id="27-StyleSheet-create"><a href="#27-StyleSheet-create" class="headerlink" title="27.StyleSheet.create"></a>27.<code>StyleSheet.create</code></h2><p>实际项目更常见：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> styles = <span class="title class_">StyleSheet</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">  <span class="attr">container</span>: &#123;</span><br><span class="line">    <span class="attr">flex</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">padding</span>: <span class="number">16</span>,</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="attr">title</span>: &#123;</span><br><span class="line">    <span class="attr">fontSize</span>: <span class="number">20</span>,</span><br><span class="line">    <span class="attr">fontWeight</span>: <span class="string">&#x27;bold&#x27;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">View</span> style=&#123;styles.<span class="property">container</span>&#125;&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span> <span class="attr">style</span>=<span class="string">&#123;styles.title&#125;</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">&lt;/<span class="title class_">View</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="第九部分：Flexbox-布局"><a href="#第九部分：Flexbox-布局" class="headerlink" title="第九部分：Flexbox 布局"></a>第九部分：Flexbox 布局</h1><h2 id="28-flexDirection"><a href="#28-flexDirection" class="headerlink" title="28.flexDirection"></a>28.<code>flexDirection</code></h2><p>React Native 布局核心是 Flexbox。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">View</span></span><br><span class="line">  style=&#123;&#123;</span><br><span class="line">    <span class="attr">flexDirection</span>: <span class="string">&#x27;row&#x27;</span>,</span><br><span class="line">  &#125;&#125;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>表示横向：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A B C</span><br></pre></td></tr></table></figure>
+
+<p>而：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">flexDirection</span>: <span class="string">&#x27;column&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A</span><br><span class="line">B</span><br><span class="line">C</span><br></pre></td></tr></table></figure>
+
+<h2 id="29-justifyContent"><a href="#29-justifyContent" class="headerlink" title="29.justifyContent"></a>29.<code>justifyContent</code></h2><p>控制<strong>主轴</strong>：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">justifyContent</span>: <span class="string">&#x27;center&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>常见：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">flex-start</span><br><span class="line">center</span><br><span class="line">flex-end</span><br><span class="line">space-between</span><br><span class="line">space-around</span><br><span class="line">space-evenly</span><br></pre></td></tr></table></figure>
+
+<h2 id="30-alignItems"><a href="#30-alignItems" class="headerlink" title="30.alignItems"></a>30.<code>alignItems</code></h2><p>控制<strong>交叉轴</strong>：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">alignItems</span>: <span class="string">&#x27;center&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>经典居中：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">View</span></span><br><span class="line">  style=&#123;&#123;</span><br><span class="line">    <span class="attr">flex</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">justifyContent</span>: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">    <span class="attr">alignItems</span>: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">  &#125;&#125;&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="31-flex-1"><a href="#31-flex-1" class="headerlink" title="31.flex: 1"></a>31.<code>flex: 1</code></h2><p>非常常见：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">View</span> style=&#123;&#123;<span class="attr">flex</span>: <span class="number">1</span>&#125;&#125;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通常可以先理解为：<strong>尽量占满父容器剩余空间。</strong></p>
+<h1 id="第十部分：列表"><a href="#第十部分：列表" class="headerlink" title="第十部分：列表"></a>第十部分：列表</h1><h2 id="32-FlatList"><a href="#32-FlatList" class="headerlink" title="32.FlatList"></a>32.<code>FlatList</code></h2><p>实际 App 最重要组件之一：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> users = [</span><br><span class="line">  &#123;<span class="attr">id</span>: <span class="string">&#x27;1&#x27;</span>, <span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">id</span>: <span class="string">&#x27;2&#x27;</span>, <span class="attr">name</span>: <span class="string">&#x27;Jack&#x27;</span>&#125;,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">FlatList</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">  <span class="attr">data</span>=<span class="string">&#123;users&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">  <span class="attr">keyExtractor</span>=<span class="string">&#123;item</span> =&gt;</span> item.id&#125;</span></span><br><span class="line"><span class="language-xml">  renderItem=&#123;(&#123;item&#125;) =&gt; (</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">Text</span>&gt;</span>&#123;item.name&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">  )&#125;</span></span><br><span class="line"><span class="language-xml">/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>核心就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">data</span><br><span class="line"> ↓</span><br><span class="line">FlatList</span><br><span class="line"> ↓</span><br><span class="line">逐条调用 renderItem</span><br><span class="line"> ↓</span><br><span class="line">生成 UI</span><br></pre></td></tr></table></figure>
+
+<p>官方建议一般列表使用 <code>FlatList</code> 或 <code>SectionList</code>；与普通 <code>ScrollView</code> 相比，<code>FlatList</code> 会围绕当前显示区域进行列表渲染，更适合长列表。</p>
+<h1 id="第十一部分：Hooks"><a href="#第十一部分：Hooks" class="headerlink" title="第十一部分：Hooks"></a>第十一部分：Hooks</h1><h2 id="33-Hook-是什么"><a href="#33-Hook-是什么" class="headerlink" title="33. Hook 是什么"></a>33. Hook 是什么</h2><p>看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">useState</span><br><span class="line">useEffect</span><br><span class="line">useContext</span><br><span class="line">useMemo</span><br><span class="line">useCallback</span><br><span class="line">useRef</span><br></pre></td></tr></table></figure>
+
+<p>这些 <code>useXXX</code> 基本就是 React Hooks。</p>
+<p>Hooks 让函数组件使用状态、Effect、Context 等 React 能力。Hook 通常只能在组件或自定义 Hook 的顶层调用。</p>
+<h2 id="34-useEffect"><a href="#34-useEffect" class="headerlink" title="34.useEffect"></a>34.<code>useEffect</code></h2><p>这是看项目代码必须掌握的第二大 Hook。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">useEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;执行&#x27;</span>);</span><br><span class="line">&#125;, []);</span><br></pre></td></tr></table></figure>
+
+<p>最常见：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">useEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">loadData</span>();</span><br><span class="line">&#125;, []);</span><br></pre></td></tr></table></figure>
+
+<p>可以先理解为：<strong>组件出现后执行加载数据。</strong></p>
+<h2 id="35-useEffect依赖"><a href="#35-useEffect依赖" class="headerlink" title="35.useEffect依赖"></a>35.<code>useEffect</code>依赖</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">useEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">loadUser</span>(userId);</span><br><span class="line">&#125;, [userId]);</span><br></pre></td></tr></table></figure>
+
+<p>理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">userId 改变</span><br><span class="line">   ↓</span><br><span class="line">Effect 重新执行</span><br></pre></td></tr></table></figure>
+
+<p><code>useEffect</code> 官方定义更准确地说，是用于让组件与 React 外部系统同步。</p>
+<h2 id="36-useEffect清理"><a href="#36-useEffect清理" class="headerlink" title="36.useEffect清理"></a>36.<code>useEffect</code>清理</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">useEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> timer = <span class="built_in">setInterval</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;timer&#x27;</span>);</span><br><span class="line">  &#125;, <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">clearInterval</span>(timer);</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;, []);</span><br></pre></td></tr></table></figure>
+
+<p>这里：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="function">() =&gt;</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是 cleanup。</p>
+<p>常用于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">取消监听</span><br><span class="line">取消订阅</span><br><span class="line">清理 Timer</span><br><span class="line">断开连接</span><br></pre></td></tr></table></figure>
+
+<h2 id="37-useRef"><a href="#37-useRef" class="headerlink" title="37.useRef"></a>37.<code>useRef</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> inputRef = useRef&lt;<span class="title class_">TextInput</span>&gt;(<span class="literal">null</span>);</span><br></pre></td></tr></table></figure>
+
+<p>然后：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inputRef.<span class="property">current</span>?.<span class="title function_">focus</span>();</span><br></pre></td></tr></table></figure>
+
+<p>通常用于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">保存不需要触发渲染的值</span><br><span class="line">获取组件引用</span><br><span class="line">调用组件方法</span><br></pre></td></tr></table></figure>
+
+<p>和setState的区别是不触发UI的重新渲染。</p>
+<h2 id="38-useMemo"><a href="#38-useMemo" class="headerlink" title="38.useMemo"></a>38.<code>useMemo</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> total = <span class="title function_">useMemo</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">calculateTotal</span>(items);</span><br><span class="line">&#125;, [items]);</span><br></pre></td></tr></table></figure>
+
+<p>理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">items 没变化</span><br><span class="line"> ↓</span><br><span class="line">尽量复用之前计算结果</span><br></pre></td></tr></table></figure>
+
+<p>主要是性能优化。</p>
+<h2 id="39-useCallback"><a href="#39-useCallback" class="headerlink" title="39.useCallback"></a>39.<code>useCallback</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> handlePress = <span class="title function_">useCallback</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;click&#x27;</span>);</span><br><span class="line">&#125;, []);</span><br></pre></td></tr></table></figure>
+
+<p>用于缓存<strong>函数引用</strong>。</p>
+<p>简单区分：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">useMemo      → 缓存一个值</span><br><span class="line"></span><br><span class="line">useCallback  → 缓存一个函数</span><br></pre></td></tr></table></figure>
+
+<p>当函数当做参数传入到组件时，如果函数变了就会重新渲染组件。使用了<code>useCallback</code>后，当父组件重新渲染，此时函数不改变，那么使用的子组件不会重新渲染。</p>
+<h1 id="第十二部分：Context"><a href="#第十二部分：Context" class="headerlink" title="第十二部分：Context"></a>第十二部分：Context</h1><h2 id="40-useContext"><a href="#40-useContext" class="headerlink" title="40. useContext"></a>40. <code>useContext</code></h2><p>当很多组件都需要：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">用户信息</span><br><span class="line">主题</span><br><span class="line">语言</span><br><span class="line">登录状态</span><br></pre></td></tr></table></figure>
+
+<p>可以使用 Context。</p>
+<p>创建：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">UserContext</span> = <span class="title function_">createContext</span>(<span class="literal">null</span>);</span><br></pre></td></tr></table></figure>
+
+<p>提供：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="title class_">UserContext</span>.<span class="property">Provider</span> value=&#123;user&#125;&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">App</span> /&gt;</span></span></span><br><span class="line">&lt;/<span class="title class_">UserContext</span>.<span class="property">Provider</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user = <span class="title function_">useContext</span>(<span class="title class_">UserContext</span>);</span><br></pre></td></tr></table></figure>
+
+<p>理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Provider</span><br><span class="line">   ↓</span><br><span class="line">组件树</span><br><span class="line">   ↓</span><br><span class="line">任意子组件</span><br><span class="line">   ↓</span><br><span class="line">useContext()</span><br></pre></td></tr></table></figure>
+
+<p>避免层层传 Props。</p>
+<h1 id="第十三部分：网络请求"><a href="#第十三部分：网络请求" class="headerlink" title="第十三部分：网络请求"></a>第十三部分：网络请求</h1><h2 id="41-fetch"><a href="#41-fetch" class="headerlink" title="41.fetch"></a>41.<code>fetch</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">loadUsers</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(</span><br><span class="line">    <span class="string">&#x27;https://example.com/users&#x27;</span>,</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="title function_">json</span>();</span><br><span class="line"></span><br><span class="line">  <span class="title function_">setUsers</span>(data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>典型流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">页面</span><br><span class="line"> ↓</span><br><span class="line">useEffect</span><br><span class="line"> ↓</span><br><span class="line">loadUsers()</span><br><span class="line"> ↓</span><br><span class="line">fetch()</span><br><span class="line"> ↓</span><br><span class="line">服务器</span><br><span class="line"> ↓</span><br><span class="line">JSON</span><br><span class="line"> ↓</span><br><span class="line">setUsers()</span><br><span class="line"> ↓</span><br><span class="line">State 更新</span><br><span class="line"> ↓</span><br><span class="line">UI 更新</span><br></pre></td></tr></table></figure>
+
+<p>实际项目也经常使用 Axios 等网络库。</p>
+<h1 id="第十四部分：Navigation"><a href="#第十四部分：Navigation" class="headerlink" title="第十四部分：Navigation"></a>第十四部分：Navigation</h1><h2 id="42-页面导航"><a href="#42-页面导航" class="headerlink" title="42. 页面导航"></a>42. 页面导航</h2><p>React Native 本身不规定唯一的路由方案；官方导航文档对入门者推荐 React Navigation，并介绍 Stack、Tab 等常见导航模式。</p>
+<p>项目中经常看到：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">navigation.<span class="title function_">navigate</span>(<span class="string">&#x27;Detail&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>理解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Home</span><br><span class="line"> ↓</span><br><span class="line">Detail</span><br></pre></td></tr></table></figure>
+
+<h2 id="43-页面传参数"><a href="#43-页面传参数" class="headerlink" title="43. 页面传参数"></a>43. 页面传参数</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">navigation.<span class="title function_">navigate</span>(<span class="string">&#x27;Detail&#x27;</span>, &#123;</span><br><span class="line">  <span class="attr">userId</span>: <span class="number">100</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>目标页面：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">DetailScreen</span>(<span class="params">&#123;route&#125;</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123;userId&#125; = route.<span class="property">params</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Text</span>&gt;</span>&#123;userId&#125;<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="第十五部分：状态提升"><a href="#第十五部分：状态提升" class="headerlink" title="第十五部分：状态提升"></a>第十五部分：状态提升</h1><h2 id="44-State-Hoisting"><a href="#44-State-Hoisting" class="headerlink" title="44. State Hoisting"></a>44. State Hoisting</h2><p>如果两个组件都需要同一份数据：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Parent</span><br><span class="line">│</span><br><span class="line">├── ComponentA</span><br><span class="line">│</span><br><span class="line">└── ComponentB</span><br></pre></td></tr></table></figure>
+
+<p>不要各保存一份。</p>
+<p>放到 Parent：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Parent</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> [name, setName] = <span class="title function_">useState</span>(<span class="string">&#x27;&#x27;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentA</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">name</span>=<span class="string">&#123;name&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">onChange</span>=<span class="string">&#123;setName&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">      /&gt;</span></span></span><br><span class="line"><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentB</span> <span class="attr">name</span>=<span class="string">&#123;name&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>思想：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">State 放在共同父组件</span><br><span class="line">        ↓</span><br><span class="line">通过 Props 向下传</span><br><span class="line">        ↓</span><br><span class="line">通过 Callback 向上传事件</span><br></pre></td></tr></table></figure>
+
+<p>将 <code>setName</code> 作为 <code>onChange</code> 属性传给 <code>ComponentA</code>。当 <code>ComponentA</code> 中的值发生变化时，调用 <code>onChange(newName)</code>，实际上就是调用父组件的 <code>setName(newName)</code>，从而修改父组件的 <code>name</code> State。<code>name</code> 改变后 <code>Parent</code> 重新渲染，并把新的 <code>name</code> 通过 Props 传给 <code>ComponentB</code>。</p>
+<h1 id="第十六部分：自定义-Hook"><a href="#第十六部分：自定义-Hook" class="headerlink" title="第十六部分：自定义 Hook"></a>第十六部分：自定义 Hook</h1><h2 id="45-useXXX"><a href="#45-useXXX" class="headerlink" title="45.useXXX"></a>45.<code>useXXX</code></h2><p>自定义的 Hook：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">useUser</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> [user, setUser] = <span class="title function_">useState</span>(<span class="literal">null</span>);</span><br><span class="line">  <span class="keyword">const</span> [loading, setLoading] = <span class="title function_">useState</span>(<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> <span class="title function_">login</span> = <span class="keyword">async</span> (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    user,</span><br><span class="line">    loading,</span><br><span class="line">    login,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在页面中直接使用：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123;</span><br><span class="line">  user,</span><br><span class="line">  loading,</span><br><span class="line">  login,</span><br><span class="line">&#125; = <span class="title function_">useUser</span>();</span><br></pre></td></tr></table></figure>
+
+<p>理解：<strong>把一组状态和业务逻辑封装起来。</strong></p>
+<h1 id="第十七部分：平台差异"><a href="#第十七部分：平台差异" class="headerlink" title="第十七部分：平台差异"></a>第十七部分：平台差异</h1><h2 id="46-Platform"><a href="#46-Platform" class="headerlink" title="46.Platform"></a>46.<code>Platform</code></h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;<span class="title class_">Platform</span>&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="title class_">Platform</span>.<span class="property">OS</span> === <span class="string">&#x27;ios&#x27;</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;iOS&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="title class_">Platform</span>.<span class="property">OS</span> === <span class="string">&#x27;android&#x27;</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Android&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也可能：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> height = <span class="title class_">Platform</span>.<span class="property">OS</span> === <span class="string">&#x27;ios&#x27;</span> ? <span class="number">100</span> : <span class="number">80</span>;</span><br></pre></td></tr></table></figure>
+
+<p>官方支持 <code>Platform.OS</code>、<code>Platform.select()</code> 等方式处理平台差异。</p>
+<h2 id="47-ios-tsx-android-tsx"><a href="#47-ios-tsx-android-tsx" class="headerlink" title="47..ios.tsx&#x2F;.android.tsx"></a>47.<code>.ios.tsx</code>&#x2F;<code>.android.tsx</code></h2><p>项目可能存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Button.ios.tsx</span><br><span class="line">Button.android.tsx</span><br></pre></td></tr></table></figure>
+
+<p>代码：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">Button</span> <span class="keyword">from</span> <span class="string">&#x27;./Button&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>React Native 会根据平台选择对应文件。这也是官方支持的平台差异组织方式。</p>
+<h1 id="第十八部分：原生能力"><a href="#第十八部分：原生能力" class="headerlink" title="第十八部分：原生能力"></a>第十八部分：原生能力</h1><h2 id="48-Native-Module"><a href="#48-Native-Module" class="headerlink" title="48. Native Module"></a>48. Native Module</h2><p>如果 JS&#x2F;TS 需要调用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">蓝牙</span><br><span class="line">NFC</span><br><span class="line">定位</span><br><span class="line">相机</span><br><span class="line">厂商 SDK</span><br><span class="line">Android API</span><br><span class="line">iOS API</span><br></pre></td></tr></table></figure>
+
+<p>可能会看到 Native Module。</p>
+<p>概念：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">TypeScript / JavaScript</span><br><span class="line"></span><br><span class="line">        ↓</span><br><span class="line"></span><br><span class="line">React Native Native Module</span><br><span class="line"></span><br><span class="line">        ↓</span><br><span class="line"></span><br><span class="line">Android</span><br><span class="line">Kotlin / Java</span><br><span class="line"></span><br><span class="line">        或</span><br><span class="line"></span><br><span class="line">iOS</span><br><span class="line">Swift / Objective-C</span><br></pre></td></tr></table></figure>
+
+<p>因此 React Native 并不意味着：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">完全不需要 Android / iOS</span><br></pre></td></tr></table></figure>
+
+<p>复杂项目经常仍然存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">android/</span><br><span class="line">ios/</span><br></pre></td></tr></table></figure>
+
+<p>目录。</p>
+<h1 id="第十九部分：项目目录"><a href="#第十九部分：项目目录" class="headerlink" title="第十九部分：项目目录"></a>第十九部分：项目目录</h1><h2 id="49-常见目录结构"><a href="#49-常见目录结构" class="headerlink" title="49. 常见目录结构"></a>49. 常见目录结构</h2><p>实际项目可能是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">project</span><br><span class="line">│</span><br><span class="line">├── android/</span><br><span class="line">│</span><br><span class="line">├── ios/</span><br><span class="line">│</span><br><span class="line">├── src/</span><br><span class="line">│   │</span><br><span class="line">│   ├── components/   通用 UI 组件</span><br><span class="line">│   ├── screens/      页面</span><br><span class="line">│   ├── navigation/   页面导航</span><br><span class="line">│   ├── hooks/        自定义 Hooks</span><br><span class="line">│   ├── services/     API、网络、业务服务</span><br><span class="line">│   ├── stores/       全局状态</span><br><span class="line">│   ├── utils/        工具方法</span><br><span class="line">│   ├── types/        TypeScript 类型</span><br><span class="line">│   └── assets/       图片等资源</span><br><span class="line">│</span><br><span class="line">├── App.tsx</span><br><span class="line">├── package.json</span><br><span class="line">└── tsconfig.json</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="第二十部分：第三方状态管理"><a href="#第二十部分：第三方状态管理" class="headerlink" title="第二十部分：第三方状态管理"></a>第二十部分：第三方状态管理</h1><h2 id="50-Redux-Zustand-等"><a href="#50-Redux-Zustand-等" class="headerlink" title="50. Redux &#x2F; Zustand 等"></a>50. Redux &#x2F; Zustand 等</h2><p>大型项目可能不会只使用：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useState</span><br></pre></td></tr></table></figure>
+
+<p>而是使用全局状态库，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Redux</span><br><span class="line">Zustand</span><br></pre></td></tr></table></figure>
+
+<p>看到 Redux 时，先理解核心关系即可：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">UI</span><br><span class="line"> ↓</span><br><span class="line">Action</span><br><span class="line"> ↓</span><br><span class="line">Store</span><br><span class="line"> ↓</span><br><span class="line">State 改变</span><br><span class="line"> ↓</span><br><span class="line">UI 更新</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="文献"><a href="#文献" class="headerlink" title="文献"></a>文献</h3><p>React Native 官方文档<br>React Native：React Fundamentals<br>React Native：Core Components and APIs<br>React Native：TypeScript<br>React 官方文档<br>React：useState<br>React：useEffect<br>React Native：Navigation</p>
+<h3 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h3><p>创建了一个React Native的项目，运行起来看了看。想到了第一次运行Flutter后的感觉，简单的页面，简单的代码，同时可运行到2个平台。写RN的代码，和写网页一模一样。如果排除iOS和Android的区别，那就是界面的编写啊。</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/09/28/%E6%9C%80%E5%B0%8F%E6%A1%86%E6%9E%B6architecture-templates%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" class="post-nav-link group text-right" title="最小框架architecture-templates学习记录">
+            <span class="post-nav-title">最小框架architecture-templates学习记录</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

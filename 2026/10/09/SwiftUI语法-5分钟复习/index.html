@@ -1,0 +1,972 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>SwiftUI语法-5分钟复习 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="SwiftUI语法-5分钟复习 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/10/09/SwiftUI%E8%AF%AD%E6%B3%95-5%E5%88%86%E9%92%9F%E5%A4%8D%E4%B9%A0/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SwiftUI语法-5分钟复习 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/10/09/SwiftUI%E8%AF%AD%E6%B3%95-5%E5%88%86%E9%92%9F%E5%A4%8D%E4%B9%A0/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            SwiftUI语法-5分钟复习
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-10-09">2026/10/09</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <h2 id="1-SwiftUI-基本结构"><a href="#1-SwiftUI-基本结构" class="headerlink" title="1.SwiftUI 基本结构"></a>1.SwiftUI 基本结构</h2><p>SwiftUI 使用 <code>View</code> 描述界面：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Hello SwiftUI&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">View</span><br><span class="line"> ↓</span><br><span class="line">body</span><br><span class="line"> ↓</span><br><span class="line">some View</span><br><span class="line"> ↓</span><br><span class="line">声明式描述 UI</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-App-入口"><a href="#2-App-入口" class="headerlink" title="2. App 入口"></a>2. App 入口</h2><p>SwiftUI App 通常从 <code>@main</code> 开始：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyApp</span>: <span class="title class_ inherited__">App</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Scene</span> &#123;</span><br><span class="line">        <span class="type">WindowGroup</span> &#123;</span><br><span class="line">            <span class="type">ContentView</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">App</span><br><span class="line"> ↓</span><br><span class="line">Scene</span><br><span class="line"> ↓</span><br><span class="line">WindowGroup</span><br><span class="line"> ↓</span><br><span class="line">ContentView</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-Text"><a href="#3-Text" class="headerlink" title="3. Text"></a>3. Text</h2><p>显示文字：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello SwiftUI&quot;</span>)</span><br><span class="line">    .font(.title)</span><br><span class="line">    .fontWeight(.bold)</span><br><span class="line">    .foregroundStyle(.blue)</span><br></pre></td></tr></table></figure>
+
+<p>字符串插值：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> name <span class="operator">=</span> <span class="string">&quot;Tom&quot;</span></span><br><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello <span class="subst">\(name)</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-Image"><a href="#4-Image" class="headerlink" title="4. Image"></a>4. Image</h2><p>系统图标：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Image</span>(systemName: <span class="string">&quot;heart.fill&quot;</span>)</span><br><span class="line">    .font(.title)</span><br><span class="line">    .foregroundStyle(.red)</span><br></pre></td></tr></table></figure>
+
+<p>资源图片：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Image</span>(<span class="string">&quot;avatar&quot;</span>)</span><br><span class="line">    .resizable()</span><br><span class="line">    .scaledToFit()</span><br><span class="line">    .frame(width: <span class="number">100</span>, height: <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-Button"><a href="#5-Button" class="headerlink" title="5. Button"></a>5. Button</h2><p>按钮：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Button</span>(<span class="string">&quot;登录&quot;</span>) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;login&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>自定义内容：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Button</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;login&quot;</span>)</span><br><span class="line">&#125; label: &#123;</span><br><span class="line">    <span class="type">Label</span>(<span class="string">&quot;登录&quot;</span>, systemImage: <span class="string">&quot;person&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-VStack"><a href="#6-VStack" class="headerlink" title="6. VStack"></a>6. VStack</h2><p>垂直布局：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">VStack</span>(spacing: <span class="number">10</span>) &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A</span><br><span class="line">B</span><br><span class="line">C</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-HStack"><a href="#7-HStack" class="headerlink" title="7. HStack"></a>7. HStack</h2><p>水平布局：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HStack</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A B C</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-ZStack"><a href="#8-ZStack" class="headerlink" title="8. ZStack"></a>8. ZStack</h2><p>层叠布局：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ZStack</span> &#123;</span><br><span class="line">    <span class="type">Color</span>.blue</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">        .foregroundStyle(.white)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">背景</span><br><span class="line"> ↑</span><br><span class="line">前景</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-Spacer"><a href="#9-Spacer" class="headerlink" title="9. Spacer"></a>9. Spacer</h2><p>占据剩余空间：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HStack</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;左边&quot;</span>)</span><br><span class="line">    <span class="type">Spacer</span>()</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;右边&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>常用于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">左边                 右边</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-Divider"><a href="#10-Divider" class="headerlink" title="10. Divider"></a>10. Divider</h2><p>分割线：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">VStack</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;第一行&quot;</span>)</span><br><span class="line">    <span class="type">Divider</span>()</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;第二行&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="11-Modifier"><a href="#11-Modifier" class="headerlink" title="11. Modifier"></a>11. Modifier</h2><p>SwiftUI 大量使用 Modifier：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    .font(.title)</span><br><span class="line">    .foregroundStyle(.blue)</span><br><span class="line">    .padding()</span><br><span class="line">    .background(.gray)</span><br></pre></td></tr></table></figure>
+
+<p>可以理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">View</span><br><span class="line"> ↓ modifier</span><br><span class="line">View</span><br><span class="line"> ↓ modifier</span><br><span class="line">View</span><br></pre></td></tr></table></figure>
+
+<p>Modifier 顺序可能影响最终效果。<strong>SwiftUI Modifier 不是“给原 View 设置一堆属性”，而是前一个 Modifier 产生新 View，后一个 Modifier 再修饰这个新 View。</strong></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">padding</span><br><span class="line">frame</span><br><span class="line">background</span><br><span class="line">overlay</span><br><span class="line">clipShape</span><br><span class="line">border</span><br><span class="line">offset</span><br><span class="line">scaleEffect</span><br><span class="line">rotationEffect</span><br><span class="line">opacity</span><br><span class="line">gesture</span><br><span class="line">contentShape</span><br></pre></td></tr></table></figure>
+
+<p>需要特别注意这些涉及<strong>尺寸、布局、绘制范围、裁剪、变换、点击区域</strong>的 Modifier。</p>
+<h2 id="12-frame"><a href="#12-frame" class="headerlink" title="12. frame"></a>12. frame</h2><p>设置 View 的布局尺寸：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>).frame(width: <span class="number">200</span>, height: <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+
+<p>占满可用宽度：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>).frame(maxWidth: .infinity)</span><br></pre></td></tr></table></figure>
+
+<h2 id="13-padding"><a href="#13-padding" class="headerlink" title="13. padding"></a>13. padding</h2><p>设置内边距：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>) .padding()</span><br></pre></td></tr></table></figure>
+
+<p>指定方向：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    .padding(.horizontal, <span class="number">20</span>)</span><br><span class="line">    .padding(.vertical, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="14-background"><a href="#14-background" class="headerlink" title="14. background"></a>14. background</h2><p>设置背景：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    .padding()</span><br><span class="line">    .background(.blue)</span><br></pre></td></tr></table></figure>
+
+<p>配合圆角：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    .padding()</span><br><span class="line">    .background(.blue)</span><br><span class="line">    .clipShape(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="number">10</span>))</span><br></pre></td></tr></table></figure>
+
+<h2 id="15-State"><a href="#15-State" class="headerlink" title="15. @State"></a>15. @State</h2><p>View 自己管理的状态：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">CounterView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> count <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Button</span>(<span class="string">&quot;Count: <span class="subst">\(count)</span>&quot;</span>) &#123;</span><br><span class="line">            count <span class="operator">+=</span> <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">State 改变</span><br><span class="line">   ↓</span><br><span class="line">SwiftUI 检测变化</span><br><span class="line">   ↓</span><br><span class="line">重新计算 body</span><br><span class="line">   ↓</span><br><span class="line">更新需要变化的 UI</span><br></pre></td></tr></table></figure>
+
+<h2 id="16-Binding"><a href="#16-Binding" class="headerlink" title="16. @Binding"></a>16. @Binding</h2><p>父组件把状态的“读写能力”传给子组件：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ParentView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> name <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">ChildView</span>(name: <span class="variable">$name</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ChildView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@Binding</span> <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">TextField</span>(<span class="string">&quot;姓名&quot;</span>, text: <span class="variable">$name</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Parent</span><br><span class="line">@State name</span><br><span class="line">   ↓ $name</span><br><span class="line">Child</span><br><span class="line">@Binding name</span><br></pre></td></tr></table></figure>
+
+<p><code>ParentView</code>传值到<code>ChildView</code>时使用的是<code>$name</code>，有就是传递的是<code>Binding&lt;String&gt;</code>.</p>
+<h2 id="17-Observable"><a href="#17-Observable" class="headerlink" title="17. @Observable"></a>17. @Observable</h2><p>现代 SwiftUI 常使用 Observation 管理模型状态：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Observable</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UserModel</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name <span class="operator">=</span> <span class="string">&quot;Tom&quot;</span></span><br><span class="line">    <span class="keyword">var</span> age <span class="operator">=</span> <span class="number">20</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> model <span class="operator">=</span> <span class="type">UserModel</span>()</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(model.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>model.name</code> 改变后，依赖它的 UI 可以自动更新。</p>
+<h2 id="18-StateObject"><a href="#18-StateObject" class="headerlink" title="18. @StateObject"></a>18. @StateObject</h2><p>传统 <code>ObservableObject</code> 模式中，如果 View 创建并持有对象：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserViewModel</span>: <span class="title class_ inherited__">ObservableObject</span> &#123;</span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> name <span class="operator">=</span> <span class="string">&quot;Tom&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@StateObject</span> <span class="keyword">private</span> <span class="keyword">var</span> vm <span class="operator">=</span> <span class="type">UserViewModel</span>()</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(vm.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ObservableObject</span><br><span class="line">      +</span><br><span class="line">  @Published</span><br><span class="line">      ↓</span><br><span class="line">@StateObject</span><br><span class="line">      ↓</span><br><span class="line">     View</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>@StateObject</code></strong> <strong>用来让 SwiftUI View 创建、持有并观察一个</strong> <strong><code>ObservableObject</code></strong> <strong>对象。</strong></p>
+<p>传统的 <code>ObservableObject + @Published</code> 状态管理体系。建议使用<code>@Observable</code>。</p>
+<h2 id="19-ObservedObject"><a href="#19-ObservedObject" class="headerlink" title="19. @ObservedObject"></a>19. @ObservedObject</h2><p>对象由外部创建，当前 View 只是观察：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">UserView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@ObservedObject</span> <span class="keyword">var</span> vm: <span class="type">UserViewModel</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(vm.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@StateObject</span><br><span class="line">→ 当前 View 创建/持有</span><br><span class="line">@ObservedObject</span><br><span class="line">→ 外部传入，当前 View 观察</span><br></pre></td></tr></table></figure>
+
+<p>建议使用<code>@Observable</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">传统方案</span><br><span class="line"><span class="type">ObservableObject</span></span><br><span class="line">   <span class="operator">+</span></span><br><span class="line"><span class="meta">@Published</span></span><br><span class="line">   <span class="operator">+</span></span><br><span class="line"><span class="meta">@StateObject</span> <span class="operator">/</span> <span class="meta">@ObservedObject</span></span><br><span class="line"></span><br><span class="line">现代方案</span><br><span class="line"><span class="meta">@Observable</span></span><br><span class="line">   <span class="operator">+</span></span><br><span class="line">普通属性</span><br><span class="line">   <span class="operator">+</span></span><br><span class="line"><span class="meta">@State</span> <span class="operator">/</span> <span class="meta">@Environment</span> 等</span><br></pre></td></tr></table></figure>
+
+<h2 id="20-Environment"><a href="#20-Environment" class="headerlink" title="20. @Environment"></a>20. @Environment</h2><p>读取 SwiftUI 环境中的值：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Environment</span>(\.dismiss)</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> dismiss</span><br></pre></td></tr></table></figure>
+
+<p>从当前 View 的 SwiftUI Environment 中取出 <code>dismiss</code> 这个能力，赋给 <code>dismiss</code> 属性。使用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Button</span>(<span class="string">&quot;关闭&quot;</span>) &#123;</span><br><span class="line">    dismiss()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还可以：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Environment</span>(\.colorScheme)</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> colorScheme</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>@Environment</code></strong> <strong>用来从 SwiftUI 当前 View 所处的“环境”中读取一个值。</strong></p>
+<h4 id="最常用的-Environment"><a href="#最常用的-Environment" class="headerlink" title="最常用的 @Environment"></a>最常用的 <code>@Environment</code></h4><table>
+<thead>
+<tr>
+<th><strong>属性</strong></th>
+<th><strong>类型&#x2F;概念</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>dismiss</code></td>
+<td><code>DismissAction</code></td>
+<td>关闭当前 sheet &#x2F; presentation，或退出当前呈现</td>
+</tr>
+<tr>
+<td><code>colorScheme</code></td>
+<td><code>ColorScheme</code></td>
+<td>当前浅色&#x2F;深色模式</td>
+</tr>
+<tr>
+<td><code>locale</code></td>
+<td><code>Locale</code></td>
+<td>当前语言、地区环境</td>
+</tr>
+<tr>
+<td><code>calendar</code></td>
+<td><code>Calendar</code></td>
+<td>当前日历系统</td>
+</tr>
+<tr>
+<td><code>timeZone</code></td>
+<td><code>TimeZone</code></td>
+<td>当前时区</td>
+</tr>
+<tr>
+<td><code>scenePhase</code></td>
+<td><code>ScenePhase</code></td>
+<td>App&#x2F;Scene 当前 active、inactive、background</td>
+</tr>
+<tr>
+<td><code>horizontalSizeClass</code></td>
+<td><code>UserInterfaceSizeClass?</code></td>
+<td>横向 compact &#x2F; regular</td>
+</tr>
+<tr>
+<td><code>verticalSizeClass</code></td>
+<td><code>UserInterfaceSizeClass?</code></td>
+<td>纵向 compact &#x2F; regular</td>
+</tr>
+<tr>
+<td><code>dynamicTypeSize</code></td>
+<td><code>DynamicTypeSize</code></td>
+<td>用户当前动态字体大小</td>
+</tr>
+<tr>
+<td><code>layoutDirection</code></td>
+<td><code>LayoutDirection</code></td>
+<td>左→右或右→左布局</td>
+</tr>
+<tr>
+<td><code>displayScale</code></td>
+<td><code>CGFloat</code></td>
+<td>屏幕缩放比例</td>
+</tr>
+<tr>
+<td><code>isEnabled</code></td>
+<td><code>Bool</code></td>
+<td>当前 View 是否允许交互</td>
+</tr>
+<tr>
+<td><code>isPresented</code></td>
+<td><code>Bool</code></td>
+<td>当前 View 是否处于被呈现状态</td>
+</tr>
+<tr>
+<td><code>isSearching</code></td>
+<td><code>Bool</code></td>
+<td>当前是否处于搜索状态</td>
+</tr>
+<tr>
+<td><code>editMode</code></td>
+<td><code>Binding&lt;EditMode&gt;?</code></td>
+<td>List 等是否处于编辑状态</td>
+</tr>
+<tr>
+<td><code>openURL</code></td>
+<td><code>OpenURLAction</code></td>
+<td>打开 URL</td>
+</tr>
+<tr>
+<td><code>refresh</code></td>
+<td><code>RefreshAction?</code></td>
+<td>获取当前刷新操作</td>
+</tr>
+<tr>
+<td><code>undoManager</code></td>
+<td><code>UndoManager?</code></td>
+<td>Undo &#x2F; Redo 管理</td>
+</tr>
+<tr>
+<td><code>modelContext</code></td>
+<td><code>ModelContext</code></td>
+<td>SwiftData 数据上下文</td>
+</tr>
+<tr>
+<td><code>managedObjectContext</code></td>
+<td><code>NSManagedObjectContext</code></td>
+<td>Core Data 上下文</td>
+</tr>
+<tr>
+<td><code>accessibilityReduceMotion</code></td>
+<td><code>Bool</code></td>
+<td>用户是否开启“减弱动态效果”</td>
+</tr>
+<tr>
+<td><code>accessibilityVoiceOverEnabled</code></td>
+<td><code>Bool</code></td>
+<td>VoiceOver 是否开启</td>
+</tr>
+<tr>
+<td><code>accessibilityDifferentiateWithoutColor</code></td>
+<td><code>Bool</code></td>
+<td>是否要求不能只依赖颜色区分信息</td>
+</tr>
+</tbody></table>
+<h2 id="21-TextField"><a href="#21-TextField" class="headerlink" title="21. TextField"></a>21. TextField</h2><p>输入框：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> name <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">TextField</span>(<span class="string">&quot;请输入姓名&quot;</span>, text: <span class="variable">$name</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常绑定：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TextField</span><br><span class="line">   ↕</span><br><span class="line">Binding</span><br><span class="line">   ↕</span><br><span class="line">State</span><br></pre></td></tr></table></figure>
+
+<h2 id="22-Toggle"><a href="#22-Toggle" class="headerlink" title="22. Toggle"></a>22. Toggle</h2><p>开关：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> enabled <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Toggle</span>(<span class="string">&quot;开启通知&quot;</span>, isOn: <span class="variable">$enabled</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Toggle</code>选中后<code>enabled</code>值变化。</p>
+<h2 id="23-Picker"><a href="#23-Picker" class="headerlink" title="23. Picker"></a>23. Picker</h2><p>选择器：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> index <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Picker</span>(<span class="string">&quot;选择&quot;</span>, selection: <span class="variable">$index</span>) &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Apple&quot;</span>).tag(<span class="number">0</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Google&quot;</span>).tag(<span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>selection</code>当前选中的值，用户选择后<code>index</code>的值也会直接变化。</p>
+<h2 id="24-ScrollView"><a href="#24-ScrollView" class="headerlink" title="24. ScrollView"></a>24. ScrollView</h2><p>滚动容器, 像<code>UIScrollView</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScrollView</span> &#123;</span><br><span class="line">    <span class="type">VStack</span> &#123;</span><br><span class="line">        <span class="type">ForEach</span>(<span class="number">0</span><span class="operator">..&lt;</span><span class="number">100</span>) &#123; index <span class="keyword">in</span></span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Item <span class="subst">\(index)</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>横向：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScrollView</span>(.horizontal) &#123;</span><br><span class="line">    <span class="type">HStack</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="25-List"><a href="#25-List" class="headerlink" title="25. List"></a>25. List</h2><p>列表，像<code>UITableView</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;Apple&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;Google&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;Microsoft&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>动态数据：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> names <span class="operator">=</span> [<span class="string">&quot;Apple&quot;</span>, <span class="string">&quot;Google&quot;</span>, <span class="string">&quot;Microsoft&quot;</span>]</span><br><span class="line"><span class="type">List</span>(names, id: \.<span class="keyword">self</span>) &#123; name <span class="keyword">in</span></span><br><span class="line">    <span class="type">Text</span>(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>提供的详细功能，见文尾的补充。</p>
+<h2 id="26-ForEach"><a href="#26-ForEach" class="headerlink" title="26. ForEach"></a>26. ForEach</h2><p>根据数据创建 View：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">VStack</span> &#123;</span><br><span class="line">    <span class="type">ForEach</span>(<span class="number">0</span><span class="operator">..&lt;</span><span class="number">5</span>) &#123; index <span class="keyword">in</span></span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;第 <span class="subst">\(index)</span> 行&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>模型通常实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_ inherited__">Identifiable</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> id: <span class="type">UUID</span></span><br><span class="line">    <span class="keyword">let</span> name: <span class="type">String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ForEach</span>(users) &#123; user <span class="keyword">in</span></span><br><span class="line">    <span class="type">Text</span>(user.name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="27-LazyVStack-LazyHStack"><a href="#27-LazyVStack-LazyHStack" class="headerlink" title="27. LazyVStack &#x2F; LazyHStack"></a>27. LazyVStack &#x2F; LazyHStack</h2><p>大量数据时延迟创建：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScrollView</span> &#123;</span><br><span class="line">    <span class="type">LazyVStack</span> &#123;</span><br><span class="line">        <span class="type">ForEach</span>(<span class="number">0</span><span class="operator">..&lt;</span><span class="number">1000</span>) &#123; index <span class="keyword">in</span></span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Item <span class="subst">\(index)</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">VStack      普通垂直布局</span><br><span class="line">LazyVStack  延迟创建垂直内容</span><br><span class="line">HStack      普通水平布局</span><br><span class="line">LazyHStack  延迟创建水平内容</span><br></pre></td></tr></table></figure>
+
+<h2 id="28-NavigationStack"><a href="#28-NavigationStack" class="headerlink" title="28. NavigationStack"></a>28. NavigationStack</h2><p>现代 SwiftUI 导航：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">NavigationStack</span> &#123;</span><br><span class="line">    <span class="type">NavigationLink</span>(<span class="string">&quot;详情&quot;</span>) &#123;</span><br><span class="line">        <span class="type">DetailView</span>()</span><br><span class="line">    &#125;</span><br><span class="line">    .navigationTitle(<span class="string">&quot;首页&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">NavigationStack</span><br><span class="line">      ↓</span><br><span class="line">     Home</span><br><span class="line">      ↓</span><br><span class="line">NavigationLink</span><br><span class="line">      ↓</span><br><span class="line">    Detail</span><br></pre></td></tr></table></figure>
+
+<p>可以设置多个链接：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">NavigationStack</span> &#123;</span><br><span class="line">    <span class="type">List</span> &#123;</span><br><span class="line">        <span class="type">NavigationLink</span> &#123;</span><br><span class="line">            <span class="type">ContentView</span>()</span><br><span class="line">        &#125; label: &#123;</span><br><span class="line">            <span class="type">Label</span>(<span class="string">&quot;个人资料&quot;</span>, systemImage: <span class="string">&quot;person&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">NavigationLink</span> &#123;</span><br><span class="line">            <span class="type">ContentView</span>()</span><br><span class="line">        &#125; label: &#123;</span><br><span class="line">            <span class="type">Label</span>(<span class="string">&quot;设置&quot;</span>, systemImage: <span class="string">&quot;gear&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .navigationTitle(<span class="string">&quot;我的&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="29-NavigationPath"><a href="#29-NavigationPath" class="headerlink" title="29. NavigationPath"></a>29. NavigationPath</h2><p>代码控制导航栈：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> path <span class="operator">=</span> <span class="type">NavigationPath</span>()</span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">NavigationStack</span>(path: <span class="variable">$path</span>) &#123;</span><br><span class="line">        <span class="type">Button</span>(<span class="string">&quot;详情&quot;</span>) &#123;</span><br><span class="line">            path.append(<span class="number">100</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        .navigationDestination(for: <span class="type">Int</span>.<span class="keyword">self</span>) &#123; userId <span class="keyword">in</span></span><br><span class="line">            <span class="type">UserDetailView</span>(userId: userId)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>NavigationPath</code></strong> <strong>就是 SwiftUI 中用数据描述导航栈，</strong><code>append()</code> <strong>相当于 Push，</strong><code>removeLast()</code><strong>相当于 Pop，</strong><code>navigationDestination</code>负责定义“某种数据应该显示哪个页面”。</p>
+<p>将<code>$path</code>传到子页面，在子页面可以继续<code>append（）</code>到其他子页面。</p>
+<h2 id="30-TabView"><a href="#30-TabView" class="headerlink" title="30. TabView"></a>30. TabView</h2><p>底部 Tab：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TabView</span> &#123;</span><br><span class="line">    <span class="type">HomeView</span>()</span><br><span class="line">        .tabItem &#123;</span><br><span class="line">            <span class="type">Label</span>(<span class="string">&quot;首页&quot;</span>, systemImage: <span class="string">&quot;house&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="type">ProfileView</span>()</span><br><span class="line">        .tabItem &#123;</span><br><span class="line">            <span class="type">Label</span>(<span class="string">&quot;我的&quot;</span>, systemImage: <span class="string">&quot;person&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="31-sheet"><a href="#31-sheet" class="headerlink" title="31. sheet"></a>31. sheet</h2><p>弹出页面：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> showDetail <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Button</span>(<span class="string">&quot;打开&quot;</span>) &#123;</span><br><span class="line">        showDetail <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    .sheet(isPresented: <span class="variable">$showDetail</span>) &#123;</span><br><span class="line">        <span class="type">DetailView</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>showDetail</code>为<code>true</code>的时候展示<code>sheet</code>。通过<code>Modifier</code>提供：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.padding()</span><br><span class="line">.background()</span><br><span class="line">.frame()</span><br><span class="line">.sheet()</span><br><span class="line">.alert()</span><br><span class="line">.navigationTitle()</span><br></pre></td></tr></table></figure>
+
+<p>也就是<code>SwiftUI View</code>都可以挂这些<code>Modfier</code>。</p>
+<h2 id="32-alert"><a href="#32-alert" class="headerlink" title="32. alert"></a>32. alert</h2><p>弹出 Alert：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> showAlert <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Button</span>(<span class="string">&quot;删除&quot;</span>) &#123;</span><br><span class="line">        showAlert <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    .alert(<span class="string">&quot;确认删除？&quot;</span>, isPresented: <span class="variable">$showAlert</span>) &#123;</span><br><span class="line">        <span class="type">Button</span>(<span class="string">&quot;删除&quot;</span>, role: .destructive) &#123;</span><br><span class="line">            delete()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Button</span>(<span class="string">&quot;取消&quot;</span>, role: .cancel) &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="33-task"><a href="#33-task" class="headerlink" title="33. task"></a>33. task</h2><p>View 出现后执行异步任务：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">UserView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> name <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(name)</span><br><span class="line">            .task &#123;</span><br><span class="line">                name <span class="operator">=</span> <span class="keyword">await</span> loadUser()</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>常用于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">页面出现</span><br><span class="line"> ↓</span><br><span class="line">.task</span><br><span class="line"> ↓</span><br><span class="line">调用 async API</span><br><span class="line"> ↓</span><br><span class="line">修改 State</span><br><span class="line"> ↓</span><br><span class="line">刷新 UI</span><br></pre></td></tr></table></figure>
+
+<p>在<code>task</code>中调用<code>ViewModel</code>中的方法进行数据的获取。<code>task</code>与<code>View</code>的生命周期关联，当<code>View</code>消失时，会主动取消<code>task</code>的请求。</p>
+<h2 id="34-onAppear-onDisappear"><a href="#34-onAppear-onDisappear" class="headerlink" title="34. onAppear &#x2F; onDisappear"></a>34. onAppear &#x2F; onDisappear</h2><p>监听 View 出现和消失：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    .onAppear &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;appear&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .onDisappear &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;disappear&quot;</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="35-onChange"><a href="#35-onChange" class="headerlink" title="35. onChange"></a>35. onChange</h2><p>监听状态变化：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> name <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">TextField</span>(<span class="string">&quot;姓名&quot;</span>, text: <span class="variable">$name</span>)</span><br><span class="line">        .onChange(of: name) &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;name changed&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>name</code>发生变化的时候，<code>onChange</code>被调用。</p>
+<h2 id="36-animation"><a href="#36-animation" class="headerlink" title="36. animation"></a>36. animation</h2><p>状态变化时执行动画：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> expanded <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Rectangle</span>()</span><br><span class="line">        .frame(</span><br><span class="line">            width: expanded <span class="operator">?</span> <span class="number">200</span> : <span class="number">100</span>,</span><br><span class="line">            height: <span class="number">100</span></span><br><span class="line">        )</span><br><span class="line">        .animation(.easeInOut, value: expanded)</span><br><span class="line">        .onTapGesture &#123;</span><br><span class="line">            expanded.toggle()</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也可以：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> expanded <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">  <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">VStack</span> &#123;</span><br><span class="line">      <span class="type">Rectangle</span>()</span><br><span class="line">        .fill(.blue)</span><br><span class="line">        .frame(</span><br><span class="line">          width: expanded <span class="operator">?</span> <span class="number">200</span> : <span class="number">100</span>,</span><br><span class="line">          height: <span class="number">100</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">      <span class="type">Button</span>(<span class="string">&quot;切换大小&quot;</span>) &#123;</span><br><span class="line">        withAnimation &#123;</span><br><span class="line">          expanded.toggle()</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="37-Gesture"><a href="#37-Gesture" class="headerlink" title="37. Gesture"></a>37. Gesture</h2><p>点击：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;点击&quot;</span>)</span><br><span class="line">    .onTapGesture &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;tap&quot;</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>长按：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;长按&quot;</span>)</span><br><span class="line">    .onLongPressGesture &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;long press&quot;</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="38-GeometryReader"><a href="#38-GeometryReader" class="headerlink" title="38. GeometryReader"></a>38. GeometryReader</h2><p>获取父布局提供的尺寸：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GeometryReader</span> &#123; geometry <span class="keyword">in</span></span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;宽度：<span class="subst">\(geometry.size.width)</span>&quot;</span>)</span><br><span class="line">        .frame(width: geometry.size.width)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>适合需要根据容器尺寸计算布局的场景，但不应把它当成所有布局问题的默认方案。</p>
+<h2 id="39-safeArea"><a href="#39-safeArea" class="headerlink" title="39. safeArea"></a>39. safeArea</h2><p>忽略安全区域：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Color</span>.blue</span><br><span class="line">    .ignoresSafeArea()</span><br></pre></td></tr></table></figure>
+
+<p>常用于全屏背景。</p>
+<h2 id="40-ViewBuilder"><a href="#40-ViewBuilder" class="headerlink" title="40. ViewBuilder"></a>40. ViewBuilder</h2><p>允许一个闭包声明多个 View：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ViewBuilder</span></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">header</span>() -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;标题&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;副标题&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>自定义容器：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Card</span>&lt;<span class="type">Content</span>: <span class="type">View</span>&gt;: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@ViewBuilder</span></span><br><span class="line">    <span class="keyword">let</span> content: () -&gt; <span class="type">Content</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            content()</span><br><span class="line">        &#125;</span><br><span class="line">        .padding()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Card &#123;</span><br><span class="line">    Text(&quot;Hello SwiftUI&quot;)</span><br><span class="line">    Text(&quot;Hello World&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ViewBuilder</code>接受一个闭包，里面可以放置多个<code>View</code>.</p>
+<h2 id="41-some-View"><a href="#41-some-View" class="headerlink" title="41. some View"></a>41. some View</h2><p>SwiftUI 的 <code>body</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>some</code> 是一个关键字，表示  <strong>不透明返回类型</strong>（opaque return type）, <code>some View</code>表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">返回一个确定的 View 类型。</span><br><span class="line">但调用者不需要知道具体类型</span><br></pre></td></tr></table></figure>
+
+<p><code>some View</code>表示确定的<code>View</code>类型。</p>
+<p>使用<code>any View</code>表示不同的<code>View</code>类型。</p>
+<h2 id="42-条件-UI"><a href="#42-条件-UI" class="headerlink" title="42. 条件 UI"></a>42. 条件 UI</h2><p>根据状态显示不同 View：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> isLogin &#123;</span><br><span class="line">    <span class="type">HomeView</span>()</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">LoginView</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也可以：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> loading &#123;</span><br><span class="line">    <span class="type">ProgressView</span>()</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">ContentView</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="43-ProgressView"><a href="#43-ProgressView" class="headerlink" title="43. ProgressView"></a>43. ProgressView</h2><p>加载状态：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ProgressView</span>(<span class="string">&quot;加载中...&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>进度：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> progress: <span class="type">Double</span> <span class="operator">=</span> <span class="number">1.0</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">ProgressView</span>(<span class="string">&quot;加载中&quot;</span>)</span><br><span class="line">            </span><br><span class="line">            <span class="type">ProgressView</span>(value: progress, total: <span class="number">100.0</span>)</span><br><span class="line">            </span><br><span class="line">            <span class="type">Button</span>(<span class="string">&quot;点我&quot;</span>) &#123;</span><br><span class="line">                progress <span class="operator">+=</span> <span class="number">1.0</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="44-自定义-View"><a href="#44-自定义-View" class="headerlink" title="44. 自定义 View"></a>44. 自定义 View</h2><p>SwiftUI 推荐拆分小组件：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">UserCard</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">HStack</span> &#123;</span><br><span class="line">            <span class="type">Image</span>(systemName: <span class="string">&quot;person.circle&quot;</span>)</span><br><span class="line">            <span class="type">Text</span>(name)</span><br><span class="line">        &#125;</span><br><span class="line">        .padding()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">UserCard</span>(name: <span class="string">&quot;Tom&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="45-ViewModifier"><a href="#45-ViewModifier" class="headerlink" title="45. ViewModifier"></a>45. ViewModifier</h2><p>复用一组 Modifier：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">CardStyle</span>: <span class="title class_ inherited__">ViewModifier</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">body</span>(<span class="params">content</span>: <span class="type">Content</span>) -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        content</span><br><span class="line">            .padding()</span><br><span class="line">            .background(.white)</span><br><span class="line">            .clipShape(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="number">12</span>))</span><br><span class="line">            .shadow(radius: <span class="number">3</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    .modifier(<span class="type">CardStyle</span>())</span><br></pre></td></tr></table></figure>
+
+<p><code>ViewModifier</code>作用是：<strong>把一组 View 样式或行为封装起来，方便在不同的 View 上重复使用。</strong></p>
+<h2 id="46-Preview"><a href="#46-Preview" class="headerlink" title="46. Preview"></a>46. Preview</h2><p>预览 View：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#<span class="type">Preview</span> &#123;</span><br><span class="line">    <span class="type">ContentView</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以快速查看组件效果，不需要每次运行整个 App。</p>
+<h2 id="47-SwiftUI-MVVM"><a href="#47-SwiftUI-MVVM" class="headerlink" title="47. SwiftUI + MVVM"></a>47. SwiftUI + MVVM</h2><p>常见项目结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">View</span><br><span class="line"> ↓ 用户操作</span><br><span class="line">ViewModel</span><br><span class="line"> ↓</span><br><span class="line">Repository / Service</span><br><span class="line"> ↓</span><br><span class="line">Network / Database</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Observable</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UserViewModel</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> users: [<span class="type">User</span>] <span class="operator">=</span> []</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">load</span>() <span class="keyword">async</span> &#123;</span><br><span class="line">        users <span class="operator">=</span> <span class="keyword">await</span> repository.loadUsers()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>View：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">UserView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> vm <span class="operator">=</span> <span class="type">UserViewModel</span>()</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">List</span>(vm.users) &#123; user <span class="keyword">in</span></span><br><span class="line">            <span class="type">Text</span>(user.name)</span><br><span class="line">        &#125;</span><br><span class="line">        .task &#123;</span><br><span class="line">            <span class="keyword">await</span> vm.load()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>做到“各司其职”。</p>
+<h2 id="48-SwiftUI-最重要的数据流"><a href="#48-SwiftUI-最重要的数据流" class="headerlink" title="48. SwiftUI 最重要的数据流"></a>48. SwiftUI 最重要的数据流</h2><p>SwiftUI 最核心的思想不是控件，而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">State</span><br><span class="line">  ↓</span><br><span class="line">View = f(State)</span><br><span class="line">  ↓</span><br><span class="line">用户操作</span><br><span class="line">  ↓</span><br><span class="line">修改 State</span><br><span class="line">  ↓</span><br><span class="line">重新计算 View</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> count <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"><span class="type">Button</span>(<span class="string">&quot;Count <span class="subst">\(count)</span>&quot;</span>) &#123;</span><br><span class="line">    count <span class="operator">+=</span> <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">找到 UILabel</span><br><span class="line">↓</span><br><span class="line">修改 UILabel.text</span><br></pre></td></tr></table></figure>
+
+<p>而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">修改数据</span><br><span class="line">↓</span><br><span class="line">SwiftUI 根据数据重新描述 UI</span><br></pre></td></tr></table></figure>
+
+<h2 id="49-UIKit-与-SwiftUI-思维对比"><a href="#49-UIKit-与-SwiftUI-思维对比" class="headerlink" title="49. UIKit 与 SwiftUI 思维对比"></a>49. UIKit 与 SwiftUI 思维对比</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">UIKit</span><br><span class="line">UIViewController</span><br><span class="line">    ↓</span><br><span class="line">创建 UIView</span><br><span class="line">    ↓</span><br><span class="line">设置约束</span><br><span class="line">    ↓</span><br><span class="line">找到控件</span><br><span class="line">    ↓</span><br><span class="line">手动修改 UI</span><br><span class="line"></span><br><span class="line">SwiftUI</span><br><span class="line">State</span><br><span class="line">    ↓</span><br><span class="line">body</span><br><span class="line">    ↓</span><br><span class="line">声明 UI</span><br><span class="line">    ↓</span><br><span class="line">State 改变</span><br><span class="line">    ↓</span><br><span class="line">SwiftUI 自动更新 UI</span><br></pre></td></tr></table></figure>
+
+<p>核心转变：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UIKit：命令式 UI</span><br><span class="line">SwiftUI：声明式 UI</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h1><h2 id="List提供的功能"><a href="#List提供的功能" class="headerlink" title="List提供的功能"></a>List提供的功能</h2><h2 id="1-Row：列表中的一行"><a href="#1-Row：列表中的一行" class="headerlink" title="1. Row：列表中的一行"></a><strong>1. Row：列表中的一行</strong></h2><p><code>List</code> 里面的每一个元素通常就是一个 Row。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;张三&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;李四&quot;</span>)</span><br><span class="line">    <span class="type">Text</span>(<span class="string">&quot;王五&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────┐</span><br><span class="line">│ 张三          │ ← Row</span><br><span class="line">├──────────────┤</span><br><span class="line">│ 李四          │ ← Row</span><br><span class="line">├──────────────┤</span><br><span class="line">│ 王五          │ ← Row</span><br><span class="line">└──────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>Row 可以是复杂 View：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span>(users) &#123; user <span class="keyword">in</span></span><br><span class="line">    <span class="type">HStack</span> &#123;</span><br><span class="line">        <span class="type">Image</span>(systemName: <span class="string">&quot;person.circle&quot;</span>)</span><br><span class="line">        <span class="type">VStack</span>(alignment: .leading) &#123;</span><br><span class="line">            <span class="type">Text</span>(user.name)</span><br><span class="line">            <span class="type">Text</span>(user.phone)</span><br><span class="line">                .font(.caption)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-Section：列表分组"><a href="#2-Section：列表分组" class="headerlink" title="2. Section：列表分组"></a><strong>2. Section：列表分组</strong></h2><p>可以把多个 Row 分成不同组：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">Section</span>(<span class="string">&quot;账号&quot;</span>) &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;个人资料&quot;</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;修改密码&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">Section</span>(<span class="string">&quot;系统&quot;</span>) &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;通知&quot;</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;隐私&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果类似 iPhone 设置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">账号</span><br><span class="line">┌──────────────┐</span><br><span class="line">│ 个人资料      │</span><br><span class="line">│ 修改密码      │</span><br><span class="line">└──────────────┘</span><br><span class="line">系统</span><br><span class="line">┌──────────────┐</span><br><span class="line">│ 通知          │</span><br><span class="line">│ 隐私          │</span><br><span class="line">└──────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-Header-Footer：分组头和分组尾"><a href="#3-Header-Footer：分组头和分组尾" class="headerlink" title="3. Header &#x2F; Footer：分组头和分组尾"></a><strong>3. Header &#x2F; Footer：分组头和分组尾</strong></h2><p><code>Section</code> 可以有 Header 和 Footer。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">Section</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Wi-Fi&quot;</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;蓝牙&quot;</span>)</span><br><span class="line">    &#125; header: &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;网络&quot;</span>)</span><br><span class="line">    &#125; footer: &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;修改网络相关设置&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">网络                 ← Header</span><br><span class="line">┌─────────────────┐</span><br><span class="line">│ Wi-Fi           │</span><br><span class="line">│ 蓝牙             │</span><br><span class="line">└─────────────────┘</span><br><span class="line">修改网络相关设置     ← Footer</span><br></pre></td></tr></table></figure>
+
+<p>Header 通常是<strong>标题</strong>，Footer 通常是<strong>补充说明</strong>。</p>
+<h2 id="4-选择-Selection：选中某一行"><a href="#4-选择-Selection：选中某一行" class="headerlink" title="4. 选择 Selection：选中某一行"></a><strong>4. 选择 Selection：选中某一行</strong></h2><p>例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> selection: <span class="type">String</span>?</span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">List</span>(selection: <span class="variable">$selection</span>) &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Apple&quot;</span>)</span><br><span class="line">            .tag(<span class="string">&quot;Apple&quot;</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Google&quot;</span>)</span><br><span class="line">            .tag(<span class="string">&quot;Google&quot;</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Microsoft&quot;</span>)</span><br><span class="line">            .tag(<span class="string">&quot;Microsoft&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当用户选择：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Apple</span><br></pre></td></tr></table></figure>
+
+<p>那么：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">selection <span class="operator">==</span> <span class="string">&quot;Apple&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>它在 iPad&#x2F;macOS 的侧边栏、主从布局等场景尤其常见。</p>
+<h2 id="5-删除-onDelete"><a href="#5-删除-onDelete" class="headerlink" title="5. 删除 onDelete"></a><strong>5. 删除 onDelete</strong></h2><p><code>List + ForEach</code> 可以直接提供系统列表删除行为：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> users <span class="operator">=</span> [</span><br><span class="line">    <span class="string">&quot;张三&quot;</span>,</span><br><span class="line">    <span class="string">&quot;李四&quot;</span>,</span><br><span class="line">    <span class="string">&quot;王五&quot;</span></span><br><span class="line">]</span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">List</span> &#123;</span><br><span class="line">        <span class="type">ForEach</span>(users, id: \.<span class="keyword">self</span>) &#123; user <span class="keyword">in</span></span><br><span class="line">            <span class="type">Text</span>(user)</span><br><span class="line">        &#125;</span><br><span class="line">        .onDelete &#123; indexSet <span class="keyword">in</span></span><br><span class="line">            users.remove(atOffsets: indexSet)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用户可以通过系统提供的列表交互删除 Row。<br>核心：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">用户删除某行</span><br><span class="line">    ↓</span><br><span class="line">onDelete</span><br><span class="line">    ↓</span><br><span class="line">得到 IndexSet</span><br><span class="line">    ↓</span><br><span class="line">删除数据</span><br><span class="line">    ↓</span><br><span class="line">List 更新</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-移动-onMove"><a href="#6-移动-onMove" class="headerlink" title="6. 移动 onMove"></a>6. 移动 onMove</h2><p>允许用户调整 <code>Row</code> 顺序：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">ForEach</span>(users, id: \.<span class="keyword">self</span>) &#123; user <span class="keyword">in</span></span><br><span class="line">        <span class="type">Text</span>(user)</span><br><span class="line">    &#125;</span><br><span class="line">    .onMove &#123; source, destination <span class="keyword">in</span></span><br><span class="line">        users.move(</span><br><span class="line">            fromOffsets: source,</span><br><span class="line">            toOffset: destination</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">原来</span><br><span class="line">1 张三</span><br><span class="line">2 李四</span><br><span class="line">3 王五</span><br><span class="line">用户拖动</span><br><span class="line">   ↓</span><br><span class="line">1 王五</span><br><span class="line">2 张三</span><br><span class="line">3 李四</span><br></pre></td></tr></table></figure>
+
+<p>常用于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">频道排序</span><br><span class="line">收藏排序</span><br><span class="line">播放列表排序</span><br><span class="line">功能入口排序</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-Swipe-Actions：左滑-右滑操作"><a href="#7-Swipe-Actions：左滑-右滑操作" class="headerlink" title="7. Swipe Actions：左滑&#x2F;右滑操作"></a><strong>7. Swipe Actions：左滑&#x2F;右滑操作</strong></h2><p>这是非常常见的功能。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span>(users) &#123; user <span class="keyword">in</span></span><br><span class="line">    <span class="type">Text</span>(user.name)</span><br><span class="line">        .swipeActions &#123;</span><br><span class="line">            <span class="type">Button</span>(<span class="string">&quot;删除&quot;</span>, role: .destructive) &#123;</span><br><span class="line">                delete(user)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用户滑动一行：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────┐</span><br><span class="line">│ 张三              │ 删除 │</span><br><span class="line">└──────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>也可以多个按钮：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.swipeActions &#123;</span><br><span class="line">    <span class="type">Button</span>(<span class="string">&quot;删除&quot;</span>, role: .destructive) &#123;</span><br><span class="line">        delete(user)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">Button</span>(<span class="string">&quot;收藏&quot;</span>) &#123;</span><br><span class="line">        favorite(user)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">邮件 App</span><br><span class="line">消息 App</span><br></pre></td></tr></table></figure>
+
+<p>里面常见的左滑删除、标记等操作。</p>
+<h2 id="8-列表样式-listStyle"><a href="#8-列表样式-listStyle" class="headerlink" title="8. 列表样式 listStyle"></a><strong>8. 列表样式 listStyle</strong></h2><p><code>List</code> 自带不同的系统列表样式。<br>例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">Section</span>(<span class="string">&quot;账号&quot;</span>) &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;个人资料&quot;</span>)</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;修改密码&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">.listStyle(.insetGrouped)</span><br></pre></td></tr></table></figure>
+
+<p>常见：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.listStyle(.plain)</span><br><span class="line">.listStyle(.in<span class="keyword">set</span>)</span><br><span class="line">.listStyle(.grouped)</span><br><span class="line">.listStyle(.insetGrouped)</span><br></pre></td></tr></table></figure>
+
+<p>你可以粗略理解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">plain</span><br><span class="line">→ 普通连续列表</span><br><span class="line">grouped</span><br><span class="line">→ 分组列表</span><br><span class="line">insetGrouped</span><br><span class="line">→ 类似 iPhone 设置 App 的圆角分组效果</span><br></pre></td></tr></table></figure>
+
+<p>具体视觉表现会根据 iOS&#x2F;macOS 和系统版本有所变化。</p>
+<h2 id="9-编辑模式-EditMode"><a href="#9-编辑模式-EditMode" class="headerlink" title="9. 编辑模式 EditMode"></a><strong>9. 编辑模式 EditMode</strong></h2><p>List 可以进入编辑状态。<br>最经典：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">ForEach</span>(users, id: \.<span class="keyword">self</span>) &#123; user <span class="keyword">in</span></span><br><span class="line">        <span class="type">Text</span>(user)</span><br><span class="line">    &#125;</span><br><span class="line">    .onDelete &#123; indexSet <span class="keyword">in</span></span><br><span class="line">        users.remove(atOffsets: indexSet)</span><br><span class="line">    &#125;</span><br><span class="line">    .onMove &#123; source, destination <span class="keyword">in</span></span><br><span class="line">        users.move(</span><br><span class="line">            fromOffsets: source,</span><br><span class="line">            toOffset: destination</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">.toolbar &#123;</span><br><span class="line">    <span class="type">EditButton</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>点击：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">编辑</span><br><span class="line"> ↓</span><br><span class="line">List 进入 EditMode</span><br><span class="line"> ↓</span><br><span class="line">可以删除 / 拖动排序</span><br><span class="line"> ↓</span><br><span class="line">完成</span><br></pre></td></tr></table></figure>
+
+<p>如果需要自己读取编辑状态：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Environment</span>(\.editMode)</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> editMode</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="do-try-catch的使用"><a href="#do-try-catch的使用" class="headerlink" title="do-try-catch的使用"></a>do-try-catch的使用</h1><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> user <span class="operator">=</span> <span class="keyword">try</span> loadUser()</span><br><span class="line">    <span class="built_in">print</span>(user.name)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;加载失败：<span class="subst">\(error)</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意三个关键字：</p>
+<table>
+<thead>
+<tr>
+<th><strong>关键字</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>do</code></td>
+<td>定义错误处理作用域</td>
+</tr>
+<tr>
+<td><code>try</code></td>
+<td>标记可能抛出错误的调用</td>
+</tr>
+<tr>
+<td><code>catch</code></td>
+<td>捕获并处理错误</td>
+</tr>
+</tbody></table>
+<p>比<code>Java/ Kotlin / JavaScript</code>语言多了一个<code>do</code>关键字。而<code>try</code>的作用也有区别：</p>
+<h3 id="1-try：正常的错误处理"><a href="#1-try：正常的错误处理" class="headerlink" title="1. try：正常的错误处理"></a><strong>1.</strong> <strong><code>try</code></strong>：正常的错误处理</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> result <span class="operator">=</span> <span class="keyword">try</span> login(</span><br><span class="line">        username: <span class="string">&quot;admin&quot;</span>,</span><br><span class="line">        password: <span class="string">&quot;123456&quot;</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(result)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>特点：</p>
+<ul>
+<li>成功：返回正常结果。</li>
+<li>失败：抛出错误。</li>
+<li>错误可以由 <code>catch</code> 捕获，也可以继续向上抛出。</li>
+</ul>
+<p><strong>这是最常用、最标准的写法。</strong></p>
+<h3 id="2-try-：将错误转换为-nil"><a href="#2-try-：将错误转换为-nil" class="headerlink" title="2. try?：将错误转换为 nil"></a><strong>2.</strong> <strong><code>try?</code></strong>：将错误转换为 nil</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> result <span class="operator">=</span> <span class="keyword">try?</span> login(</span><br><span class="line">    username: <span class="string">&quot;admin&quot;</span>,</span><br><span class="line">    password: <span class="string">&quot;wrong&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>如果登录失败：<code>result == nil</code></p>
+<p>如果成功：<code>result == Optional(&quot;登录成功&quot;)</code></p>
+<p><strong>不关心具体错误原因，只关心成功还是失败。</strong></p>
+<h3 id="3-try-：确信不会出错"><a href="#3-try-：确信不会出错" class="headerlink" title="3. try!：确信不会出错"></a><strong>3.</strong> <strong><code>try!</code></strong>：确信不会出错</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> result <span class="operator">=</span> <span class="keyword">try!</span> login(</span><br><span class="line">    username: <span class="string">&quot;admin&quot;</span>,</span><br><span class="line">    password: <span class="string">&quot;123456&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>如果成功：<code>返回正常结果</code></p>
+<p>如果抛出错误：<code>程序运行时触发致命错误</code></p>
+<p><strong>实际开发中尽量避免</strong> <strong><code>try!</code></strong>，除非能够确保不会抛出错误。</p>
+<h3 id="4-单独使用try"><a href="#4-单独使用try" class="headerlink" title="4. 单独使用try"></a>4. 单独使用<code>try</code></h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">loadData</span>() <span class="keyword">throws</span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> name <span class="operator">=</span> <span class="keyword">try</span> loadUser()</span><br><span class="line">    <span class="keyword">return</span> name</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-try-await一起使用"><a href="#5-try-await一起使用" class="headerlink" title="5. try await一起使用"></a>5. try await一起使用</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">loadUser</span>() <span class="keyword">async</span> <span class="keyword">throws</span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> <span class="keyword">await</span> <span class="type">Task</span>.sleep(for: .seconds(<span class="number">1</span>))</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;张三&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th><strong>关键字</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>async</code></td>
+<td>函数为异步函数</td>
+</tr>
+<tr>
+<td><code>throws</code></td>
+<td>函数可能抛出错误</td>
+</tr>
+<tr>
+<td><code>try</code></td>
+<td>函数可能抛出错误</td>
+</tr>
+<tr>
+<td><code>await</code></td>
+<td>函数调用可能发生挂起，等待异步操作完成</td>
+</tr>
+</tbody></table>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>接连着学习了<code>Flutter</code>,<code>Jetpack Compose</code>,<code>Dart语法</code>，<code>Swift语法</code>,<code>React Native</code>和现在的<code>SwiftUI</code>后，感觉到了<strong>千变一律</strong>啊，那种返璞归真的错觉。似乎再发展几年，所有的语言和UI相关，都可以回归到同一套了。大家功能相似，作用一样，搞那么多没用啊。</p>
+<p><code>AI</code>又来替代手搓代码，那代码的差异性进一步缩小了。<code>AI</code>眼中所有<strong>语言</strong>都是一样的吧。很期待5年或10年后，程序员行业会变为怎样。希望我还是站在风里，跟着一直成长！！！</p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/10/03/ReactNative%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" class="post-nav-link group text-right" title="ReactNative快速入门">
+            <span class="post-nav-title">ReactNative快速入门</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hexo " />
+    <!-- FOUC prevention: apply dark mode class before first paint.
+         Flow: read default → build valid states → read localStorage (try/catch for Safari private mode)
+         → validate saved state → set data-theme-state on <html> → resolve effective dark/light
+         → add .dark class and colorScheme if needed. -->
+    <script>(function(){const d="light";window.__themeDefault=d;const s=d==='system'?['system','light','dark']:['light','dark'];let sv;try{sv=localStorage.getItem('theme')}catch(e){}if(!sv||s.indexOf(sv)===-1)sv=d;const h=document.documentElement;h.setAttribute('data-theme-state',sv);const k=sv==='dark'||(sv!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(k)h.classList.add('dark');h.style.colorScheme=k?'dark':'light';})()</script>
+    <!-- Preconnect for Google Fonts (before any CSS to maximize benefit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Google Fonts: async preload to avoid render-blocking; merged into a single request.
+         Note: onload inline handler may be blocked under strict CSP; use JS font loader if CSP is required. -->
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" onload="this.rel='stylesheet'" data-csp-fallback />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Spectral:wght@400;600&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;500&display=swap" /></noscript>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+    
+    
+    <title>Flutter本地数据Drift的使用记录 | 益烟雨江南 · 工程札记</title>
+
+    <!-- SEO Meta -->
+    
+    
+    <meta name="author" content="Arthur Wang" />
+    
+    
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Flutter本地数据Drift的使用记录 | 益烟雨江南 · 工程札记" />
+    
+    <meta property="og:url" content="https://yinanwang1.github.io/2026/10/12/Flutter%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AEDrift%E7%9A%84%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/index.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="益烟雨江南 · 工程札记" />
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Flutter本地数据Drift的使用记录 | 益烟雨江南 · 工程札记" />
+    
+    
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yinanwang1.github.io/2026/10/12/Flutter%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AEDrift%E7%9A%84%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/index.html" />
+
+    <!-- Favicon -->
+    
+    <link rel="icon" href="/favicon.svg" />
+    
+
+    <!-- RSS -->
+    
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery.min.css" integrity="sha384-YlypU+LX5577RgeZebpBZTy28roXf0lHGaOSxrroczh16ktxM0BoAMPXsrehqxx8" crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="/css/style.min.css?v=69bbab69">
+    <!-- CSP fallback: promote preloaded font stylesheets if onload was blocked.
+         setTimeout(3000) gives onload enough time to fire first; only unprocessed preloads are promoted. -->
+    <script>setTimeout(function(){document.querySelectorAll('link[data-csp-fallback][rel="preload"]').forEach(function(l){l.rel='stylesheet'})},3000)</script>
+</head>
+
+
+<body class="h-full fog-bg text-slate-800">
+    
+    
+<svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+        <filter id="seal-roughness" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+        </filter>
+        <filter id="text-erosion">
+            <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+        </filter>
+    </defs>
+</svg>
+
+    
+
+    
+    <div id="progressBar" class="progress-bar" aria-hidden="true"></div>
+    
+
+    <div class="min-h-full px-4 pt-14 pb-6 md:pb-5">
+
+        <!-- Paper Card -->
+        <div
+            class="paper relative mx-auto w-full max-w-4xl rounded-xl px-5 sm:px-8 md:px-12 lg:px-14 pt-10 pb-6 md:pt-12 md:pb-8">
+
+            
+<header class="relative">
+
+    <div class="relative flex items-start justify-center">
+        <div class="text-center">
+            <div class="relative inline-block">
+                
+                <p class="site-title">
+                    <a href="/">益烟雨江南 · 工程札记</a>
+                </p>
+                
+                <!-- Seal: Mathematically Centered -->
+                
+                <div
+                    class="absolute left-full top-1/2 -translate-y-1/2 ml-1 sm:ml-4 origin-left scale-75 sm:scale-110">
+                    
+<svg width="52" height="52" viewBox="0 0 100 100" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15,12 Q50,5 85,12 Q95,50 88,88 Q50,95 12,88 Q5,50 15,12 Z"
+        fill="var(--color-seal)" filter="url(#seal-roughness)" opacity="0.92" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-size="42" fill="rgba(255,255,255,0.92)" filter="url(#text-erosion)"
+        class="seal-text select-none">南</text>
+</svg>
+
+                </div>
+                
+            </div>
+            
+            <p class="site-subtitle">
+                记录代码、系统与思考。关注移动开发、后端架构，以及技术背后的底层逻辑。
+            </p>
+            
+            <div class="mt-3 sm:mt-4 flex justify-center gap-2">
+                
+                
+                
+                <button id="themeToggle" class="group header-pill-btn" aria-label="Light" data-label-system="System" data-label-light="Light" data-label-dark="Dark">
+                    
+<svg data-icon="system" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/>
+    <path d="M8 21h8M12 17v4" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="light" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" stroke-width="1.5"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                    
+<svg data-icon="dark" class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+                </button>
+                
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<nav class="mt-8 md:mt-10" aria-label="Menu">
+    <!-- Mobile Toggle -->
+    <div class="flex items-center justify-center md:hidden">
+        <button id="menuBtn"
+            class="focus-elegant inline-flex items-center gap-2 rounded-full border border-slate-200 bg-paper/95 px-4 py-2 text-sm text-slate-700 shadow-xs"
+            aria-expanded="false" aria-controls="mobileMenu">
+            <span class="text-base leading-none tracking-widest">Menu</span>
+            
+<svg class="size-4 text-slate-500 transition-transform duration-200" id="menuChevron"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+        </button>
+    </div>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:block">
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-base text-slate-700 px-4">
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="nav-divider text-slate-400 select-none" role="separator" aria-hidden="true">/</li>
+            
+            
+            <li><a class="focus-elegant rounded-md px-2 py-1 hover:text-seal transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="menu-panel md:hidden mt-4" data-open="false">
+        <ul
+            class="mx-auto max-w-sm max-h-menu overflow-y-auto rounded-2xl border border-slate-200 bg-paper/95 shadow-xs">
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/" >首页</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/archives" >归档</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-cards" >知识卡片</a></li>
+            
+            <li class="h-px bg-slate-200/70" role="separator" aria-hidden="true"></li>
+            
+            
+            <li><a class="focus-elegant block px-6 py-3 text-center text-slate-800 hover:text-seal hover:bg-seal/5 transition-colors"
+                    href="/knowledge-system" >知识体系</a></li>
+            
+            
+        </ul>
+    </div>
+</nav>
+
+
+            <!-- Main Content -->
+            <main class="section-divider">
+                
+
+
+
+
+
+<article class="content-article">
+    <header class="text-center mb-8">
+        <h1 class="page-title mb-4">
+            Flutter本地数据Drift的使用记录
+        </h1>
+        
+        
+<div class="mb-4 flex items-center justify-center gap-4 text-sm text-slate-500 flex-wrap">
+    <div class="flex items-center gap-1.5">
+        
+<svg class="size-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+
+        <a href="/archives/2026/" class="oldstyle-nums link-muted"><time datetime="2026-10-12">2026/10/12</time></a>
+    </div>
+    
+</div>
+
+        
+    </header>
+
+    
+    
+<!-- Inline TOC (small screens < xl) -->
+<div id="tocInline" class="toc-inline xl:hidden mb-8">
+    <button class="toc-toggle" aria-expanded="false" aria-controls="tocInlineBody">
+        <span class="toc-toggle-title">Contents</span>
+        
+<svg class="toc-chevron size-4 text-slate-500 transition-transform duration-200"
+    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"
+        clip-rule="evenodd" />
+</svg>
+
+    </button>
+    <div class="toc-body" id="tocInlineBody" data-open="false"></div>
+</div>
+
+<!-- Sidebar TOC (xl+ screens) -->
+<aside id="tocSidebar" class="toc-sidebar hidden xl:block" aria-label="Contents">
+    <div class="toc-sidebar-inner">
+        <p class="toc-sidebar-title">Contents</p>
+        <div class="toc-body"></div>
+    </div>
+</aside>
+
+    
+
+    <div class="prose-shiro">
+        <p>需要持久化的数据量小，结构简单，直接采用系统自带的就够。如果数据量大，结构复杂，那么还是需要数据库来保存。当然文件保存也是可行，不过读取数据的灵活性还是数据库好。使用系统的持久化时，需要注意数据类型，是否存在，设置好默认值。使用数据库保存，那么表结构需要设计好，数据库迁移要考虑到跨版本升级。</p>
+<p>项目的新功能都是用<code>flutter</code>编写的，尝试下<code>Drfit</code>的数据创建，读写，升级。代码可以查看<a target="_blank" rel="noopener" href="https://github.com/yinanwang1/FlutterSnippet/tree/main/lib/drift_demo">drift_demo</a>。</p>
+<h2 id="一、Drift的了解"><a href="#一、Drift的了解" class="headerlink" title="一、Drift的了解"></a>一、<code>Drift</code>的了解</h2><p>Drift是基于 SQLite的离线数据读写，并让数据库操作更方便、更易维护。支持Android、iOS、Linux、MacOS、Web和Windows平台。它有三个特点：</p>
+<ul>
+<li><strong>类型安全</strong>：根据表结构生成 Dart 数据对象和查询接口，减少手动转换及字段使用错误。</li>
+<li><strong>响应式查询</strong>：通过 <code>watch()</code> 监听查询结果，数据变化后自动通知页面更新。</li>
+<li><strong>数据库迁移</strong>：通过版本号和迁移逻辑调整表结构，在升级时保留已有数据。（减少了开发人员手动处理数据）</li>
+</ul>
+<h2 id="二、集成Drift"><a href="#二、集成Drift" class="headerlink" title="二、集成Drift"></a>二、集成<code>Drift</code></h2><h4 id="1-添加依赖"><a href="#1-添加依赖" class="headerlink" title="1. 添加依赖"></a>1. 添加依赖</h4><p>在项目根目录执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flutter pub add drift drift_flutter path_provider</span><br><span class="line">flutter pub add --dev drift_dev build_runner</span><br></pre></td></tr></table></figure>
+
+<p><code>drift</code> 提供数据库 API，<code>drift_flutter</code> 负责打开数据库，<code>path_provider</code> 获取存储目录；<code>drift_dev</code> 和 <code>build_runner</code> 用于生成代码。</p>
+<h4 id="2-创建数据库"><a href="#2-创建数据库" class="headerlink" title="2. 创建数据库"></a>2. 创建数据库</h4><p>新建 <code>app_database.dart</code>：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:drift/drift.dart&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:drift_flutter/drift_flutter.dart&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:path_provider/path_provider.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">part</span> <span class="string">&#x27;app_database.g.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@DriftDatabase</span>(tables: [])</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AppDatabase</span> <span class="keyword">extends</span> <span class="title">_</span>$<span class="title">AppDatabase</span> </span>&#123;</span><br><span class="line">  AppDatabase()</span><br><span class="line">      : <span class="keyword">super</span>(</span><br><span class="line">          driftDatabase(</span><br><span class="line">            name: <span class="string">&#x27;app_database&#x27;</span>,</span><br><span class="line">            native: <span class="keyword">const</span> DriftNativeOptions(</span><br><span class="line">              databaseDirectory: getApplicationSupportDirectory,</span><br><span class="line">            ),</span><br><span class="line">          ),</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="built_in">int</span> <span class="keyword">get</span> schemaVersion =&gt; <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>tables</code>：注册表，目前为空，下一步添加。(比如添加<code>User</code>表)</li>
+<li><code>name</code> 和 <code>databaseDirectory</code>：指定数据库文件名及存储目录，升级时保持不变。</li>
+<li><code>schemaVersion</code>：数据库结构版本，后续修改表结构时配合迁移逻辑递增。（数据库的不同版本，每次数据结构变了，这个版本号就+1，只能向上升）</li>
+</ul>
+<h4 id="3-生成代码"><a href="#3-生成代码" class="headerlink" title="3. 生成代码"></a>3. 生成代码</h4><p>创建好<code>AppDatabase</code>即定义数据库后，让工具生成配套代码。以后新增表或修改表，都需要执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dart run build_runner build</span><br></pre></td></tr></table></figure>
+
+<p>生成的 <code>app_database.g.dart</code> 包含 <code>_$AppDatabase</code> 基类，以及后续表定义对应的数据对象和操作辅助代码。<strong>不要手动修改它</strong>；修改数据库声明后重新生成即可。</p>
+<p>数据库<strong>按需打开</strong>，首次执行查询或写入时才真正访问数据库文件。</p>
+<h2 id="三、创建数据表"><a href="#三、创建数据表" class="headerlink" title="三、创建数据表"></a>三、创建数据表</h2><h4 id="1-定义心率记录表"><a href="#1-定义心率记录表" class="headerlink" title="1. 定义心率记录表"></a>1. 定义心率记录表</h4><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:drift/drift.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@DataClassName</span>(<span class="string">&#x27;HeartRateRecord&#x27;</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HeartRateRecords</span> <span class="keyword">extends</span> <span class="title">Table</span> </span>&#123;</span><br><span class="line">  IntColumn <span class="keyword">get</span> id =&gt; integer().autoIncrement()();</span><br><span class="line">  TextColumn <span class="keyword">get</span> deviceId =&gt; text()();</span><br><span class="line">  IntColumn <span class="keyword">get</span> bpm =&gt; integer()();</span><br><span class="line">  DateTimeColumn <span class="keyword">get</span> measuredAt =&gt; dateTime()();</span><br><span class="line">  DateTimeColumn <span class="keyword">get</span> createdAt =&gt;</span><br><span class="line">      dateTime().withDefault(currentDateAndTime)();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在文件夹<code>tables</code>中新建数据库的表，以后新增的表都放在这个文件夹中。<code>id</code> 为自增主键，<code>deviceId</code> 标识设备，<code>bpm</code> 保存心率，<code>measuredAt</code> 保存测量时间，<code>createdAt</code> 默认使用数据库当前时间。</p>
+<h4 id="2-注册表并生成代码"><a href="#2-注册表并生成代码" class="headerlink" title="2. 注册表并生成代码"></a>2. 注册表并生成代码</h4><p>在 <code>AppDatabase</code> 中注册：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@DriftDatabase(tables: [HeartRateRecords])</span><br></pre></td></tr></table></figure>
+
+<p>保持 <code>schemaVersion</code> 为 <code>1</code>，然后执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dart run build_runner build</span><br></pre></td></tr></table></figure>
+
+<p>更新<code>app_database.g.dart</code>中内容，。四个类型的职责不同：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HeartRateRecords</code></td>
+<td>手写的表结构定义</td>
+</tr>
+<tr>
+<td><code>$HeartRateRecordsTable</code></td>
+<td>自动生成，根据表定义生成实际表实现，让<code>HeartRateRecords</code>能数据库操作</td>
+</tr>
+<tr>
+<td><code>HeartRateRecord</code></td>
+<td>自动生成，表示查询得到的一条完整记录</td>
+</tr>
+<tr>
+<td><code>HeartRateRecordsCompanion</code></td>
+<td>自动生成，用于插入或更新，可区分“提供字段值”和“不修改该字段”</td>
+</tr>
+</tbody></table>
+<h4 id="3-首次打开时建表"><a href="#3-首次打开时建表" class="headerlink" title="3. 首次打开时建表"></a>3. 首次打开时建表</h4><p>在 <code>AppDatabase</code> 中配置：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">MigrationStrategy <span class="keyword">get</span> migration =&gt; MigrationStrategy(</span><br><span class="line">  onCreate: (migrator) =&gt; migrator.createAll(),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>首次实际访问新数据库时，<code>Drift</code> 自动创建已注册的表；再次打开已有数据库，不会重复建表。</p>
+<h4 id="4-drift-schema-v1-json-各版本表结构快照"><a href="#4-drift-schema-v1-json-各版本表结构快照" class="headerlink" title="4. drift_schema_v1.json 各版本表结构快照"></a>4. drift_schema_v1.json 各版本表结构快照</h4><p><code>drift_schema_v1.json</code>是<code>drift_dev</code>生成的：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dart run drift_dev schema dump \</span><br><span class="line">  lib/drift_demo/database/app_database.dart \</span><br><span class="line">  drift_schemas/</span><br></pre></td></tr></table></figure>
+
+<p>工具读取数据库定义，根据 <code>schemaVersion</code> 导出对应的表结构快照，所以 V1 得到 <code>drift_schema_v1.json</code>。已发布版本的快照应保留不变，新版本另存一份。</p>
+<p><strong>迁移测试</strong>：按快照创建一个 V1 数据库，再运行新版本迁移，验证旧数据能否保留、表结构是否正确。</p>
+<p><strong>历史对照</strong>：查看旧版本有哪些字段、类型、默认值和约束，方便编写或检查迁移逻辑。</p>
+<h2 id="四、-读写数据并展示"><a href="#四、-读写数据并展示" class="headerlink" title="四、 读写数据并展示"></a>四、 读写数据并展示</h2><h4 id="1-插入、查询、修改、删除"><a href="#1-插入、查询、修改、删除" class="headerlink" title="1. 插入、查询、修改、删除"></a>1. 插入、查询、修改、删除</h4><p>在AppDatabase新增的方法：</p>
+<ol>
+<li><code>MigrationStrategy get migration =&gt; MigrationStrategy</code> 配置首次建表和版本升级逻辑，由 Drift 打开数据库时调用。</li>
+<li><code>Future&lt;int&gt; addHeartRateRecord</code> 插入一条心率记录。</li>
+<li><code>Future&lt;int&gt; updateHeartRate(int id, int bpm)</code>修改指定 ID 的心率值。</li>
+<li><code>Future&lt;int&gt; deleteHeartRateRecord(int id)</code>删除指定 ID 的记录。</li>
+<li><code>Future&lt;String&gt; databaseFilePath()</code>查询当前数据库文件的实际路径，方便调试。</li>
+</ol>
+<p>其中 <code>Future</code> 表示异步操作，需要用 <code>await</code> 获取结果；<code>Stream</code> 会持续发送结果，需要订阅或通过 <code>StreamBuilder</code> 展示。如果需要其他的数据库操作，继续在<code>AppDatabase</code>新增。</p>
+<h4 id="2-监听数据并展示"><a href="#2-监听数据并展示" class="headerlink" title="2. 监听数据并展示"></a>2. 监听数据并展示</h4><p><code>get()</code> 查询一次，<code>watch()</code> 持续监听查询结果：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;<span class="built_in">List</span>&lt;HeartRateRecord&gt;&gt; watchHeartRateRecords() &#123;</span><br><span class="line">    <span class="keyword">return</span> (select(heartRateRecords)</span><br><span class="line">          ..orderBy([</span><br><span class="line">            (table) =&gt; OrderingTerm.desc(table.measuredAt),</span><br><span class="line">            (table) =&gt; OrderingTerm.desc(table.id),</span><br><span class="line">          ]))</span><br><span class="line">        .watch();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>查询心率记录并持续监听变化，按测量时间倒序返回，适合自动刷新列表。</p>
+<p>页面初始化时保存 Stream：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// database 使用应用内共享的 AppDatabase 实例</span><br><span class="line">_records = _database.watchHeartRateRecords();</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>StreamBuilder</code> 展示：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">Expanded(</span><br><span class="line">  child: StreamBuilder&lt;<span class="built_in">List</span>&lt;HeartRateRecord&gt;&gt;(</span><br><span class="line">    stream: _records,</span><br><span class="line">    builder: (context, snapshot) &#123;</span><br><span class="line">      <span class="keyword">if</span> (snapshot.hasError) &#123;</span><br><span class="line">        <span class="keyword">return</span> Center(child: Text(<span class="string">&#x27;读取失败：<span class="subst">$&#123;snapshot.error&#125;</span>&#x27;</span>));</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (!snapshot.hasData) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">const</span> Center(child: CircularProgressIndicator());</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">final</span> records = snapshot.data!;</span><br><span class="line">      <span class="keyword">return</span> Column(</span><br><span class="line">        children: [</span><br><span class="line">          Text(<span class="string">&#x27;共 <span class="subst">$&#123;records.length&#125;</span> 条记录（按测量时间倒序）&#x27;</span>),</span><br><span class="line">          Expanded(</span><br><span class="line">            child: records.isEmpty</span><br><span class="line">                ? <span class="keyword">const</span> Center(child: Text(<span class="string">&#x27;暂无记录，点击按钮添加&#x27;</span>))</span><br><span class="line">                : ListView.builder(</span><br><span class="line">                    itemCount: records.length,</span><br><span class="line">                    itemBuilder: (context, index) &#123;</span><br><span class="line">                      <span class="keyword">final</span> record = records[index];</span><br><span class="line">                      <span class="keyword">return</span> ListTile(</span><br><span class="line">                        key: ValueKey(record.id),</span><br><span class="line">                        title: Text(</span><br><span class="line">                            <span class="string">&#x27;<span class="subst">$&#123;record.bpm&#125;</span> bpm · #<span class="subst">$&#123;record.id&#125;</span>&#x27;</span>),</span><br><span class="line">                        subtitle: Text(</span><br><span class="line">                          <span class="string">&#x27;设备：<span class="subst">$&#123;record.deviceId&#125;</span>\n&#x27;</span></span><br><span class="line">                          <span class="string">&#x27;测量：<span class="subst">$&#123;record.measuredAt.toLocal()&#125;</span>\n&#x27;</span></span><br><span class="line">                          <span class="string">&#x27;创建：<span class="subst">$&#123;record.createdAt.toLocal()&#125;</span>&#x27;</span>,</span><br><span class="line">                        ),</span><br><span class="line">                        isThreeLine: <span class="keyword">true</span>,</span><br><span class="line">                        trailing: Row(</span><br><span class="line">                          mainAxisSize: MainAxisSize.min,</span><br><span class="line">                          children: [</span><br><span class="line">                            IconButton(</span><br><span class="line">                              tooltip: <span class="string">&#x27;修改心率&#x27;</span>,</span><br><span class="line">                              onPressed: _saving</span><br><span class="line">                                  ? <span class="keyword">null</span></span><br><span class="line">                                  : () =&gt; _edit(record),</span><br><span class="line">                              icon: <span class="keyword">const</span> Icon(Icons.edit_outlined),</span><br><span class="line">                            ),</span><br><span class="line">                            IconButton(</span><br><span class="line">                              tooltip: <span class="string">&#x27;删除记录&#x27;</span>,</span><br><span class="line">                              onPressed: _saving</span><br><span class="line">                                  ? <span class="keyword">null</span></span><br><span class="line">                                  : () =&gt; _runOperation(() <span class="keyword">async</span> &#123;</span><br><span class="line">                                        <span class="keyword">await</span> _database</span><br><span class="line">                                            .deleteHeartRateRecord(</span><br><span class="line">                                                record.id);</span><br><span class="line">                                      &#125;),</span><br><span class="line">                              icon:</span><br><span class="line">                                  <span class="keyword">const</span> Icon(Icons.delete_outline),</span><br><span class="line">                            ),</span><br><span class="line">                          ],</span><br><span class="line">                        ),</span><br><span class="line">                      );</span><br><span class="line">                    &#125;,</span><br><span class="line">                  ),</span><br><span class="line">          ),</span><br><span class="line">        ],</span><br><span class="line">      );</span><br><span class="line">    &#125;,</span><br><span class="line">  ),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>通过 Drift 增删改数据后，Stream 自动发送最新列表，页面随之更新。</p>
+<h4 id="3-验证持久化"><a href="#3-验证持久化" class="headerlink" title="3. 验证持久化"></a>3. 验证持久化</h4><p>等待写入完成，再彻底关闭并重新打开 App。使用相同数据库文件查询，记录仍应存在。不要卸载或清除应用数据。</p>
+<h2 id="五、修改表结构和版本升级"><a href="#五、修改表结构和版本升级" class="headerlink" title="五、修改表结构和版本升级"></a>五、修改表结构和版本升级</h2><p>修改表结构时，需要同时完成三件事：（1）<strong>修改表定义、（2）提升 <code>schemaVersion</code>、（3）编写迁移逻辑</strong>。然后重新生成代码<code>app_database.g.dart</code>和<code>drift_schema_v*.json</code>。</p>
+<h4 id="1-V1-→-V2：新增同步状态"><a href="#1-V1-→-V2：新增同步状态" class="headerlink" title="1. V1 → V2：新增同步状态"></a>1. V1 → V2：新增同步状态</h4><p>在<code>HeartRateRecords</code>表中增加：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BoolColumn <span class="keyword">get</span> isSynced =&gt; boolean().withDefault(<span class="keyword">const</span> Constant(<span class="keyword">false</span>))();</span><br></pre></td></tr></table></figure>
+
+<p>版本改为 <code>2</code>，升级时添加列：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> migrator.addColumn(</span><br><span class="line">  heartRateRecords,</span><br><span class="line">  heartRateRecords.isSynced,</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>旧记录和未指定该字段的新记录，默认值都是 <code>false</code>。 执行命令生成<code>drift_schema_v2.json</code>。</p>
+<p>在<code>AppDatabase</code>中方法修改<code>isSynced</code>为<code>true</code>:</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;<span class="built_in">int</span>&gt; markHeartRateSynced(<span class="built_in">int</span> id) &#123;</span><br><span class="line">   <span class="keyword">return</span> (update(heartRateRecords)..where((table) =&gt; table.id.equals(id)))</span><br><span class="line">       .write(<span class="keyword">const</span> HeartRateRecordsCompanion(isSynced: Value(<span class="keyword">true</span>)));</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-V2-→-V3：新增温度"><a href="#2-V2-→-V3：新增温度" class="headerlink" title="2. V2 → V3：新增温度"></a>2. V2 → V3：新增温度</h4><p>在<code>HeartRateRecords</code>表中增加：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RealColumn <span class="keyword">get</span> temperature =&gt; real().withDefault(<span class="keyword">const</span> Constant(<span class="number">36.8</span>))();</span><br></pre></td></tr></table></figure>
+
+<p>版本改为 <code>3</code>，升级时添加列：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> migrator.addColumn(</span><br><span class="line">  heartRateRecords,</span><br><span class="line">  heartRateRecords.temperature,</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>旧记录默认温度为 <code>36.8</code>。 执行命令生成<code>drift_schema_v3.json</code>。</p>
+<h4 id="3-V3-→-V4：删除同步状态"><a href="#3-V3-→-V4：删除同步状态" class="headerlink" title="3. V3 → V4：删除同步状态"></a>3. V3 → V4：删除同步状态</h4><p>删除<code>HeartRateRecords</code>表定义中的 <code>isSynced</code>，版本改为 <code>4</code>。使用 Drift 重建表，复制其余字段的数据：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> migrator.alterTable(</span><br><span class="line">  TableMigration(heartRateRecords),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>心率、温度等记录保留，原同步状态被删除。重建表时，如需保证历史 ID 不复用，还应保留自增序列。</p>
+<p>执行命令生成<code>drift_schema_v4.json</code>。</p>
+<h4 id="4-首次建库、升级与跨版本处理"><a href="#4-首次建库、升级与跨版本处理" class="headerlink" title="4. 首次建库、升级与跨版本处理"></a>4. 首次建库、升级与跨版本处理</h4><p>V4 的迁移核心代码：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line"><span class="built_in">int</span> <span class="keyword">get</span> schemaVersion =&gt; <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@override</span></span><br><span class="line">MigrationStrategy <span class="keyword">get</span> migration =&gt; MigrationStrategy(</span><br><span class="line">  onCreate: (migrator) =&gt; migrator.createAll(),</span><br><span class="line">  onUpgrade: (migrator, from, to) <span class="keyword">async</span> &#123;</span><br><span class="line">    <span class="keyword">await</span> transaction(() <span class="keyword">async</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (from &lt; <span class="number">3</span>) &#123;</span><br><span class="line">        <span class="keyword">await</span> migrator.addColumn(</span><br><span class="line">          heartRateRecords,</span><br><span class="line">          heartRateRecords.temperature,</span><br><span class="line">        );</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (from &lt; <span class="number">4</span>) &#123;</span><br><span class="line">        <span class="keyword">await</span> migrator.alterTable(</span><br><span class="line">          TableMigration(heartRateRecords),</span><br><span class="line">        );</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;,</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>onCreate</code>：新数据库直接创建当前 V4 表结构。</li>
+<li><code>onUpgrade</code>：已有数据库版本较低时执行迁移。</li>
+<li><code>transaction</code>：迁移全部成功才提交，异常时整体回滚。</li>
+<li><code>from</code>：旧版本号。V1&#x2F;V2 直接升级 V4 时先补温度，再调整为 V4 结构；无需添加已废弃的同步字段。</li>
+</ul>
+<p>最后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dart run build_runner build</span><br></pre></td></tr></table></figure>
+
+<p><strong>代码生成更新 Dart 类型，迁移更新设备上已有的数据库，两者不能互相替代。</strong></p>
+<h2 id="六、迁移成功"><a href="#六、迁移成功" class="headerlink" title="六、迁移成功"></a>六、迁移成功</h2><p>验证迁移，应先安装旧版本并写入数据，再<strong>保留应用数据覆盖安装新版本</strong>。卸载重装只能验证首次建库，无法验证旧库升级。</p>
+<p>升级后重点检查：</p>
+<ul>
+<li><strong>旧数据</strong>：记录数量、ID 和保留字段的值不变。</li>
+<li><strong>表结构</strong>：新增字段及默认值正确，删除字段已不存在。</li>
+<li><strong>读写操作</strong>：查询、插入、修改、删除正常，页面展示正确。</li>
+<li><strong>重新启动</strong>：数据仍保留，不会重复执行迁移。</li>
+</ul>
+<p>还应验证跨版本升级，例如 V1 直接升级 V4，并分别在 Android、iOS 上测试。</p>
+<p>生产环境应<strong>谨慎删除</strong>字段：<strong>先停止使用，确认不再需要且兼容旧版本升级后，再通过迁移删除</strong>，避免数据丢失或影响版本回退。</p>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>使用工具进行生成代码，减少了好多的工作量。但是还是要每一个函数的作用，阅读大致的流程，做到心里有数。</p>
+<p>又是面向AI学习的一天，谁是主人，该怎么判定。!_! </p>
+
+    </div>
+
+    <!-- Tags -->
+    
+
+    
+    <!-- Post Navigation: Hexo's page.prev = newer post, page.next = older post -->
+    <div class="section-divider flex justify-between items-center text-sm md:text-base">
+        
+        <div></div>
+        
+
+        
+        <a href="/2026/10/09/SwiftUI%E8%AF%AD%E6%B3%95-5%E5%88%86%E9%92%9F%E5%A4%8D%E4%B9%A0/" class="post-nav-link group text-right" title="SwiftUI语法-5分钟复习">
+            <span class="post-nav-title">SwiftUI语法-5分钟复习</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+        
+    </div>
+
+
+    
+
+    
+
+</article>
+
+
+            </main>
+
+            <footer class="section-divider">
+    <div class="text-center text-sm text-slate-500 leading-relaxed">
+        <p>&copy; <span class="oldstyle-nums">2026</span> 益烟雨江南 · 工程札记</p>
+        <p class="font-eng text-footnote tracking-wide opacity-90">Elegant theme by <a href="https://github.com/Acris/hexo-theme-shiro" target="_blank" rel="noopener noreferrer" class="link-muted">Shiro</a> · Made by <a href="https://acris.me" target="_blank" rel="noopener noreferrer" class="link-muted">Acris</a>
+                        with <span aria-label="love" title="love">❤️</span></p>
+    </div>
+</footer>
+
+        </div>
+
+        <!-- Note Text — decorative aside, not part of main content or footer -->
+        <aside class="mt-4 text-center" aria-hidden="true" role="presentation">
+            <p class="site-note font-title text-xs sm:text-sm text-slate-400/70 tracking-note font-light select-none" lang="ja">
+                白は、余白の名。
+            </p>
+        </aside>
+    </div>
+
+    
+    <button id="backToTop" class="back-to-top" data-visible="false" aria-label="Back to Top">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+    
+
+    <!-- Scripts -->
+    
+    <script>window.__i18n = {"clipboard_copy":"Copy code","clipboard_copied":"Copied","gallery_visit_source":"View Source Link","gallery_view_image":"View image"};</script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/lightgallery.min.js" integrity="sha384-yshhQEAY0bBxbxfLyRlLQ7v1z45XofL6adlFh192s2NpDzXS+HPKjXoloaHiNcYO" crossorigin="anonymous"></script>
+    <script defer src="/js/lightgallery.js?v=7e9057b9"></script>
+    <script defer src="/js/clipboard.js?v=29d59ec0"></script>
+    
+    
+    
+    <script>window.__tocConfig = {"depth":3,"minHeadings":3};</script>
+    <script defer src="/js/toc.js?v=14494dd4"></script>
+    
+    
+    
+    <script defer src="/js/progress.js?v=a52f509d"></script>
+    
+    
+    <script defer src="/js/theme-toggle.js?v=0a313889"></script>
+    
+    
+    <script defer src="/js/mobile-menu.js?v=9c4e4c22"></script>
+    
+    
+
+</body>
+</html>
